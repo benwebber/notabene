@@ -1,0 +1,14 @@
+---
+source: src/linter.rs
+expression: InvalidDate.check(&changelog)
+---
+- rule: InvalidDate
+  span:
+    start: 1
+    end: 10
+  path: ~
+- rule: InvalidDate
+  span:
+    start: 2
+    end: 5
+  path: ~

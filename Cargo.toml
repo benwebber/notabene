@@ -1,0 +1,32 @@
+[package]
+name = "notabene"
+version = "0.1.0"
+edition = "2024"
+default-run = "nb"
+license = "MIT"
+
+[dependencies]
+pulldown-cmark = "0.13.0"
+serde = { version = "1.0.219", features = ["derive"] }
+clap = { version = "4.5.45", features = ["cargo"], optional = true }
+owo-colors = { version = "4.2.2", features = ["supports-colors"], optional = true }
+serde_json = { version = "1.0.143", optional = true }
+time = { version = "0.3.43", features = ["formatting", "macros", "parsing"] }
+
+[dev-dependencies]
+insta = { version = "1.43.1", features = ["yaml"] }
+
+[features]
+cli = ["dep:clap", "dep:serde_json", "dep:owo-colors"]
+
+[lib]
+name = "notabene"
+path = "src/lib.rs"
+
+[[bin]]
+name = "nb"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[profile.dev.package]
+insta.opt-level = 3

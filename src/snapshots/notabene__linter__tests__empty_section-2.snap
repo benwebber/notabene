@@ -1,0 +1,19 @@
+---
+source: src/linter.rs
+expression: EmptySection.check(&changelog)
+---
+- rule: EmptySection
+  span:
+    start: 1
+    end: 18446744073709551615
+  path: ~
+- rule: EmptySection
+  span:
+    start: 2
+    end: 18446744073709551615
+  path: ~
+- rule: EmptySection
+  span:
+    start: 3
+    end: 18446744073709551615
+  path: ~

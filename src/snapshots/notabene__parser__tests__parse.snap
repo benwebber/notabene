@@ -1,0 +1,102 @@
+---
+source: src/parser.rs
+expression: "(changelog, diagnostics)"
+---
+- titles:
+    - span:
+        start: 3
+        end: 10
+      value: Title 1
+    - span:
+        start: 13
+        end: 20
+      value: Title 2
+  sections:
+    - Unreleased:
+        heading_span:
+          start: 22
+          end: 39
+        url: "https://example.org/unreleased"
+        changes:
+          - heading_span:
+              start: 41
+              end: 52
+            kind:
+              span:
+                start: 41
+                end: 52
+              value: Removed
+            changes:
+              - span:
+                  start: 56
+                  end: 66
+                value: Remove foo
+    - Release:
+        heading_span:
+          start: 68
+          end: 91
+        version:
+          span:
+            start: 72
+            end: 77
+          value: 1.0.0
+        url: "https://example.org/release/1.0.0"
+        date:
+          span:
+            start: 81
+            end: 91
+          value: 2025-01-01
+        yanked: ~
+        changes:
+          - heading_span:
+              start: 93
+              end: 102
+            kind:
+              span:
+                start: 93
+                end: 102
+              value: Added
+            changes:
+              - span:
+                  start: 106
+                  end: 113
+                value: Add foo
+              - span:
+                  start: 116
+                  end: 123
+                value: Add bar
+    - Release:
+        heading_span:
+          start: 125
+          end: 148
+        version:
+          span:
+            start: 129
+            end: 134
+          value: 0.1.0
+        url: "https://example.org/release/0.1.0"
+        date:
+          span:
+            start: 138
+            end: 148
+          value: 2024-01-01
+        yanked: ~
+        changes:
+          - heading_span:
+              start: 150
+              end: 159
+            kind:
+              span:
+                start: 150
+                end: 159
+              value: Added
+            changes:
+              - span:
+                  start: 163
+                  end: 170
+                value: Add baz
+              - span:
+                  start: 173
+                  end: 181
+                value: Add quux
+- []

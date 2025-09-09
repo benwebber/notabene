@@ -1,0 +1,7 @@
+---
+source: src/linter.rs
+expression: MissingUnreleased.check(&changelog)
+---
+- rule: MissingUnreleased
+  span: ~
+  path: ~

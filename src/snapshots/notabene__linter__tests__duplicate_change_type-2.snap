@@ -1,0 +1,14 @@
+---
+source: src/linter.rs
+expression: DuplicateChangeType.check(&changelog)
+---
+- rule: DuplicateChangeType
+  span:
+    start: 1
+    end: 18446744073709551615
+  path: ~
+- rule: DuplicateChangeType
+  span:
+    start: 2
+    end: 18446744073709551615
+  path: ~

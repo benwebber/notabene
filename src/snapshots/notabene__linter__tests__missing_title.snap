@@ -1,0 +1,7 @@
+---
+source: src/linter.rs
+expression: MissingTitle.check(&changelog)
+---
+- rule: MissingTitle
+  span: ~
+  path: ~

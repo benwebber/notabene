@@ -1,0 +1,23 @@
+---
+source: src/ast/parser.rs
+expression: blocks
+---
+- Heading:
+    span:
+      start: 0
+      end: 53
+    level: 2
+    inlines:
+      - Link:
+          span:
+            start: 3
+            end: 32
+          content:
+            span:
+              start: 4
+              end: 9
+          target: "https://example.org/"
+      - Literal:
+          span:
+            start: 32
+            end: 54
