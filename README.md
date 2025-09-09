@@ -4,6 +4,10 @@ A fast linter for changelogs in the [Keep a Changelog] format.
 
 **notabene** provides the `nb` binary.
 
+```
+cargo install --features=cli notabene
+```
+
 ## Usage
 
 ```
