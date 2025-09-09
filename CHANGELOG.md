@@ -6,4 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/benwebber/notabene/commit/HEAD
+### Removed
+
+* Remove unused method `Changelog::title`
+
+[Unreleased]: https://github.com/benwebber/notabene/compare/v0.1.0...HEAD

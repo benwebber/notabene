@@ -66,11 +66,6 @@ impl<T> Spanned<T> {
 }
 
 impl Changelog {
-    /// Return the first title, or [`None`] if it does not exist.
-    pub fn title(&self) -> Option<&Spanned<String>> {
-        self.titles.first()
-    }
-
     /// Return the first unreleased section, or [`None`] if it does not exist.
     pub fn unreleased(&self) -> Option<&Unreleased> {
         self.sections.iter().find_map(|section| {
@@ -157,12 +152,6 @@ pub(crate) mod tests {
                 }),
             ],
         }
-    }
-
-    #[test]
-    fn test_title() {
-        assert_eq!(Changelog::default().title(), None);
-        assert_eq!(changelog().title(), Some(&spanned!("Title 1")));
     }
 
     #[test]
