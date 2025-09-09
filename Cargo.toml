@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2024"
 default-run = "nb"
 license = "MIT"
+description = "A fast linter for changelogs in Keep a Changelog format"
+readme = "README.md"
+homepage = "https://github.com/benwebber/notabene"
+repository = "https://github.com/benwebber/notabene"
+keywords = ["changelog", "lint"]
+categories = ["command-line-utilities"]
+
 
 [dependencies]
 pulldown-cmark = "0.13.0"
