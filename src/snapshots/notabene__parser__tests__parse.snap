@@ -2,16 +2,17 @@
 source: src/parser.rs
 expression: "(changelog, diagnostics)"
 ---
-- titles:
-    - span:
-        start: 3
-        end: 10
-      value: Title 1
-    - span:
-        start: 13
-        end: 20
-      value: Title 2
-  sections:
+- sections:
+    - Title:
+        span:
+          start: 3
+          end: 10
+        value: Title 1
+    - Title:
+        span:
+          start: 13
+          end: 20
+        value: Title 2
     - Unreleased:
         heading_span:
           start: 22

@@ -58,7 +58,7 @@ fn checks() -> Vec<Box<dyn Check>> {
 // =============
 
 check!(MissingTitle, self, changelog, {
-    if changelog.titles.is_empty() {
+    if changelog.titles().collect::<Vec<_>>().is_empty() {
         vec![Diagnostic::new(self.rule(), None)]
     } else {
         vec![]
@@ -67,8 +67,7 @@ check!(MissingTitle, self, changelog, {
 
 check!(DuplicateTitle, self, changelog, {
     changelog
-        .titles
-        .iter()
+        .titles()
         .skip(1)
         .map(|s| Diagnostic::new(self.rule(), Some(s.span)))
         .collect()
@@ -201,7 +200,7 @@ mod tests {
         assert_yaml_snapshot!(MissingTitle.check(&changelog));
 
         let changelog = Changelog {
-            titles: vec![Spanned::<String>::default()],
+            sections: vec![Section::Title(Spanned::<String>::default())],
             ..Default::default()
         };
         assert_yaml_snapshot!(MissingTitle.check(&changelog));
@@ -213,9 +212,9 @@ mod tests {
         assert_yaml_snapshot!(DuplicateTitle.check(&changelog));
 
         let changelog = Changelog {
-            titles: vec![
-                Spanned::<String>::default(),
-                Spanned::new(Span::new(2, 11), "Changelog".to_string()),
+            sections: vec![
+                Section::Title(Spanned::<String>::default()),
+                Section::Title(Spanned::new(Span::new(2, 11), "Changelog".to_string())),
             ],
             ..Default::default()
         };

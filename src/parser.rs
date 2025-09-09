@@ -20,7 +20,7 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
                 match get_heading_span(&heading) {
                     Some(span) => {
                         let spanned = Spanned::new(span, s[span.range()].to_string());
-                        changelog.titles.push(spanned);
+                        changelog.sections.push(Section::Title(spanned));
                     }
                     None => {
                         diagnostics.push(Diagnostic::new(Rule::InvalidTitle, Some(heading.span)))

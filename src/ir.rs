@@ -19,12 +19,12 @@ pub(crate) struct Spanned<T> {
 
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub(crate) struct Changelog {
-    pub titles: Vec<Spanned<String>>,
     pub sections: Vec<Section>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Section {
+    Title(Spanned<String>),
     Unreleased(Unreleased),
     Release(Release),
 }
@@ -70,6 +70,17 @@ impl<T> Spanned<T> {
 }
 
 impl Changelog {
+    /// Filter titles.
+    pub fn titles(&self) -> impl Iterator<Item = &Spanned<String>> {
+        self.sections.iter().filter_map(|section| {
+            if let Section::Title(title) = section {
+                Some(title)
+            } else {
+                None
+            }
+        })
+    }
+
     /// Filter unreleased sections.
     pub fn unreleased(&self) -> impl Iterator<Item = &Unreleased> {
         self.sections.iter().filter_map(|section| {
@@ -94,9 +105,10 @@ impl Changelog {
 
     /// Iterate over all unreleased and release sections.
     pub fn sections(&self) -> impl Iterator<Item = &dyn ChangelogSection> {
-        self.sections.iter().map(|s| match s {
-            Section::Unreleased(u) => u as &dyn ChangelogSection,
-            Section::Release(r) => r as &dyn ChangelogSection,
+        self.sections.iter().filter_map(|s| match s {
+            Section::Unreleased(u) => Some(u as &dyn ChangelogSection),
+            Section::Release(r) => Some(r as &dyn ChangelogSection),
+            _ => None,
         })
     }
 }
@@ -127,12 +139,10 @@ pub(crate) mod tests {
     // TODO: Figure out a better way to share this complete IR with Changelog tests.
     pub fn changelog() -> Changelog {
         Changelog {
-            titles: vec![
-                spanned!("Title 1"),
-                spanned!("Title 2"),
-                spanned!("Title 3"),
-            ],
             sections: vec![
+                Section::Title(spanned!("Title 1")),
+                Section::Title(spanned!("Title 2")),
+                Section::Title(spanned!("Title 3")),
                 Section::Unreleased(Unreleased {
                     url: Some("https://example.org/unreleased/1".to_string()),
                     changes: vec![Changes {

@@ -39,11 +39,16 @@ pub struct Changes {
 /// Use the first title and the first unreleased section as `title` and `unreleased`, respectively.
 impl From<ir::Changelog> for Changelog {
     fn from(changelog: ir::Changelog) -> Self {
-        let title = changelog.titles.into_iter().next().map(|t| t.into_inner());
+        let mut title: Option<String> = None;
         let mut unreleased: Option<Unreleased> = None;
         let mut releases: Vec<Release> = Vec::new();
         for section in changelog.sections.into_iter() {
             match section {
+                ir::Section::Title(t) => {
+                    if title.is_none() {
+                        title = Some(t.into_inner())
+                    }
+                }
                 ir::Section::Unreleased(u) => {
                     if unreleased.is_none() {
                         unreleased = Some(u.into())
