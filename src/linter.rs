@@ -5,7 +5,7 @@ use time::Date;
 use time::macros::format_description;
 
 use crate::diagnostic::Diagnostic;
-use crate::ir::{Changelog, Section};
+use crate::ir::Changelog;
 use crate::rule::Rule;
 
 macro_rules! check {
@@ -64,45 +64,30 @@ check!(MissingTitle, self, changelog, {
 });
 
 check!(DuplicateTitle, self, changelog, {
-    let mut diagnostics = vec![];
-    for title in changelog.titles.iter().skip(1) {
-        diagnostics.push(Diagnostic::new(self.rule(), Some(title.span)));
-    }
-    diagnostics
+    changelog
+        .titles
+        .iter()
+        .skip(1)
+        .map(|s| Diagnostic::new(self.rule(), Some(s.span)))
+        .collect()
 });
 
 // E100 Unreleased
 // ===============
 
 check!(MissingUnreleased, self, changelog, {
-    let has_unreleased = changelog
-        .sections
-        .iter()
-        .any(|s| matches!(s, Section::Unreleased(_)));
-    if has_unreleased {
-        vec![]
-    } else {
-        vec![Diagnostic::new(self.rule(), None)]
+    match changelog.unreleased().next() {
+        Some(_) => vec![],
+        None => vec![Diagnostic::new(self.rule(), None)],
     }
 });
 
 check!(DuplicateUnreleased, self, changelog, {
-    let mut diagnostics = vec![];
-    for unreleased in changelog
-        .sections
-        .iter()
-        .filter_map(|s| {
-            if let Section::Unreleased(u) = s {
-                Some(u)
-            } else {
-                None
-            }
-        })
+    changelog
+        .unreleased()
         .skip(1)
-    {
-        diagnostics.push(Diagnostic::new(self.rule(), Some(unreleased.heading_span)));
-    }
-    diagnostics
+        .map(|u| Diagnostic::new(self.rule(), Some(u.heading_span)))
+        .collect()
 });
 
 // E200 Release
@@ -111,14 +96,7 @@ check!(DuplicateUnreleased, self, changelog, {
 check!(InvalidDate, self, changelog, {
     let format = format_description!("[year]-[month]-[day]");
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    let releases = changelog.sections.iter().filter_map(|s| {
-        if let Section::Release(r) = s {
-            Some(r)
-        } else {
-            None
-        }
-    });
-    for release in releases {
+    for release in changelog.releases() {
         match &release.date {
             Some(spanned) => {
                 if Date::parse(&spanned.value, &format).is_err() {
@@ -133,14 +111,7 @@ check!(InvalidDate, self, changelog, {
 
 check!(InvalidYanked, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    let releases = changelog.sections.iter().filter_map(|s| {
-        if let Section::Release(r) = s {
-            Some(r)
-        } else {
-            None
-        }
-    });
-    for release in releases {
+    for release in changelog.releases() {
         match &release.yanked {
             Some(spanned) => {
                 if spanned.value == "[YANKED]" {
@@ -161,13 +132,7 @@ check!(InvalidYanked, self, changelog, {
 check!(InvalidChangeType, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
     // TODO: Make section a trait to call `changes()` instead of matching.
-    for unreleased in changelog.sections.iter().filter_map(|s| {
-        if let Section::Unreleased(u) = s {
-            Some(u)
-        } else {
-            None
-        }
-    }) {
+    for unreleased in changelog.unreleased() {
         for changes in unreleased.changes.iter() {
             if !matches!(
                 changes.kind.value.as_str(),
@@ -193,13 +158,7 @@ check!(InvalidChangeType, self, changelog, {
 check!(DuplicateChangeType, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let mut seen = HashSet::new();
-    for unreleased in changelog.sections.iter().filter_map(|s| {
-        if let Section::Unreleased(u) = s {
-            Some(u)
-        } else {
-            None
-        }
-    }) {
+    for unreleased in changelog.unreleased() {
         seen.clear();
         for changes in unreleased.changes.iter() {
             if !seen.insert(changes.kind.value.as_str()) {
@@ -223,13 +182,7 @@ check!(DuplicateChangeType, self, changelog, {
 
 check!(EmptySection, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    for unreleased in changelog.sections.iter().filter_map(|s| {
-        if let Section::Unreleased(u) = s {
-            Some(u)
-        } else {
-            None
-        }
-    }) {
+    for unreleased in changelog.unreleased() {
         for changes in unreleased.changes.iter() {
             if changes.changes.is_empty() {
                 diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));

@@ -66,9 +66,9 @@ impl<T> Spanned<T> {
 }
 
 impl Changelog {
-    /// Return the first unreleased section, or [`None`] if it does not exist.
-    pub fn unreleased(&self) -> Option<&Unreleased> {
-        self.sections.iter().find_map(|section| {
+    /// Filter unreleased sections.
+    pub fn unreleased(&self) -> impl Iterator<Item = &Unreleased> {
+        self.sections.iter().filter_map(|section| {
             if let Section::Unreleased(unreleased) = section {
                 Some(unreleased)
             } else {
@@ -77,7 +77,7 @@ impl Changelog {
         })
     }
 
-    /// Filter sections to releases.
+    /// Filter released sections.
     pub fn releases(&self) -> impl Iterator<Item = &Release> {
         self.sections.iter().filter_map(|s| {
             if let Section::Release(r) = s {
@@ -152,28 +152,6 @@ pub(crate) mod tests {
                 }),
             ],
         }
-    }
-
-    #[test]
-    fn test_unreleased() {
-        assert_eq!(Changelog::default().unreleased(), None);
-        let mut changelog = changelog();
-        // These the non-matching branch by inserting a fake Release before the Unreleased section.
-        changelog
-            .sections
-            .insert(0, Section::Release(Release::default()));
-        assert_eq!(
-            changelog.unreleased(),
-            Some(&Unreleased {
-                url: Some("https://example.org/unreleased/1".to_string()),
-                changes: vec![Changes {
-                    kind: spanned!("Added"),
-                    heading_span: Span::default(),
-                    changes: vec![spanned!("Add foo"), spanned!("Add bar"),],
-                }],
-                ..Default::default()
-            })
-        );
     }
 
     #[test]
