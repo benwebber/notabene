@@ -55,6 +55,10 @@ pub(crate) struct Changes {
     pub changes: Vec<Spanned<String>>,
 }
 
+pub trait ChangelogSection {
+    fn changes(&self) -> &[Changes];
+}
+
 impl<T> Spanned<T> {
     pub(crate) fn new(span: Span, value: T) -> Self {
         Self { value, span }
@@ -86,6 +90,26 @@ impl Changelog {
                 None
             }
         })
+    }
+
+    /// Iterate over all unreleased and release sections.
+    pub fn sections(&self) -> impl Iterator<Item = &dyn ChangelogSection> {
+        self.sections.iter().map(|s| match s {
+            Section::Unreleased(u) => u as &dyn ChangelogSection,
+            Section::Release(r) => r as &dyn ChangelogSection,
+        })
+    }
+}
+
+impl ChangelogSection for Unreleased {
+    fn changes(&self) -> &[Changes] {
+        &self.changes
+    }
+}
+
+impl ChangelogSection for Release {
+    fn changes(&self) -> &[Changes] {
+        &self.changes
     }
 }
 

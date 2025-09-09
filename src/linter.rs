@@ -131,19 +131,8 @@ check!(InvalidYanked, self, changelog, {
 
 check!(InvalidChangeType, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    // TODO: Make section a trait to call `changes()` instead of matching.
-    for unreleased in changelog.unreleased() {
-        for changes in unreleased.changes.iter() {
-            if !matches!(
-                changes.kind.value.as_str(),
-                "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
-            ) {
-                diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
-            }
-        }
-    }
-    for release in changelog.releases() {
-        for changes in release.changes.iter() {
+    for section in changelog.sections() {
+        for changes in section.changes().iter() {
             if !matches!(
                 changes.kind.value.as_str(),
                 "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
@@ -158,17 +147,9 @@ check!(InvalidChangeType, self, changelog, {
 check!(DuplicateChangeType, self, changelog, {
     let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let mut seen = HashSet::new();
-    for unreleased in changelog.unreleased() {
+    for section in changelog.sections() {
         seen.clear();
-        for changes in unreleased.changes.iter() {
-            if !seen.insert(changes.kind.value.as_str()) {
-                diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
-            }
-        }
-    }
-    for release in changelog.releases() {
-        seen.clear();
-        for changes in release.changes.iter() {
+        for changes in section.changes().iter() {
             if !seen.insert(changes.kind.value.as_str()) {
                 diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
             }
