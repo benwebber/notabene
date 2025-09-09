@@ -5,6 +5,7 @@ pub(crate) mod diagnostic;
 pub(crate) mod ir;
 pub(crate) mod linter;
 pub(crate) mod parser;
+pub(crate) mod profile;
 #[cfg(feature = "cli")]
 pub(crate) mod renderer;
 pub(crate) mod rule;
@@ -41,7 +42,8 @@ pub fn parse_file(path: &Path) -> Result<(Changelog, Vec<Diagnostic>), Error> {
 
 fn parse(s: &str, path: Option<&Path>) -> Result<(Changelog, Vec<Diagnostic>), ParseError> {
     let (changelog, mut diagnostics) = parser::parse(s);
-    diagnostics.append(&mut linter::lint(&changelog));
+    let profile = profile::Profile::default();
+    diagnostics.append(&mut linter::lint(&changelog, &profile));
     diagnostics.sort_by_key(|d| d.span);
     for diagnostic in &mut diagnostics {
         diagnostic.path = path.map(|p| p.to_path_buf());

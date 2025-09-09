@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 macro_rules! rules {
     ($($rule:ident = ($doc:literal, $code:literal, $message:literal $(,)?)),* $(,)?) => {
         /// A linter rule.
-        #[derive(Clone, Copy, Debug, PartialEq, Deserialize, Serialize)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
         #[non_exhaustive]
         pub enum Rule {
             $(#[doc = concat!("`", $code, "`. ")] #[doc = $doc] $rule),*

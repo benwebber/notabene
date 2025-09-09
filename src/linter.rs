@@ -6,6 +6,7 @@ use time::macros::format_description;
 
 use crate::diagnostic::Diagnostic;
 use crate::ir::Changelog;
+use crate::profile::Profile;
 use crate::rule::Rule;
 
 macro_rules! check {
@@ -26,9 +27,10 @@ pub(crate) trait Check {
     fn check(&self, changelog: &Changelog) -> Vec<Diagnostic>;
 }
 
-pub fn lint(changelog: &Changelog) -> Vec<Diagnostic> {
+pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
     checks()
         .into_iter()
+        .filter(|check| profile.is_enabled(check.rule()))
         .flat_map(|check| check.check(changelog))
         .collect()
 }
