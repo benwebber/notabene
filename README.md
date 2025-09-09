@@ -38,15 +38,15 @@ The `h2` is not a valid unreleased or release section heading.
 
 The document does not have an unreleased section.
 
-### E102
+### E101
 
 There is more than one unreleased section heading in the document.
 
-### E201
+### E200
 
 The date is not in ISO 8601 format.
 
-### E202
+### E201
 
 The yanked token does not match `[YANKED]`.
 

@@ -70,18 +70,18 @@ rules! {
     ),
     DuplicateUnreleased = (
         "There is more than one unreleased section heading in the document.",
-        "E102",
+        "E101",
         "Duplicate unreleased section `{}`",
     ),
     // E200 Release
     InvalidDate = (
         "The date is not in ISO 8601 format.",
-        "E201",
+        "E200",
         "Invalid date `{}`",
     ),
     InvalidYanked = (
         "The yanked token does not match `[YANKED]`.",
-        "E202",
+        "E201",
         "Invalid [YANKED] format `{}`",
     ),
     // E300 Changes
