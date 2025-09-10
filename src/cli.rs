@@ -56,13 +56,11 @@ fn parse_rule_code(code: &str) -> Result<String, String> {
     if Rule::ALL.iter().any(|rule| rule.code() == code) {
         Ok(code)
     } else {
-        Err(format!(
-            "{}",
-            Rule::ALL
-                .iter()
-                .map(|rule| rule.code())
-                .collect::<Vec<&str>>()
-                .join(", ")
-        ))
+        Err(Rule::ALL
+            .iter()
+            .map(|rule| rule.code())
+            .collect::<Vec<&str>>()
+            .join(", ")
+            .to_string())
     }
 }

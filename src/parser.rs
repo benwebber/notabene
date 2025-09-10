@@ -198,7 +198,7 @@ mod tests {
 [1.0.0]: https://example.org/release/1.0.0
 [0.1.0]: https://example.org/release/0.1.0
         ";
-        let (changelog, diagnostics) = parse(&source);
+        let (changelog, diagnostics) = parse(source);
         assert_yaml_snapshot!((changelog, diagnostics));
     }
 }
