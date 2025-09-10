@@ -6,11 +6,11 @@ pub(crate) mod ir;
 pub(crate) mod linter;
 pub(crate) mod parser;
 pub(crate) mod profile;
-#[cfg(feature = "cli")]
-pub(crate) mod renderer;
 pub(crate) mod rule;
 
 pub mod changelog;
+#[cfg(feature = "cli")]
+pub mod cli;
 pub mod error;
 pub mod span;
 pub mod unist;
@@ -19,9 +19,6 @@ pub use changelog::Changelog;
 pub use diagnostic::Diagnostic;
 pub use error::{Error, ParseError};
 pub use rule::Rule;
-
-#[cfg(feature = "cli")]
-pub use renderer::{OutputFormat, render};
 
 /// Parse a changelog from a string.
 ///
