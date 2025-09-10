@@ -1,0 +1,11 @@
+---
+- id: nb-check
+  name: nb check
+  description: Check changelog with 'nb check'
+  entry: nb check
+  files: 'CHANGELOG.md'
+  language: rust
+  additional_dependencies:
+    - cli:clap
+    - cli:owo-colors
+    - cli:serde_json
