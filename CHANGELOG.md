@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+* Run checks in single pass
+
 ### Fixed
 
 * Fix code sequence for initial rules
@@ -13,5 +17,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Removed
 
 * Remove unused method `Changelog::title`
+* Remove `renderer` from public API
 
 [Unreleased]: https://github.com/benwebber/notabene/compare/v0.1.0...HEAD
