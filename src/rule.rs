@@ -89,6 +89,11 @@ rules! {
         "E201",
         "Invalid [YANKED] format `{}`",
     ),
+    MissingDate = (
+        "The release is missing a date",
+        "E202",
+        "Release missing date",
+    ),
     // E300 Changes
     InvalidChangeType = (
         "The change section heading is not a known change type.",

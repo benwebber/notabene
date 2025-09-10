@@ -60,6 +60,7 @@ fn checks() -> Vec<Box<dyn Check>> {
         //// E200 Release
         Box::new(InvalidDateCheck::default()),
         Box::new(InvalidYankedCheck::default()),
+        Box::new(MissingDateCheck::default()),
         //// E300 Changes
         Box::new(InvalidChangeTypeCheck::default()),
         Box::new(DuplicateChangeTypeCheck::default()),
@@ -258,6 +259,29 @@ impl Check for InvalidYankedCheck {
                 if spanned.value != "[YANKED]" {
                     self.spans.push(spanned.span);
                 }
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+struct MissingDateCheck {
+    spans: Vec<Span>,
+}
+
+impl Check for MissingDateCheck {
+    fn rule(&self) -> Rule {
+        Rule::MissingDate
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Release(release) = section {
+            if release.date.is_none() {
+                self.spans.push(release.heading_span);
             }
         }
     }
@@ -499,6 +523,29 @@ mod tests {
                 }),
                 Section::Release(Release {
                     yanked: Some(Spanned::new(Span::new(1, 10), "[ZANKED]".to_string())),
+                    ..Default::default()
+                }),
+            ],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_missing_date() {
+        let profile = Profile::new(&[Rule::MissingDate]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![
+                Section::Release(Release {
+                    date: Some(Spanned::new(Span::new(0, 11), "2025-01-01".to_string())),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    heading_span: Span::new(1, usize::MAX),
                     ..Default::default()
                 }),
             ],
