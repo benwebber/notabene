@@ -53,6 +53,7 @@ fn checks() -> Vec<Box<dyn Check>> {
         // E000 Document
         Box::new(MissingTitleCheck::default()),
         Box::new(DuplicateTitleCheck::default()),
+        Box::new(UnreleasedNotFirstCheck::default()),
         //// E100 Unreleased
         Box::new(MissingUnreleasedCheck::default()),
         Box::new(DuplicateUnreleasedCheck::default()),
@@ -177,6 +178,33 @@ impl Check for DuplicateUnreleasedCheck {
             } else {
                 self.found = true;
             }
+        }
+    }
+}
+
+#[derive(Default)]
+struct UnreleasedNotFirstCheck {
+    spans: Vec<Span>,
+    found: bool,
+}
+
+impl Check for UnreleasedNotFirstCheck {
+    fn rule(&self) -> Rule {
+        Rule::UnreleasedNotFirst
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if self.found {
+            return;
+        }
+        match section {
+            Section::Unreleased(_) => self.found = true,
+            Section::Release(release) => self.spans.push(release.heading_span),
+            _ => {}
         }
     }
 }
@@ -378,6 +406,26 @@ mod tests {
 
         let changelog = Changelog {
             sections: vec![Section::Unreleased(Unreleased::default())],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_unreleased_not_first() {
+        let profile = Profile::new(&[Rule::UnreleasedNotFirst]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![
+                Section::Release(Release {
+                    heading_span: Span::new(1, usize::MAX),
+                    ..Default::default()
+                }),
+                Section::Unreleased(Unreleased::default()),
+            ],
             ..Default::default()
         };
         assert_yaml_snapshot!(lint(&changelog, &profile));
