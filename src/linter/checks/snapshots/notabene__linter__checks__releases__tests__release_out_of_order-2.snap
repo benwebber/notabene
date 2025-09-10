@@ -1,0 +1,9 @@
+---
+source: src/linter/checks/releases.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: ReleaseOutOfOrder
+  span:
+    start: 1
+    end: 18446744073709551615
+  path: ~

@@ -94,6 +94,11 @@ rules! {
         "E202",
         "Release missing date",
     ),
+    ReleaseOutOfOrder = (
+        "The release is not in reverse chronological order.",
+        "E203",
+        "Release out of order `{}`",
+    ),
     // E300 Changes
     InvalidChangeType = (
         "The change section heading is not a known change type.",

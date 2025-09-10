@@ -77,6 +77,43 @@ impl Check for MissingDate {
     }
 }
 
+#[derive(Default)]
+pub struct ReleaseOutOfOrder {
+    dates_with_heading_spans: Vec<(String, Span)>,
+}
+
+impl Check for ReleaseOutOfOrder {
+    fn rule(&self) -> Rule {
+        Rule::ReleaseOutOfOrder
+    }
+
+    fn spans(&self) -> &[Span] {
+        unimplemented!()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Release(release) = section {
+            if let Some(spanned) = &release.date {
+                self.dates_with_heading_spans
+                    .push((spanned.value.clone(), release.heading_span));
+            }
+        }
+    }
+
+    fn diagnostics(&self) -> Vec<Diagnostic> {
+        self.dates_with_heading_spans
+            .as_slice()
+            .windows(2)
+            .filter_map(|w| {
+                let prev = &w[0];
+                let cur = &w[1];
+                if cur.0 > prev.0 { Some(cur.1) } else { None }
+            })
+            .map(|span| Diagnostic::new(self.rule(), Some(span)))
+            .collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,6 +196,38 @@ mod tests {
                 }),
                 Section::Release(Release {
                     heading_span: Span::new(1, usize::MAX),
+                    ..Default::default()
+                }),
+            ],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_release_out_of_order() {
+        let profile = Profile::new(&[Rule::ReleaseOutOfOrder]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![
+                Section::Release(Release {
+                    date: Some(Spanned::new(Span::default(), "2025-12-31".to_string())),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    date: Some(Spanned::new(Span::default(), "2025-01-01".to_string())),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    heading_span: Span::new(1, usize::MAX),
+                    date: Some(Spanned::new(Span::default(), "2025-06-01".to_string())),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    date: Some(Spanned::new(Span::default(), "2025-01-01".to_string())),
                     ..Default::default()
                 }),
             ],

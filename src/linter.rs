@@ -57,6 +57,7 @@ fn checks() -> Vec<Box<dyn Check>> {
         Box::new(checks::InvalidDate::default()),
         Box::new(checks::InvalidYanked::default()),
         Box::new(checks::MissingDate::default()),
+        Box::new(checks::ReleaseOutOfOrder::default()),
         //// E300 Changes
         Box::new(checks::InvalidChangeType::default()),
         Box::new(checks::DuplicateChangeType::default()),
