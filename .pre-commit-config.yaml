@@ -3,6 +3,11 @@ repos:
     rev: v1.0
     hooks:
       - id: cargo-check
+        args:
+          - -F
+          - cli
       - id: fmt
       - id: clippy
-
+        args:
+          - -F
+          - cli
