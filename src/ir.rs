@@ -11,7 +11,7 @@ use crate::span::Span;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
 pub(crate) struct Spanned<T> {
     pub span: Span,
     pub value: T,
@@ -55,10 +55,6 @@ pub(crate) struct Changes {
     pub changes: Vec<Spanned<String>>,
 }
 
-pub trait ChangelogSection {
-    fn changes(&self) -> &[Changes];
-}
-
 impl<T> Spanned<T> {
     pub(crate) fn new(span: Span, value: T) -> Self {
         Self { value, span }
@@ -66,161 +62,5 @@ impl<T> Spanned<T> {
 
     pub(crate) fn into_inner(self) -> T {
         self.value
-    }
-}
-
-impl Changelog {
-    /// Filter titles.
-    pub fn titles(&self) -> impl Iterator<Item = &Spanned<String>> {
-        self.sections.iter().filter_map(|section| {
-            if let Section::Title(title) = section {
-                Some(title)
-            } else {
-                None
-            }
-        })
-    }
-
-    /// Filter unreleased sections.
-    pub fn unreleased(&self) -> impl Iterator<Item = &Unreleased> {
-        self.sections.iter().filter_map(|section| {
-            if let Section::Unreleased(unreleased) = section {
-                Some(unreleased)
-            } else {
-                None
-            }
-        })
-    }
-
-    /// Filter released sections.
-    pub fn releases(&self) -> impl Iterator<Item = &Release> {
-        self.sections.iter().filter_map(|s| {
-            if let Section::Release(r) = s {
-                Some(r)
-            } else {
-                None
-            }
-        })
-    }
-
-    /// Iterate over all unreleased and release sections.
-    pub fn sections(&self) -> impl Iterator<Item = &dyn ChangelogSection> {
-        self.sections.iter().filter_map(|s| match s {
-            Section::Unreleased(u) => Some(u as &dyn ChangelogSection),
-            Section::Release(r) => Some(r as &dyn ChangelogSection),
-            _ => None,
-        })
-    }
-}
-
-impl ChangelogSection for Unreleased {
-    fn changes(&self) -> &[Changes] {
-        &self.changes
-    }
-}
-
-impl ChangelogSection for Release {
-    fn changes(&self) -> &[Changes] {
-        &self.changes
-    }
-}
-
-#[cfg(test)]
-pub(crate) mod tests {
-    use super::*;
-
-    // Spans are not useful here, so create dummy spans.
-    macro_rules! spanned {
-        ($s:literal) => {
-            Spanned::new(Span::new(0, 0), $s.to_string())
-        };
-    }
-
-    // TODO: Figure out a better way to share this complete IR with Changelog tests.
-    pub fn changelog() -> Changelog {
-        Changelog {
-            sections: vec![
-                Section::Title(spanned!("Title 1")),
-                Section::Title(spanned!("Title 2")),
-                Section::Title(spanned!("Title 3")),
-                Section::Unreleased(Unreleased {
-                    url: Some("https://example.org/unreleased/1".to_string()),
-                    changes: vec![Changes {
-                        kind: spanned!("Added"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Add foo"), spanned!("Add bar")],
-                    }],
-                    ..Default::default()
-                }),
-                Section::Unreleased(Unreleased {
-                    url: Some("https://example.org/unreleased/2".to_string()),
-                    changes: vec![Changes {
-                        kind: spanned!("Added"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Add baz"), spanned!("Add quux")],
-                    }],
-                    ..Default::default()
-                }),
-                Section::Release(Release {
-                    version: spanned!("1.0.0"),
-                    url: Some("https://example.org/release/1.0.0".to_string()),
-                    date: Some(spanned!("2025-01-01")),
-                    changes: vec![Changes {
-                        kind: spanned!("Changed"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Change foo"), spanned!("Change bar")],
-                    }],
-                    ..Default::default()
-                }),
-                Section::Release(Release {
-                    version: spanned!("0.1.0"),
-                    url: Some("https://example.org/release/0.1.0".to_string()),
-                    date: Some(spanned!("2024-01-01")),
-                    yanked: Some(spanned!("[YANKED]")),
-                    changes: vec![Changes {
-                        kind: spanned!("Changed"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Change baz"), spanned!("Change quux")],
-                    }],
-                    ..Default::default()
-                }),
-            ],
-        }
-    }
-
-    #[test]
-    fn test_releases() {
-        assert_eq!(
-            Changelog::default().releases().collect::<Vec<&Release>>(),
-            Vec::<&Release>::new()
-        );
-        assert_eq!(
-            changelog().releases().collect::<Vec<_>>(),
-            vec![
-                &Release {
-                    version: spanned!("1.0.0"),
-                    url: Some("https://example.org/release/1.0.0".to_string()),
-                    date: Some(spanned!("2025-01-01")),
-                    changes: vec![Changes {
-                        kind: spanned!("Changed"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Change foo"), spanned!("Change bar")],
-                    }],
-                    ..Default::default()
-                },
-                &Release {
-                    version: spanned!("0.1.0"),
-                    url: Some("https://example.org/release/0.1.0".to_string()),
-                    date: Some(spanned!("2024-01-01")),
-                    yanked: Some(spanned!("[YANKED]")),
-                    changes: vec![Changes {
-                        kind: spanned!("Changed"),
-                        heading_span: Span::default(),
-                        changes: vec![spanned!("Change baz"), spanned!("Change quux")],
-                    }],
-                    ..Default::default()
-                },
-            ]
-        );
     }
 }

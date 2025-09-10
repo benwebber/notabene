@@ -105,9 +105,65 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
+    use crate::span::Span;
+
+    // Spans are not useful here, so create dummy spans.
+    macro_rules! spanned {
+        ($s:literal) => {
+            ir::Spanned::new(Span::new(0, 0), $s.to_string())
+        };
+    }
+
     #[test]
     fn test_from_ir() {
-        let ir_changelog = ir::tests::changelog();
+        let ir_changelog = ir::Changelog {
+            sections: vec![
+                ir::Section::Title(spanned!("Title 1")),
+                ir::Section::Title(spanned!("Title 2")),
+                ir::Section::Title(spanned!("Title 3")),
+                ir::Section::Unreleased(ir::Unreleased {
+                    url: Some("https://example.org/unreleased/1".to_string()),
+                    changes: vec![ir::Changes {
+                        kind: spanned!("Added"),
+                        heading_span: Span::default(),
+                        changes: vec![spanned!("Add foo"), spanned!("Add bar")],
+                    }],
+                    ..Default::default()
+                }),
+                ir::Section::Unreleased(ir::Unreleased {
+                    url: Some("https://example.org/unreleased/2".to_string()),
+                    changes: vec![ir::Changes {
+                        kind: spanned!("Added"),
+                        heading_span: Span::default(),
+                        changes: vec![spanned!("Add baz"), spanned!("Add quux")],
+                    }],
+                    ..Default::default()
+                }),
+                ir::Section::Release(ir::Release {
+                    version: spanned!("1.0.0"),
+                    url: Some("https://example.org/release/1.0.0".to_string()),
+                    date: Some(spanned!("2025-01-01")),
+                    changes: vec![ir::Changes {
+                        kind: spanned!("Changed"),
+                        heading_span: Span::default(),
+                        changes: vec![spanned!("Change foo"), spanned!("Change bar")],
+                    }],
+                    ..Default::default()
+                }),
+                ir::Section::Release(ir::Release {
+                    version: spanned!("0.1.0"),
+                    url: Some("https://example.org/release/0.1.0".to_string()),
+                    date: Some(spanned!("2024-01-01")),
+                    yanked: Some(spanned!("[YANKED]")),
+                    changes: vec![ir::Changes {
+                        kind: spanned!("Changed"),
+                        heading_span: Span::default(),
+                        changes: vec![spanned!("Change baz"), spanned!("Change quux")],
+                    }],
+                    ..Default::default()
+                }),
+            ],
+        };
         assert_yaml_snapshot!(Changelog::from(ir_changelog));
     }
 }

@@ -5,185 +5,328 @@ use time::Date;
 use time::macros::format_description;
 
 use crate::diagnostic::Diagnostic;
-use crate::ir::Changelog;
+use crate::ir::{Changelog, Changes, Section};
 use crate::profile::Profile;
 use crate::rule::Rule;
+use crate::span::Span;
 
-macro_rules! check {
-    ($name:ident, $linter:ident, $changelog: ident, $f:block) => {
-        struct $name;
-        impl Check for $name {
-            fn rule(&self) -> Rule {
-                Rule::$name
-            }
+mod check;
 
-            fn check(&$linter, $changelog: &Changelog) -> Vec<Diagnostic> $f
-        }
-    }
-}
-
-pub(crate) trait Check {
-    fn rule(&self) -> Rule;
-    fn check(&self, changelog: &Changelog) -> Vec<Diagnostic>;
-}
+use check::Check;
 
 pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
-    checks()
+    let mut diagnostics = Vec::new();
+
+    let mut checks: Vec<_> = checks()
         .into_iter()
         .filter(|check| profile.is_enabled(check.rule()))
-        .flat_map(|check| check.check(changelog))
-        .collect()
+        .collect();
+
+    for section in &changelog.sections {
+        for check in checks.iter_mut() {
+            check.visit_section(section);
+            match section {
+                Section::Unreleased(unreleased) => {
+                    for changes in &unreleased.changes {
+                        check.visit_changes(changes);
+                    }
+                }
+                Section::Release(release) => {
+                    for changes in &release.changes {
+                        check.visit_changes(changes);
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    for check in checks.iter_mut() {
+        diagnostics.append(&mut check.diagnostics());
+    }
+
+    diagnostics
 }
 
 fn checks() -> Vec<Box<dyn Check>> {
     vec![
         // E000 Document
-        Box::new(MissingTitle),
-        Box::new(DuplicateTitle),
-        // E100 Unreleased
-        Box::new(MissingUnreleased),
-        Box::new(DuplicateUnreleased),
-        // E200 Release
-        Box::new(InvalidDate),
-        Box::new(InvalidYanked),
-        // E300 Changes
-        Box::new(InvalidChangeType),
-        Box::new(DuplicateChangeType),
-        // E400 Content
-        Box::new(EmptySection),
+        Box::new(MissingTitleCheck::default()),
+        Box::new(DuplicateTitleCheck::default()),
+        //// E100 Unreleased
+        Box::new(MissingUnreleasedCheck::default()),
+        Box::new(DuplicateUnreleasedCheck::default()),
+        //// E200 Release
+        Box::new(InvalidDateCheck::default()),
+        Box::new(InvalidYankedCheck::default()),
+        //// E300 Changes
+        Box::new(InvalidChangeTypeCheck::default()),
+        Box::new(DuplicateChangeTypeCheck::default()),
+        //// E400 Content
+        Box::new(EmptySectionCheck::default()),
     ]
 }
 
 // E000 Document
 // =============
 
-check!(MissingTitle, self, changelog, {
-    if changelog.titles().collect::<Vec<_>>().is_empty() {
-        vec![Diagnostic::new(self.rule(), None)]
-    } else {
-        vec![]
-    }
-});
+#[derive(Default)]
+struct MissingTitleCheck {
+    found: bool,
+}
 
-check!(DuplicateTitle, self, changelog, {
-    changelog
-        .titles()
-        .skip(1)
-        .map(|s| Diagnostic::new(self.rule(), Some(s.span)))
-        .collect()
-});
+impl Check for MissingTitleCheck {
+    fn rule(&self) -> Rule {
+        Rule::MissingTitle
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if self.found {
+            return;
+        }
+        if matches!(section, Section::Title(_)) {
+            self.found = true;
+        }
+    }
+
+    fn diagnostics(&self) -> Vec<Diagnostic> {
+        if self.found {
+            vec![]
+        } else {
+            vec![Diagnostic::new(self.rule(), None)]
+        }
+    }
+}
+
+#[derive(Default)]
+struct DuplicateTitleCheck {
+    spans: Vec<Span>,
+    found: bool,
+}
+
+impl Check for DuplicateTitleCheck {
+    fn rule(&self) -> Rule {
+        Rule::DuplicateTitle
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Title(spanned) = section {
+            if self.found {
+                self.spans.push(spanned.span);
+            } else {
+                self.found = true;
+            }
+        }
+    }
+}
 
 // E100 Unreleased
 // ===============
 
-check!(MissingUnreleased, self, changelog, {
-    match changelog.unreleased().next() {
-        Some(_) => vec![],
-        None => vec![Diagnostic::new(self.rule(), None)],
-    }
-});
+#[derive(Default)]
+struct MissingUnreleasedCheck {
+    found: bool,
+}
 
-check!(DuplicateUnreleased, self, changelog, {
-    changelog
-        .unreleased()
-        .skip(1)
-        .map(|u| Diagnostic::new(self.rule(), Some(u.heading_span)))
-        .collect()
-});
+impl Check for MissingUnreleasedCheck {
+    fn rule(&self) -> Rule {
+        Rule::MissingUnreleased
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if self.found {
+            return;
+        }
+        if matches!(section, Section::Unreleased(_)) {
+            self.found = true;
+        }
+    }
+
+    fn diagnostics(&self) -> Vec<Diagnostic> {
+        if self.found {
+            vec![]
+        } else {
+            vec![Diagnostic::new(self.rule(), None)]
+        }
+    }
+}
+
+#[derive(Default)]
+struct DuplicateUnreleasedCheck {
+    spans: Vec<Span>,
+    found: bool,
+}
+
+impl Check for DuplicateUnreleasedCheck {
+    fn rule(&self) -> Rule {
+        Rule::DuplicateUnreleased
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Unreleased(unreleased) = section {
+            if self.found {
+                self.spans.push(unreleased.heading_span);
+            } else {
+                self.found = true;
+            }
+        }
+    }
+}
 
 // E200 Release
 // ============
 
-check!(InvalidDate, self, changelog, {
-    let format = format_description!("[year]-[month]-[day]");
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    for release in changelog.releases() {
-        match &release.date {
-            Some(spanned) => {
-                if Date::parse(&spanned.value, &format).is_err() {
-                    diagnostics.push(Diagnostic::new(self.rule(), Some(spanned.span)));
-                }
-            }
-            None => continue,
-        }
-    }
-    diagnostics
-});
+#[derive(Default)]
+struct InvalidDateCheck {
+    spans: Vec<Span>,
+}
 
-check!(InvalidYanked, self, changelog, {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    for release in changelog.releases() {
-        match &release.yanked {
-            Some(spanned) => {
-                if spanned.value == "[YANKED]" {
-                    continue;
-                } else {
-                    diagnostics.push(Diagnostic::new(self.rule(), Some(spanned.span)));
+impl Check for InvalidDateCheck {
+    fn rule(&self) -> Rule {
+        Rule::InvalidDate
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        let format = format_description!("[year]-[month]-[day]");
+        if let Section::Release(release) = section {
+            if let Some(spanned) = &release.date {
+                if Date::parse(&spanned.value, &format).is_err() {
+                    self.spans.push(spanned.span);
                 }
             }
-            None => continue,
         }
     }
-    diagnostics
-});
+}
+
+#[derive(Default)]
+struct InvalidYankedCheck {
+    spans: Vec<Span>,
+}
+
+impl Check for InvalidYankedCheck {
+    fn rule(&self) -> Rule {
+        Rule::InvalidYanked
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Release(release) = section {
+            if let Some(spanned) = &release.yanked {
+                if spanned.value != "[YANKED]" {
+                    self.spans.push(spanned.span);
+                }
+            }
+        }
+    }
+}
 
 // E300 Changes
 // ============
 
-check!(InvalidChangeType, self, changelog, {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    for section in changelog.sections() {
-        for changes in section.changes().iter() {
-            if !matches!(
-                changes.kind.value.as_str(),
-                "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
-            ) {
-                diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
-            }
-        }
-    }
-    diagnostics
-});
+#[derive(Default)]
+struct InvalidChangeTypeCheck {
+    spans: Vec<Span>,
+}
 
-check!(DuplicateChangeType, self, changelog, {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    let mut seen = HashSet::new();
-    for section in changelog.sections() {
-        seen.clear();
-        for changes in section.changes().iter() {
-            if !seen.insert(changes.kind.value.as_str()) {
-                diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
-            }
+impl Check for InvalidChangeTypeCheck {
+    fn rule(&self) -> Rule {
+        Rule::InvalidChangeType
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_changes(&mut self, changes: &Changes) {
+        if !matches!(
+            changes.kind.value.as_str(),
+            "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
+        ) {
+            self.spans.push(changes.kind.span);
         }
     }
-    diagnostics
-});
+}
+
+#[derive(Default)]
+struct DuplicateChangeTypeCheck {
+    spans: Vec<Span>,
+    seen: HashSet<String>,
+}
+
+impl Check for DuplicateChangeTypeCheck {
+    fn rule(&self) -> Rule {
+        Rule::DuplicateChangeType
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, _section: &Section) {
+        self.seen.clear();
+    }
+
+    fn visit_changes(&mut self, changes: &Changes) {
+        if !self.seen.insert(changes.kind.value.clone()) {
+            self.spans.push(changes.kind.span);
+        }
+    }
+}
 
 // E400 Content
 // ============
 
-check!(EmptySection, self, changelog, {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    for unreleased in changelog.unreleased() {
-        for changes in unreleased.changes.iter() {
-            if changes.changes.is_empty() {
-                diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
-            }
-        }
+#[derive(Default)]
+struct EmptySectionCheck {
+    spans: Vec<Span>,
+}
+
+impl Check for EmptySectionCheck {
+    fn rule(&self) -> Rule {
+        Rule::EmptySection
     }
-    for release in changelog.releases() {
-        if release.changes.is_empty() {
-            diagnostics.push(Diagnostic::new(self.rule(), Some(release.heading_span)));
-        } else {
-            for changes in release.changes.iter() {
-                if changes.changes.is_empty() {
-                    diagnostics.push(Diagnostic::new(self.rule(), Some(changes.kind.span)));
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        match section {
+            Section::Unreleased(unreleased) => {
+                if unreleased.changes.is_empty() {
+                    self.spans.push(unreleased.heading_span);
                 }
             }
+            Section::Release(release) => {
+                if release.changes.is_empty() {
+                    self.spans.push(release.heading_span);
+                }
+            }
+            _ => {}
         }
     }
-    diagnostics
-});
+
+    fn visit_changes(&mut self, changes: &Changes) {
+        if changes.changes.is_empty() {
+            self.spans.push(changes.heading_span)
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -192,24 +335,29 @@ mod tests {
     use insta::assert_yaml_snapshot;
 
     use crate::ir::*;
+    use crate::profile::Profile;
     use crate::span::Span;
 
     #[test]
     fn test_missing_title() {
+        let profile = Profile::new(&[Rule::MissingTitle]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(MissingTitle.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![Section::Title(Spanned::<String>::default())],
             ..Default::default()
         };
-        assert_yaml_snapshot!(MissingTitle.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_duplicate_title() {
+        let profile = Profile::new(&[Rule::DuplicateTitle]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(DuplicateTitle.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -218,25 +366,29 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(DuplicateTitle.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_missing_unreleased() {
+        let profile = Profile::new(&[Rule::MissingUnreleased]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(MissingUnreleased.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![Section::Unreleased(Unreleased::default())],
             ..Default::default()
         };
-        assert_yaml_snapshot!(MissingUnreleased.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_duplicate_unreleased() {
+        let profile = Profile::new(&[Rule::DuplicateUnreleased]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(DuplicateUnreleased.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -248,13 +400,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(DuplicateUnreleased.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_invalid_date() {
+        let profile = Profile::new(&[Rule::InvalidDate]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(InvalidDate.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -276,13 +430,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(InvalidDate.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_invalid_yanked() {
+        let profile = Profile::new(&[Rule::InvalidYanked]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(InvalidYanked.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -300,13 +456,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(InvalidYanked.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_invalid_change_type() {
+        let profile = Profile::new(&[Rule::InvalidChangeType]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(InvalidChangeType.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -339,13 +497,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(InvalidChangeType.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_duplicate_change_type() {
+        let profile = Profile::new(&[Rule::DuplicateChangeType]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(DuplicateChangeType.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
@@ -378,16 +538,23 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(DuplicateChangeType.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 
     #[test]
     fn test_empty_section() {
+        let profile = Profile::new(&[Rule::EmptySection]);
+
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(EmptySection.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
             sections: vec![
+                // No changes.
+                Section::Unreleased(Unreleased {
+                    heading_span: Span::new(1, usize::MAX),
+                    ..Default::default()
+                }),
                 Section::Unreleased(Unreleased {
                     changes: vec![
                         Changes {
@@ -395,15 +562,17 @@ mod tests {
                             changes: vec![Spanned::new(Span::new(0, 0), "Add foo".to_string())],
                             ..Default::default()
                         },
+                        // Empty changes.
                         Changes {
-                            kind: Spanned::new(Span::new(1, usize::MAX), "Added".to_string()),
+                            heading_span: Span::new(2, usize::MAX),
                             ..Default::default()
                         },
                     ],
                     ..Default::default()
                 }),
+                // No changes.
                 Section::Release(Release {
-                    heading_span: Span::new(2, usize::MAX),
+                    heading_span: Span::new(3, usize::MAX),
                     ..Default::default()
                 }),
                 Section::Release(Release {
@@ -413,8 +582,9 @@ mod tests {
                             changes: vec![Spanned::new(Span::new(0, 0), "Add foo".to_string())],
                             ..Default::default()
                         },
+                        // Empty changes.
                         Changes {
-                            kind: Spanned::new(Span::new(3, usize::MAX), "Added".to_string()),
+                            heading_span: Span::new(4, usize::MAX),
                             ..Default::default()
                         },
                     ],
@@ -423,6 +593,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(EmptySection.check(&changelog));
+        assert_yaml_snapshot!(lint(&changelog, &profile));
     }
 }

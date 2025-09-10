@@ -10,7 +10,9 @@ pub use index::Index;
 pub(crate) use iter::SpanIterator;
 
 /// A span within the source document.
-#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+#[derive(
+    Copy, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize,
+)]
 pub struct Span {
     /// The start offset of the span.
     pub start: usize,
