@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use time::Date;
 use time::macros::format_description;
 
@@ -111,6 +113,30 @@ impl Check for ReleaseOutOfOrder {
             })
             .map(|span| Diagnostic::new(self.rule(), Some(span)))
             .collect()
+    }
+}
+
+#[derive(Default)]
+pub struct DuplicateVersion {
+    spans: Vec<Span>,
+    versions: HashSet<String>,
+}
+
+impl Check for DuplicateVersion {
+    fn rule(&self) -> Rule {
+        Rule::DuplicateVersion
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Release(release) = section {
+            if !self.versions.insert(release.version.value.clone()) {
+                self.spans.push(release.version.span);
+            }
+        }
     }
 }
 
@@ -228,6 +254,33 @@ mod tests {
                 }),
                 Section::Release(Release {
                     date: Some(Spanned::new(Span::default(), "2025-01-01".to_string())),
+                    ..Default::default()
+                }),
+            ],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_duplicate_version() {
+        let profile = Profile::new(&[Rule::DuplicateVersion]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![
+                Section::Release(Release {
+                    version: Spanned::new(Span::default(), "1.0.0".to_string()),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    version: Spanned::new(Span::new(1, usize::MAX), "1.0.0".to_string()),
+                    ..Default::default()
+                }),
+                Section::Release(Release {
+                    version: Spanned::new(Span::default(), "0.1.0".to_string()),
                     ..Default::default()
                 }),
             ],

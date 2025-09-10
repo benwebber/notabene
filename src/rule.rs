@@ -99,6 +99,11 @@ rules! {
         "E203",
         "Release out of order `{}`",
     ),
+    DuplicateVersion = (
+        "There is more than one release for this version in the document.",
+        "E204",
+        "Duplicate version `{}`",
+    ),
     // E300 Changes
     InvalidChangeType = (
         "The change section heading is not a known change type.",
