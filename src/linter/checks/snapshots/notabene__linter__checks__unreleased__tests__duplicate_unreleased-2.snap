@@ -1,0 +1,9 @@
+---
+source: src/linter/checks/unreleased.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: DuplicateUnreleased
+  span:
+    start: 0
+    end: 17
+  path: ~

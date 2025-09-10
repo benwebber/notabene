@@ -1,9 +1,0 @@
----
-source: src/linter.rs
-expression: DuplicateUnreleased.check(&changelog)
----
-- rule: DuplicateUnreleased
-  span:
-    start: 0
-    end: 17
-  path: ~

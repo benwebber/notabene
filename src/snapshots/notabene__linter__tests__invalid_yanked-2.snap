@@ -1,9 +1,0 @@
----
-source: src/linter.rs
-expression: InvalidYanked.check(&changelog)
----
-- rule: InvalidYanked
-  span:
-    start: 1
-    end: 10
-  path: ~

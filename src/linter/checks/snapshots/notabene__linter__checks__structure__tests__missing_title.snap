@@ -1,0 +1,7 @@
+---
+source: src/linter/checks/structure.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: MissingTitle
+  span: ~
+  path: ~

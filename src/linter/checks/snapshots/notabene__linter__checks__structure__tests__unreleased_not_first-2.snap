@@ -1,5 +1,5 @@
 ---
-source: src/linter.rs
+source: src/linter/checks/structure.rs
 expression: "lint(&changelog, &profile)"
 ---
 - rule: UnreleasedNotFirst

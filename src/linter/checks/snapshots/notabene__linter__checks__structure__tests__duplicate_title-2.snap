@@ -1,0 +1,9 @@
+---
+source: src/linter/checks/structure.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: DuplicateTitle
+  span:
+    start: 2
+    end: 11
+  path: ~

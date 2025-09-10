@@ -1,0 +1,7 @@
+---
+source: src/linter/checks/unreleased.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: MissingUnreleased
+  span: ~
+  path: ~

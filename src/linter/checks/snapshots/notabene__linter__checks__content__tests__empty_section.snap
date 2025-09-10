@@ -1,0 +1,5 @@
+---
+source: src/linter/checks/content.rs
+expression: "lint(&changelog, &profile)"
+---
+[]

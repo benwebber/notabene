@@ -1,5 +1,0 @@
----
-source: src/linter.rs
-expression: DuplicateChangeType.check(&changelog)
----
-[]
