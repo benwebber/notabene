@@ -11,3 +11,8 @@ repos:
         args:
           - -F
           - cli
+
+  - repo: .
+    rev: HEAD
+    hooks:
+      - id: nb-check
