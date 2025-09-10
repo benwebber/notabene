@@ -56,14 +56,14 @@ impl Check for DuplicateTitle {
 }
 
 #[derive(Default)]
-pub struct UnreleasedNotFirst {
+pub struct UnreleasedOutOfOrder {
     spans: Vec<Span>,
     found: bool,
 }
 
-impl Check for UnreleasedNotFirst {
+impl Check for UnreleasedOutOfOrder {
     fn rule(&self) -> Rule {
-        Rule::UnreleasedNotFirst
+        Rule::UnreleasedOutOfOrder
     }
 
     fn spans(&self) -> &[Span] {
@@ -126,7 +126,7 @@ mod tests {
 
     #[test]
     fn test_unreleased_not_first() {
-        let profile = Profile::new(&[Rule::UnreleasedNotFirst]);
+        let profile = Profile::new(&[Rule::UnreleasedOutOfOrder]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

@@ -62,7 +62,7 @@ rules! {
         "E004",
         "Invalid heading `{}`",
     ),
-    UnreleasedNotFirst = (
+    UnreleasedOutOfOrder = (
         "The unreleased section is not the first section in the document.",
         "E005",
         "Unreleased section must come before releases.",
