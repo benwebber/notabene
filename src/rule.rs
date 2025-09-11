@@ -121,6 +121,12 @@ rules! {
         "E400",
         "Empty section",
     ),
+    // E500 Links
+    LinkReferenceDoesNotExist = (
+        "The target reference does not exist.",
+        "E500",
+        "Link reference does not exist: `{}`",
+    ),
 }
 
 #[cfg(test)]

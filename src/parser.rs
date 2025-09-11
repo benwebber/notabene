@@ -6,6 +6,8 @@ use crate::rule::Rule;
 use crate::span::{Span, SpanIterator};
 use std::iter::Peekable;
 
+use pulldown_cmark as md;
+
 /// Parse a changelog.
 ///
 /// Parsing never fails, although the parser may return diagnostics indicating that it cannot parse
@@ -37,6 +39,17 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
             _ => {}
         }
     }
+    // Detect broken links.
+    let callback = |link: md::BrokenLink| {
+        diagnostics.push(Diagnostic::new(
+            Rule::LinkReferenceDoesNotExist,
+            Some(link.span.into()),
+        ));
+        None
+    };
+    let mut parser =
+        md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
+    for _event in parser {}
     (changelog, diagnostics)
 }
 
@@ -193,6 +206,8 @@ mod tests {
 
 * Add baz
 * Add quux
+
+## [broken] - 2024-01-01
 
 [Unreleased]: https://example.org/unreleased
 [1.0.0]: https://example.org/release/1.0.0
