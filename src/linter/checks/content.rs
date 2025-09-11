@@ -19,11 +19,6 @@ impl Check for EmptySection {
 
     fn visit_section(&mut self, section: &Section) {
         match section {
-            Section::Unreleased(unreleased) => {
-                if unreleased.changes.is_empty() {
-                    self.spans.push(unreleased.heading_span);
-                }
-            }
             Section::Release(release) => {
                 if release.changes.is_empty() {
                     self.spans.push(release.heading_span);
@@ -60,11 +55,8 @@ mod tests {
 
         let changelog = Changelog {
             sections: vec![
-                // No changes.
-                Section::Unreleased(Unreleased {
-                    heading_span: Span::new(1, usize::MAX),
-                    ..Default::default()
-                }),
+                // Unreleased can be empty.
+                Section::Unreleased(Unreleased::default()),
                 Section::Unreleased(Unreleased {
                     changes: vec![
                         Changes {
