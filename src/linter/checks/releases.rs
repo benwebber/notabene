@@ -1,7 +1,9 @@
+use std::cmp::Ordering;
 use std::collections::HashSet;
 
 use time::Date;
 use time::macros::format_description;
+use version_compare::{Cmp, Version};
 
 use super::preamble::*;
 
@@ -81,7 +83,13 @@ impl Check for MissingDate {
 
 #[derive(Default)]
 pub struct ReleaseOutOfOrder {
-    dates_with_heading_spans: Vec<(String, Span)>,
+    info: Vec<ReleaseInfo>,
+}
+
+struct ReleaseInfo {
+    span: Span,
+    version: String,
+    date: Option<String>,
 }
 
 impl Check for ReleaseOutOfOrder {
@@ -95,21 +103,41 @@ impl Check for ReleaseOutOfOrder {
 
     fn visit_section(&mut self, section: &Section) {
         if let Section::Release(release) = section {
-            if let Some(spanned) = &release.date {
-                self.dates_with_heading_spans
-                    .push((spanned.value.clone(), release.heading_span));
-            }
+            self.info.push(ReleaseInfo {
+                span: release.heading_span,
+                version: release.version.value.clone(),
+                date: release.date.as_ref().map(|s| s.value.clone()),
+            })
         }
     }
 
     fn diagnostics(&self) -> Vec<Diagnostic> {
-        self.dates_with_heading_spans
+        self.info
             .as_slice()
             .windows(2)
-            .filter_map(|w| {
-                let prev = &w[0];
-                let cur = &w[1];
-                if cur.0 > prev.0 { Some(cur.1) } else { None }
+            .filter_map(|window| {
+                let prev = &window[0];
+                let curr = &window[1];
+                let prev_version = Version::from(&prev.version);
+                let curr_version = Version::from(&curr.version);
+                let (Some(prev_version), Some(curr_version)) = (prev_version, curr_version) else {
+                    // Skip if either version is invalid.
+                    return None;
+                };
+                // Sort by date in reverse chronological order. If the date is None, sort it last.
+                let date_cmp = match (&curr.date, &prev.date) {
+                    (Some(curr_date), Some(prev_date)) => curr_date.cmp(prev_date),
+                    (Some(_), None) => Ordering::Greater,
+                    (None, Some(_)) => Ordering::Less,
+                    (None, None) => Ordering::Equal,
+                };
+                // Then sort by version in reverse order.
+                let out_of_order = match date_cmp {
+                    Ordering::Less => false,
+                    Ordering::Equal => matches!(curr_version.compare(&prev_version), Cmp::Gt),
+                    Ordering::Greater => true,
+                };
+                if out_of_order { Some(curr.span) } else { None }
             })
             .map(|span| Diagnostic::new(self.rule(), Some(span)))
             .collect()
