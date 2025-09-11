@@ -1,7 +1,5 @@
-use crate::diagnostic::Diagnostic;
-use crate::ir::{Changelog, Changes, Section};
-use crate::linter::{Check, lint};
-use crate::profile::Profile;
+use crate::ir::{Changes, Section};
+use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
 
@@ -49,6 +47,7 @@ mod tests {
     use insta::assert_yaml_snapshot;
 
     use crate::ir::*;
+    use crate::linter::lint;
     use crate::profile::Profile;
     use crate::span::Span;
 

@@ -1,9 +1,7 @@
 //! Linter implementation.
 use crate::diagnostic::Diagnostic;
-use crate::ir::{Changelog, Changes, Section};
+use crate::ir::{Changelog, Section};
 use crate::profile::Profile;
-use crate::rule::Rule;
-use crate::span::Span;
 
 mod check;
 mod checks;

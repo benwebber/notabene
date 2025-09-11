@@ -47,8 +47,7 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
         ));
         None
     };
-    let mut parser =
-        md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
+    let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
     for _event in parser {}
     (changelog, diagnostics)
 }
