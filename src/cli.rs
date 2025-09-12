@@ -23,7 +23,8 @@ pub fn main() -> IoResult<()> {
                         .long("output-format")
                         .value_parser(["full", "json", "jsonl", "short"])
                         .default_value("short"),
-                ),
+                )
+                .arg(Arg::new("select").long("select").value_delimiter(',')),
         )
         .subcommand(
             Command::new("rule")

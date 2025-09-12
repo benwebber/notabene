@@ -24,7 +24,13 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         "full" => OutputFormat::Full,
         _ => unreachable!(),
     };
-    let profile = Profile::default();
+    let profile = match matches.get_many::<&str>("select") {
+        Some(values) => {
+            let codes: Vec<String> = values.into_iter().map(|s| s.to_uppercase()).collect();
+            Profile::try_from(codes).expect("invalid code")
+        }
+        None => Profile::default(),
+    };
     let (_, diagnostics) = parse_and_lint_file(&path, &profile).unwrap();
     if diagnostics.is_empty() {
         Ok(())
