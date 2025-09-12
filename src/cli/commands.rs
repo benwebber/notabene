@@ -4,7 +4,8 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::parse_file;
+use crate::parse_and_lint_file;
+use crate::profile::Profile;
 use crate::rule::Rule;
 use crate::span::Index;
 
@@ -23,7 +24,8 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         "full" => OutputFormat::Full,
         _ => unreachable!(),
     };
-    let (_, diagnostics) = parse_file(&path).unwrap();
+    let profile = Profile::default();
+    let (_, diagnostics) = parse_and_lint_file(&path, &profile).unwrap();
     if diagnostics.is_empty() {
         Ok(())
     } else {
