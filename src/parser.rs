@@ -1,6 +1,5 @@
 //! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
 use crate::ast::*;
-use crate::diagnostic::Diagnostic;
 use crate::ir::*;
 use crate::rule::Rule;
 use crate::span::{Span, SpanIterator};
@@ -10,11 +9,9 @@ use pulldown_cmark as md;
 
 /// Parse a changelog.
 ///
-/// Parsing never fails, although the parser may return diagnostics indicating that it cannot parse
-/// some element of the document correctly.
-pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
+/// Parsing never fails.
+pub fn parse(s: &str) -> Changelog {
     let mut changelog = Changelog::default();
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let mut blocks = Parser::new(s).peekable();
     while let Some(block) = blocks.next() {
         match block {
@@ -31,8 +28,7 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
                 changelog.sections.push(section);
             }
             Block::Heading(heading @ Heading { level: 2, .. }) => {
-                let (section, mut section_diagnostics) = parse_section(s, &heading, &mut blocks);
-                diagnostics.append(&mut section_diagnostics);
+                let section = parse_section(s, &heading, &mut blocks);
                 if let Some(sec) = section {
                     changelog.sections.push(sec);
                 }
@@ -47,20 +43,14 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
     };
     let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
     for _event in parser {}
-    (changelog, diagnostics)
+    changelog
 }
 
-fn parse_section(
-    s: &str,
-    heading: &Heading,
-    blocks: &mut Peekable<Parser>,
-) -> (Option<Section>, Vec<Diagnostic>) {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
+fn parse_section(s: &str, heading: &Heading, blocks: &mut Peekable<Parser>) -> Option<Section> {
     let section = match heading.inlines.as_slice() {
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
-            let (changes, mut change_diagnostics) = parse_changes(s, blocks);
-            diagnostics.append(&mut change_diagnostics);
+            let changes = parse_changes(s, blocks);
             Some(Section::Unreleased(Unreleased {
                 heading_span: heading.span,
                 url: Some(l.target.clone()),
@@ -86,21 +76,19 @@ fn parse_section(
                 let yanked = &s[span.range()];
                 release.yanked = Some(Spanned::new(span, yanked.to_string()));
             }
-            let (changes, mut change_diagnostics) = parse_changes(s, blocks);
+            let changes = parse_changes(s, blocks);
             release.changes = changes;
-            diagnostics.append(&mut change_diagnostics);
             Some(Section::Release(release))
         }
         _ => Some(Section::Invalid(InvalidSection {
             heading_span: heading.span,
         })),
     };
-    (section, diagnostics)
+    section
 }
 
-fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> (Vec<Changes>, Vec<Diagnostic>) {
+fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> Vec<Changes> {
     let mut sections: Vec<(Span, Spanned<String>, Vec<Spanned<String>>)> = Vec::new();
-    let diagnostics: Vec<Diagnostic> = Vec::new();
     let mut current_kind: Option<String> = None;
     let mut current_changes: Vec<Spanned<String>> = Vec::new();
     let mut current_heading_span: Span = Span::default();
@@ -151,7 +139,7 @@ fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> (Vec<Changes>, Vec<D
         })
         .collect();
 
-    (changes, diagnostics)
+    changes
 }
 
 fn get_heading_span(heading: &Heading) -> Option<Span> {
@@ -206,7 +194,7 @@ mod tests {
 [1.0.0]: https://example.org/release/1.0.0
 [0.1.0]: https://example.org/release/0.1.0
         ";
-        let (changelog, diagnostics) = parse(source);
-        assert_yaml_snapshot!((changelog, diagnostics));
+        let changelog = parse(source);
+        assert_yaml_snapshot!(changelog);
     }
 }
