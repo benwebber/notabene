@@ -30,6 +30,27 @@ impl Check for MissingTitle {
 }
 
 #[derive(Default)]
+pub struct InvalidTitle {
+    spans: Vec<Span>,
+}
+
+impl Check for InvalidTitle {
+    fn rule(&self) -> Rule {
+        Rule::InvalidTitle
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::InvalidTitle(invalid) = section {
+            self.spans.push(invalid.heading_span);
+        }
+    }
+}
+
+#[derive(Default)]
 pub struct DuplicateTitle {
     spans: Vec<Span>,
     found: bool,
@@ -109,7 +130,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::*;
+    use crate::ir::{self, *};
     use crate::linter::lint;
     use crate::profile::Profile;
     use crate::span::Span;
@@ -123,6 +144,22 @@ mod tests {
 
         let changelog = Changelog {
             sections: vec![Section::Title(Spanned::<String>::default())],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_invalid_title() {
+        let profile = Profile::new(&[Rule::InvalidTitle]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![Section::InvalidTitle(ir::InvalidTitle {
+                heading_span: Span::new(1, usize::MAX),
+            })],
             ..Default::default()
         };
         assert_yaml_snapshot!(lint(&changelog, &profile));

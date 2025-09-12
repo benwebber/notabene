@@ -1,0 +1,9 @@
+---
+source: src/linter/checks/structure.rs
+expression: "lint(&changelog, &profile)"
+---
+- rule: InvalidTitle
+  span:
+    start: 1
+    end: 18446744073709551615
+  path: ~

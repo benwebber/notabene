@@ -55,7 +55,7 @@ impl From<ir::Changelog> for Changelog {
                     }
                 }
                 ir::Section::Release(r) => releases.push(r.into()),
-                ir::Section::Invalid(_) => {}
+                ir::Section::Invalid(_) | ir::Section::InvalidTitle(_) => {}
             }
         }
         Self {

@@ -28,6 +28,9 @@ pub enum Section {
     Unreleased(Unreleased),
     Release(Release),
     Invalid(InvalidSection),
+    // TODO: If Title held something like Vec<Inline>, it would be possible
+    // to get rid of InvalidTitle and validate Title in the linter.
+    InvalidTitle(InvalidTitle),
 }
 
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
@@ -68,5 +71,10 @@ impl<T> Spanned<T> {
 
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
 pub(crate) struct InvalidSection {
+    pub heading_span: Span,
+}
+
+#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+pub(crate) struct InvalidTitle {
     pub heading_span: Span,
 }

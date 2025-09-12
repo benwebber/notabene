@@ -46,6 +46,7 @@ fn checks() -> Vec<Box<dyn Check>> {
     vec![
         // E000 Document
         Box::new(checks::MissingTitle::default()),
+        Box::new(checks::InvalidTitle::default()),
         Box::new(checks::DuplicateTitle::default()),
         Box::new(checks::InvalidSectionHeading::default()),
         Box::new(checks::UnreleasedOutOfOrder::default()),

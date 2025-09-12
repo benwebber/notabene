@@ -19,15 +19,16 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
     while let Some(block) = blocks.next() {
         match block {
             Block::Heading(heading @ Heading { level: 1, .. }) => {
-                match get_heading_span(&heading) {
+                let section = match get_heading_span(&heading) {
                     Some(span) => {
                         let spanned = Spanned::new(span, s[span.range()].to_string());
-                        changelog.sections.push(Section::Title(spanned));
+                        Section::Title(spanned)
                     }
-                    None => {
-                        diagnostics.push(Diagnostic::new(Rule::InvalidTitle, Some(heading.span)))
-                    }
-                }
+                    None => Section::InvalidTitle(InvalidTitle {
+                        heading_span: heading.span,
+                    }),
+                };
+                changelog.sections.push(section);
             }
             Block::Heading(heading @ Heading { level: 2, .. }) => {
                 let (section, mut section_diagnostics) = parse_section(s, &heading, &mut blocks);
