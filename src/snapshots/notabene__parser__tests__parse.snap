@@ -100,12 +100,11 @@ expression: "(changelog, diagnostics)"
                   start: 173
                   end: 181
                 value: Add quux
-- - rule: InvalidSectionHeading
-    span:
-      start: 183
-      end: 207
-    path: ~
-  - rule: LinkReferenceDoesNotExist
+    - Invalid:
+        heading_span:
+          start: 183
+          end: 207
+- - rule: LinkReferenceDoesNotExist
     span:
       start: 186
       end: 194

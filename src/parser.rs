@@ -93,13 +93,9 @@ fn parse_section(
             diagnostics.append(&mut change_diagnostics);
             Some(Section::Release(release))
         }
-        _ => {
-            diagnostics.push(Diagnostic::new(
-                Rule::InvalidSectionHeading,
-                Some(heading.span),
-            ));
-            None
-        }
+        _ => Some(Section::Invalid(InvalidSection {
+            heading_span: heading.span,
+        })),
     };
     (section, diagnostics)
 }

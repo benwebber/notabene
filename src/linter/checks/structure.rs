@@ -56,6 +56,27 @@ impl Check for DuplicateTitle {
 }
 
 #[derive(Default)]
+pub struct InvalidSectionHeading {
+    spans: Vec<Span>,
+}
+
+impl Check for InvalidSectionHeading {
+    fn rule(&self) -> Rule {
+        Rule::InvalidSectionHeading
+    }
+
+    fn spans(&self) -> &[Span] {
+        self.spans.as_slice()
+    }
+
+    fn visit_section(&mut self, section: &Section) {
+        if let Section::Invalid(invalid) = section {
+            self.spans.push(invalid.heading_span);
+        }
+    }
+}
+
+#[derive(Default)]
 pub struct UnreleasedOutOfOrder {
     spans: Vec<Span>,
     found: bool,
@@ -119,6 +140,22 @@ mod tests {
                 Section::Title(Spanned::<String>::default()),
                 Section::Title(Spanned::new(Span::new(2, 11), "Changelog".to_string())),
             ],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+    }
+
+    #[test]
+    fn test_invalid_section() {
+        let profile = Profile::new(&[Rule::InvalidSectionHeading]);
+
+        let changelog = Changelog::default();
+        assert_yaml_snapshot!(lint(&changelog, &profile));
+
+        let changelog = Changelog {
+            sections: vec![Section::Invalid(InvalidSection {
+                heading_span: Span::new(1, usize::MAX),
+            })],
             ..Default::default()
         };
         assert_yaml_snapshot!(lint(&changelog, &profile));

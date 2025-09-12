@@ -27,6 +27,7 @@ pub enum Section {
     Title(Spanned<String>),
     Unreleased(Unreleased),
     Release(Release),
+    Invalid(InvalidSection),
 }
 
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
@@ -63,4 +64,9 @@ impl<T> Spanned<T> {
     pub(crate) fn into_inner(self) -> T {
         self.value
     }
+}
+
+#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+pub(crate) struct InvalidSection {
+    pub heading_span: Span,
 }
