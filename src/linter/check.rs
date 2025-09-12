@@ -12,6 +12,9 @@ pub(crate) trait Check {
         &[]
     }
 
+    /// Evaluate this check for the entire `Changelog`.
+    fn visit_changelog(&mut self, _changelog: &ir::Changelog) {}
+
     /// Evaluate this check for a `Section`.
     fn visit_section(&mut self, _section: &ir::Section) {}
 

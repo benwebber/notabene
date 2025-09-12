@@ -10,12 +10,13 @@ use check::Check;
 
 pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();
-
     let mut checks: Vec<_> = checks()
         .into_iter()
         .filter(|check| profile.is_enabled(check.rule()))
         .collect();
-
+    for check in checks.iter_mut() {
+        check.visit_changelog(changelog);
+    }
     for section in &changelog.sections {
         for check in checks.iter_mut() {
             check.visit_section(section);
@@ -34,11 +35,9 @@ pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
             }
         }
     }
-
     for check in checks.iter_mut() {
         diagnostics.append(&mut check.diagnostics());
     }
-
     diagnostics
 }
 
@@ -50,19 +49,21 @@ fn checks() -> Vec<Box<dyn Check>> {
         Box::new(checks::DuplicateTitle::default()),
         Box::new(checks::InvalidSectionHeading::default()),
         Box::new(checks::UnreleasedOutOfOrder::default()),
-        //// E100 Unreleased
+        // E100 Unreleased
         Box::new(checks::MissingUnreleased::default()),
         Box::new(checks::DuplicateUnreleased::default()),
-        //// E200 Release
+        // E200 Release
         Box::new(checks::InvalidDate::default()),
         Box::new(checks::InvalidYanked::default()),
         Box::new(checks::MissingDate::default()),
         Box::new(checks::ReleaseOutOfOrder::default()),
         Box::new(checks::DuplicateVersion::default()),
-        //// E300 Changes
+        // E300 Changes
         Box::new(checks::InvalidChangeType::default()),
         Box::new(checks::DuplicateChangeType::default()),
-        //// E400 Content
+        // E400 Content
         Box::new(checks::EmptySection::default()),
+        // E500 Links
+        Box::new(checks::LinkReferenceDoesNotExist::default()),
     ]
 }

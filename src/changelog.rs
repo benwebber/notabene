@@ -164,6 +164,7 @@ mod tests {
                     ..Default::default()
                 }),
             ],
+            ..Default::default()
         };
         assert_yaml_snapshot!(Changelog::from(ir_changelog));
     }

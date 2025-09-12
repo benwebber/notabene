@@ -104,8 +104,7 @@ expression: "(changelog, diagnostics)"
         heading_span:
           start: 183
           end: 207
-- - rule: LinkReferenceDoesNotExist
-    span:
-      start: 186
+  broken_links:
+    - start: 186
       end: 194
-    path: ~
+- []

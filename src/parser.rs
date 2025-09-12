@@ -42,10 +42,7 @@ pub fn parse(s: &str) -> (Changelog, Vec<Diagnostic>) {
     }
     // Detect broken links.
     let callback = |link: md::BrokenLink| {
-        diagnostics.push(Diagnostic::new(
-            Rule::LinkReferenceDoesNotExist,
-            Some(link.span.into()),
-        ));
+        changelog.broken_links.push(link.span.into());
         None
     };
     let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));

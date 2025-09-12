@@ -20,6 +20,7 @@ pub(crate) struct Spanned<T> {
 #[derive(Debug, Default, Deserialize, Serialize)]
 pub(crate) struct Changelog {
     pub sections: Vec<Section>,
+    pub broken_links: Vec<Span>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
