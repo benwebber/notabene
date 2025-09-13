@@ -16,14 +16,9 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         .get_one::<PathBuf>("FILE")
         .unwrap_or(&PathBuf::from("CHANGELOG.md"))
         .clone();
-    let format: &String = matches.get_one("output_format").expect("default");
-    let output_format = match format.as_str() {
-        "short" => OutputFormat::Short,
-        "json" => OutputFormat::Json,
-        "jsonl" => OutputFormat::JsonLines,
-        "full" => OutputFormat::Full,
-        _ => unreachable!(),
-    };
+    let output_format = *matches
+        .get_one::<OutputFormat>("output_format")
+        .unwrap_or(&OutputFormat::Short);
     let selected: HashSet<Rule> = match matches.get_many::<Rule>("select") {
         Some(values) => values.copied().collect(),
         None => Rule::ALL.iter().copied().collect(),

@@ -21,7 +21,7 @@ pub fn main() -> IoResult<()> {
                 .arg(
                     Arg::new("output_format")
                         .long("output-format")
-                        .value_parser(["full", "json", "jsonl", "short"])
+                        .value_parser(ValueParser::new(parse_output_format))
                         .default_value("short"),
                 )
                 .arg(
@@ -75,4 +75,15 @@ fn parse_rule_code(code: &str) -> Result<Rule, String> {
                 .to_string(),
         )
         .copied()
+}
+
+fn parse_output_format(format: &str) -> Result<renderer::OutputFormat, String> {
+    use renderer::OutputFormat::*;
+    match format.to_lowercase().as_str() {
+        "full" => Ok(Full),
+        "json" => Ok(Json),
+        "jsonl" => Ok(JsonLines),
+        "short" => Ok(Short),
+        _ => Err("full, json, jsonl, short".to_string()),
+    }
 }
