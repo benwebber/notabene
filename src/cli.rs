@@ -8,6 +8,7 @@ use crate::rule::{RULES_BY_CODE, Rule};
 
 mod commands;
 mod config;
+mod error;
 mod renderer;
 
 pub fn main() -> IoResult<()> {
@@ -19,6 +20,12 @@ pub fn main() -> IoResult<()> {
             Command::new("check")
                 .about("Check a changelog")
                 .arg(Arg::new("FILE").value_parser(value_parser!(PathBuf)))
+                .arg(
+                    Arg::new("config_file")
+                        .long("config-file")
+                        .short('c')
+                        .value_parser(value_parser!(PathBuf)),
+                )
                 .arg(
                     Arg::new("output_format")
                         .long("output-format")

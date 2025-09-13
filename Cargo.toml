@@ -23,7 +23,7 @@ version-compare = "0.2.0"
 toml = { version = "0.9.5", features = ["parse", "serde"], optional = true }
 
 [dev-dependencies]
-insta = { version = "1.43.1", features = ["yaml"] }
+insta = { version = "1.43.1", features = ["redactions", "yaml"] }
 
 [features]
 cli = ["dep:clap", "dep:serde_json", "dep:owo-colors", "dep:toml"]

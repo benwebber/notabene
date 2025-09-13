@@ -20,9 +20,10 @@ pub struct JsonDiagnostic {
 }
 
 /// A render output format.
-#[derive(Copy, Clone, Debug, PartialEq, Serialize)]
+#[derive(Copy, Clone, Debug, Default, PartialEq, Serialize)]
 pub enum OutputFormat {
     /// One-line output.
+    #[default]
     Short,
     /// Multi-line output with context.
     Full,

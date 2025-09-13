@@ -9,25 +9,42 @@ use crate::profile::Profile;
 use crate::rule::Rule;
 use crate::span::Index;
 
+use super::config::{Config, Lint};
 use super::renderer::{OutputFormat, render};
 
 pub fn check(matches: &ArgMatches) -> Result<()> {
+    let mut config = Config::load(None).unwrap();
+    if let Some(path) = matches.get_one::<PathBuf>("config_file") {
+        config = config.merge(&Config::from_file(path).unwrap());
+    };
     let path = matches
         .get_one::<PathBuf>("FILE")
         .unwrap_or(&PathBuf::from("CHANGELOG.md"))
         .clone();
-    let output_format = *matches
-        .get_one::<OutputFormat>("output_format")
-        .unwrap_or(&OutputFormat::Short);
-    let selected: HashSet<Rule> = match matches.get_many::<Rule>("select") {
-        Some(values) => values.copied().collect(),
-        None => Rule::ALL.iter().copied().collect(),
+    let select: Option<HashSet<Rule>> = match matches.get_many::<Rule>("select") {
+        Some(values) => Some(values.copied().collect()),
+        None => None,
     };
-    let ignored: HashSet<Rule> = match matches.get_many::<Rule>("ignore") {
-        Some(values) => values.copied().collect(),
-        None => HashSet::new(),
+    let ignore: Option<HashSet<Rule>> = match matches.get_many::<Rule>("ignore") {
+        Some(values) => Some(values.copied().collect()),
+        None => None,
     };
-    let rules: HashSet<Rule> = selected.difference(&ignored).copied().collect();
+    let output_format = matches.get_one::<OutputFormat>("output_format").copied();
+    let cli_config = Config {
+        lint: Lint {
+            select,
+            ignore,
+            output_format,
+        },
+    };
+    config = config.merge(&cli_config);
+    let rules = config
+        .lint
+        .select
+        .unwrap()
+        .difference(&config.lint.ignore.unwrap())
+        .copied()
+        .collect();
     let profile = Profile::new(rules);
     let (_, diagnostics) = parse_and_lint_file(&path, &profile).unwrap();
     if diagnostics.is_empty() {
@@ -45,7 +62,8 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
             &content,
             Some(&path),
             &index,
-            output_format,
+            // TODO: Build final config.
+            config.lint.output_format.unwrap(),
         )
     }
 }
