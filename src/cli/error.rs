@@ -9,6 +9,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     Io(IoError),
     Toml(TomlDeError),
+    Check,
 }
 
 impl std::error::Error for Error {}
@@ -18,6 +19,7 @@ impl fmt::Display for Error {
         match self {
             Self::Io(e) => write!(f, "I/O error: {}", e),
             Self::Toml(e) => write!(f, "TOML parse error: {}", e),
+            Self::Check => write!(f, "checks failed"),
         }
     }
 }

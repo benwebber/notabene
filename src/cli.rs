@@ -11,7 +11,7 @@ mod config;
 mod error;
 mod renderer;
 
-pub fn main() -> IoResult<()> {
+pub fn main() -> error::Result<()> {
     let matches = Command::new("nb")
         .arg_required_else_help(true)
         .subcommand_required(true)

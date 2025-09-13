@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::io::{self, Result, Write};
+use std::io::{self, Write};
 use std::path::PathBuf;
 
 use clap::ArgMatches;
@@ -10,6 +10,7 @@ use crate::rule::Rule;
 use crate::span::Index;
 
 use super::config::{Config, Lint};
+use super::error::{Error, Result};
 use super::renderer::{OutputFormat, render};
 
 pub fn check(matches: &ArgMatches) -> Result<()> {
@@ -64,7 +65,8 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
             &index,
             // TODO: Build final config.
             config.lint.output_format.unwrap(),
-        )
+        )?;
+        Err(Error::Check)
     }
 }
 
