@@ -20,12 +20,13 @@ owo-colors = { version = "4.2.2", features = ["supports-colors"], optional = tru
 serde_json = { version = "1.0.143", optional = true }
 time = { version = "0.3.43", features = ["formatting", "macros", "parsing"] }
 version-compare = "0.2.0"
+toml = { version = "0.9.5", features = ["parse", "serde"], optional = true }
 
 [dev-dependencies]
 insta = { version = "1.43.1", features = ["yaml"] }
 
 [features]
-cli = ["dep:clap", "dep:serde_json", "dep:owo-colors"]
+cli = ["dep:clap", "dep:serde_json", "dep:owo-colors", "dep:toml"]
 
 [lib]
 name = "notabene"

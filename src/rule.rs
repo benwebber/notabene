@@ -2,7 +2,8 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-use serde::{Deserialize, Serialize};
+use serde::de::{self, Visitor};
+use serde::{Deserialize, Deserializer, Serialize};
 
 pub static RULES_BY_CODE: LazyLock<HashMap<String, Rule>> = LazyLock::new(|| {
     Rule::ALL
@@ -14,7 +15,7 @@ pub static RULES_BY_CODE: LazyLock<HashMap<String, Rule>> = LazyLock::new(|| {
 macro_rules! rules {
     ($($rule:ident = ($doc:literal, $code:literal, $message:literal $(,)?)),* $(,)?) => {
         /// A linter rule.
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Deserialize, Serialize)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize)]
         #[non_exhaustive]
         pub enum Rule {
             $(#[doc = concat!("`", $code, "`. ")] #[doc = $doc] $rule),*
@@ -24,6 +25,11 @@ macro_rules! rules {
             /// All rules.
             pub const ALL: [Self; [$(stringify!($rule)),*].len()] = [
                 $(Self::$rule),*
+            ];
+
+            /// All codes.
+            pub(crate) const CODES: [&str; [$(stringify!($code)),*].len()] = [
+                $($code),*
             ];
 
             /// Return the error code for this rule.
@@ -174,5 +180,34 @@ mod tests {
             }
         }
         assert_eq!(duplicates, Vec::<&str>::new());
+    }
+}
+
+impl<'de> Deserialize<'de> for Rule {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct RuleVisitor;
+
+        impl<'de> Visitor<'de> for RuleVisitor {
+            type Value = Rule;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a rule code")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Rule, E>
+            where
+                E: de::Error,
+            {
+                RULES_BY_CODE
+                    .get(value)
+                    .ok_or(de::Error::unknown_variant(value, &Rule::CODES))
+                    .copied()
+            }
+        }
+
+        deserializer.deserialize_str(RuleVisitor)
     }
 }

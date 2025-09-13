@@ -3,7 +3,8 @@ use std::io::Write as IoWrite;
 use std::path::Path;
 
 use owo_colors::{OwoColorize, Stream};
-use serde::{Deserialize, Serialize};
+use serde::de::{self, Visitor};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::diagnostic::Diagnostic;
 use crate::span::Index;
@@ -19,6 +20,7 @@ pub struct JsonDiagnostic {
 }
 
 /// A render output format.
+#[derive(Copy, Clone, Debug, PartialEq, Serialize)]
 pub enum OutputFormat {
     /// One-line output.
     Short,
@@ -28,6 +30,41 @@ pub enum OutputFormat {
     Json,
     /// JSON Lines output.
     JsonLines,
+}
+
+impl<'de> Deserialize<'de> for OutputFormat {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct OutputFormatVisitor;
+
+        impl<'de> Visitor<'de> for OutputFormatVisitor {
+            type Value = OutputFormat;
+
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("an output format")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<OutputFormat, E>
+            where
+                E: de::Error,
+            {
+                match value {
+                    "short" => Ok(OutputFormat::Short),
+                    "full" => Ok(OutputFormat::Full),
+                    "json" => Ok(OutputFormat::Json),
+                    "jsonl" => Ok(OutputFormat::JsonLines),
+                    _ => Err(de::Error::unknown_variant(
+                        value,
+                        &["short", "full", "json", "jsonl"],
+                    )),
+                }
+            }
+        }
+
+        deserializer.deserialize_str(OutputFormatVisitor)
+    }
 }
 
 /// Render diagnostics in a given output format.

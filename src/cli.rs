@@ -7,6 +7,7 @@ use clap::{Arg, ArgGroup, Command, value_parser};
 use crate::rule::{RULES_BY_CODE, Rule};
 
 mod commands;
+mod config;
 mod renderer;
 
 pub fn main() -> IoResult<()> {
