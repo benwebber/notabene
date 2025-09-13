@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::io::{self, Result, Write};
 use std::path::PathBuf;
 
@@ -24,13 +24,16 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         "full" => OutputFormat::Full,
         _ => unreachable!(),
     };
-    let profile = match matches.get_many::<&str>("select") {
-        Some(values) => {
-            let codes: Vec<String> = values.into_iter().map(|s| s.to_uppercase()).collect();
-            Profile::try_from(codes).expect("invalid code")
-        }
-        None => Profile::default(),
+    let selected: HashSet<Rule> = match matches.get_many::<Rule>("select") {
+        Some(values) => values.copied().collect(),
+        None => Rule::ALL.iter().copied().collect(),
     };
+    let ignored: HashSet<Rule> = match matches.get_many::<Rule>("ignore") {
+        Some(values) => values.copied().collect(),
+        None => HashSet::new(),
+    };
+    let rules: HashSet<Rule> = selected.difference(&ignored).copied().collect();
+    let profile = Profile::new(rules);
     let (_, diagnostics) = parse_and_lint_file(&path, &profile).unwrap();
     if diagnostics.is_empty() {
         Ok(())
@@ -73,8 +76,7 @@ pub fn rule(matches: &ArgMatches) -> Result<()> {
                 rule.doc()
             )?;
         }
-    } else if let Some(code) = matches.get_one::<String>("RULE") {
-        let rule = rules_by_code.get(code).unwrap();
+    } else if let Some(rule) = matches.get_one::<Rule>("RULE") {
         write!(
             output,
             "# {}

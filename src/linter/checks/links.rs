@@ -35,7 +35,7 @@ mod tests {
 
     #[test]
     fn test_link_reference_does_not_exist() {
-        let profile = Profile::new(&[Rule::LinkReferenceDoesNotExist]);
+        let profile = Profile::from([Rule::LinkReferenceDoesNotExist]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

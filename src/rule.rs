@@ -1,5 +1,15 @@
 //! Linter rules.
+use std::collections::HashMap;
+use std::sync::LazyLock;
+
 use serde::{Deserialize, Serialize};
+
+pub static RULES_BY_CODE: LazyLock<HashMap<String, Rule>> = LazyLock::new(|| {
+    Rule::ALL
+        .iter()
+        .map(|rule| (rule.code().to_string(), *rule))
+        .collect()
+});
 
 macro_rules! rules {
     ($($rule:ident = ($doc:literal, $code:literal, $message:literal $(,)?)),* $(,)?) => {
@@ -127,6 +137,25 @@ rules! {
         "E500",
         "Link reference does not exist: `{}`",
     ),
+}
+
+impl TryFrom<String> for Rule {
+    type Error = String;
+
+    fn try_from(code: String) -> Result<Self, Self::Error> {
+        RULES_BY_CODE
+            .get(&code.to_uppercase())
+            .copied()
+            .ok_or_else(|| format!("invalid rule code '{}'", code))
+    }
+}
+
+impl TryFrom<&str> for Rule {
+    type Error = String;
+
+    fn try_from(code: &str) -> Result<Self, Self::Error> {
+        Rule::try_from(code.to_string())
+    }
 }
 
 #[cfg(test)]

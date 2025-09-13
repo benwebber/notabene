@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use clap::builder::{Styles, ValueParser};
 use clap::{Arg, ArgGroup, Command, value_parser};
 
-use crate::rule::Rule;
+use crate::rule::{RULES_BY_CODE, Rule};
 
 mod commands;
 mod renderer;
@@ -24,7 +24,18 @@ pub fn main() -> IoResult<()> {
                         .value_parser(["full", "json", "jsonl", "short"])
                         .default_value("short"),
                 )
-                .arg(Arg::new("select").long("select").value_delimiter(',')),
+                .arg(
+                    Arg::new("select")
+                        .long("select")
+                        .value_parser(ValueParser::new(parse_rule_code))
+                        .value_delimiter(','),
+                )
+                .arg(
+                    Arg::new("ignore")
+                        .long("ignore")
+                        .value_parser(ValueParser::new(parse_rule_code))
+                        .value_delimiter(','),
+                ),
         )
         .subcommand(
             Command::new("rule")
@@ -52,16 +63,16 @@ pub fn main() -> IoResult<()> {
     }
 }
 
-fn parse_rule_code(code: &str) -> Result<String, String> {
-    let code = code.to_uppercase();
-    if Rule::ALL.iter().any(|rule| rule.code() == code) {
-        Ok(code)
-    } else {
-        Err(Rule::ALL
-            .iter()
-            .map(|rule| rule.code())
-            .collect::<Vec<&str>>()
-            .join(", ")
-            .to_string())
-    }
+fn parse_rule_code(code: &str) -> Result<Rule, String> {
+    RULES_BY_CODE
+        .get(&code.to_uppercase())
+        .ok_or(
+            Rule::ALL
+                .iter()
+                .map(|rule| rule.code())
+                .collect::<Vec<&str>>()
+                .join(", ")
+                .to_string(),
+        )
+        .copied()
 }

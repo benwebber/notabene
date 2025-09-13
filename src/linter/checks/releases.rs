@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn test_invalid_date() {
-        let profile = Profile::new(&[Rule::InvalidDate]);
+        let profile = Profile::from([Rule::InvalidDate]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -211,7 +211,7 @@ mod tests {
 
     #[test]
     fn test_invalid_yanked() {
-        let profile = Profile::new(&[Rule::InvalidYanked]);
+        let profile = Profile::from([Rule::InvalidYanked]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -237,7 +237,7 @@ mod tests {
 
     #[test]
     fn test_missing_date() {
-        let profile = Profile::new(&[Rule::MissingDate]);
+        let profile = Profile::from([Rule::MissingDate]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_release_out_of_order() {
-        let profile = Profile::new(&[Rule::ReleaseOutOfOrder]);
+        let profile = Profile::from([Rule::ReleaseOutOfOrder]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     fn test_duplicate_version() {
-        let profile = Profile::new(&[Rule::DuplicateVersion]);
+        let profile = Profile::from([Rule::DuplicateVersion]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

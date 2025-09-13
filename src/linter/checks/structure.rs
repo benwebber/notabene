@@ -137,7 +137,7 @@ mod tests {
 
     #[test]
     fn test_missing_title() {
-        let profile = Profile::new(&[Rule::MissingTitle]);
+        let profile = Profile::from([Rule::MissingTitle]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -151,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_invalid_title() {
-        let profile = Profile::new(&[Rule::InvalidTitle]);
+        let profile = Profile::from([Rule::InvalidTitle]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_duplicate_title() {
-        let profile = Profile::new(&[Rule::DuplicateTitle]);
+        let profile = Profile::from([Rule::DuplicateTitle]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -184,7 +184,7 @@ mod tests {
 
     #[test]
     fn test_invalid_section() {
-        let profile = Profile::new(&[Rule::InvalidSectionHeading]);
+        let profile = Profile::from([Rule::InvalidSectionHeading]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -200,7 +200,7 @@ mod tests {
 
     #[test]
     fn test_unreleased_not_first() {
-        let profile = Profile::new(&[Rule::UnreleasedOutOfOrder]);
+        let profile = Profile::from([Rule::UnreleasedOutOfOrder]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

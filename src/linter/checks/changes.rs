@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_invalid_change_type() {
-        let profile = Profile::new(&[Rule::InvalidChangeType]);
+        let profile = Profile::from([Rule::InvalidChangeType]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -106,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_duplicate_change_type() {
-        let profile = Profile::new(&[Rule::DuplicateChangeType]);
+        let profile = Profile::from([Rule::DuplicateChangeType]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

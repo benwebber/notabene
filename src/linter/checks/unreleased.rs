@@ -68,7 +68,7 @@ mod tests {
 
     #[test]
     fn test_missing_unreleased() {
-        let profile = Profile::new(&[Rule::MissingUnreleased]);
+        let profile = Profile::from([Rule::MissingUnreleased]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -82,7 +82,7 @@ mod tests {
 
     #[test]
     fn test_duplicate_unreleased() {
-        let profile = Profile::new(&[Rule::DuplicateUnreleased]);
+        let profile = Profile::from([Rule::DuplicateUnreleased]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));

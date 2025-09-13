@@ -48,7 +48,7 @@ mod tests {
 
     #[test]
     fn test_empty_section() {
-        let profile = Profile::new(&[Rule::EmptySection]);
+        let profile = Profile::from([Rule::EmptySection]);
 
         let changelog = Changelog::default();
         assert_yaml_snapshot!(lint(&changelog, &profile));
