@@ -27,6 +27,16 @@ pub struct Lint {
     pub output_format: Option<OutputFormat>,
 }
 
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+struct PyProjectConfig {
+    tool: PyProjectTool,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+struct PyProjectTool {
+    nb: Config,
+}
+
 impl Config {
     pub fn new() -> Self {
         Self::default()
@@ -48,6 +58,10 @@ impl Config {
     pub fn load(path: Option<&Path>) -> Result<Config> {
         let mut config = Config::default();
         // TODO: Add debug logging for I/O error.
+        if let Ok(s) = std::fs::read_to_string("pyproject.toml") {
+            let pyproject = PyProjectConfig::from_str(&s)?;
+            config = config.merge(&pyproject.tool.nb);
+        }
         if let Ok(s) = std::fs::read_to_string("nb.toml") {
             let other = Config::from_str(&s)?;
             config = config.merge(&Config::from_str(&s)?);
@@ -68,6 +82,12 @@ impl Config {
     pub fn from_file(path: &Path) -> Result<Self> {
         let s = std::fs::read_to_string(path)?;
         Self::from_str(&s)
+    }
+}
+
+impl PyProjectConfig {
+    pub fn from_str(s: &str) -> Result<Self> {
+        Ok(toml::from_str(s)?)
     }
 }
 
