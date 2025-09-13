@@ -18,13 +18,10 @@ impl Check for EmptySection {
     }
 
     fn visit_section(&mut self, section: &Section) {
-        match section {
-            Section::Release(release) => {
-                if release.changes.is_empty() {
-                    self.spans.push(release.heading_span);
-                }
+        if let Section::Release(release) = section {
+            if release.changes.is_empty() {
+                self.spans.push(release.heading_span);
             }
-            _ => {}
         }
     }
 

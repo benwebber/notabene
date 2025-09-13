@@ -26,7 +26,7 @@ pub use rule::Rule;
 /// Parsing a changelog will always succeed. This function returns a [`Result`] to support future
 /// fatal errors (e.g. if the document is not a changelog at all).
 pub fn parse_str(s: &str) -> Result<Changelog, ParseError> {
-    Ok(parser::parse(&s).into())
+    Ok(parser::parse(s).into())
 }
 
 /// Parse and lint a changelog from a string.
@@ -64,7 +64,7 @@ fn parse_and_lint(
     profile: &Profile,
 ) -> Result<(Changelog, Vec<Diagnostic>), ParseError> {
     let changelog = parser::parse(s);
-    let mut diagnostics = linter::lint(&changelog, &profile);
+    let mut diagnostics = linter::lint(&changelog, profile);
     diagnostics.sort_by_key(|d| d.span);
     for diagnostic in &mut diagnostics {
         diagnostic.path = path.map(|p| p.to_path_buf());

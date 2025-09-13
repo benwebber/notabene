@@ -1,7 +1,6 @@
 //! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
 use crate::ast::*;
 use crate::ir::*;
-use crate::rule::Rule;
 use crate::span::{Span, SpanIterator};
 use std::iter::Peekable;
 
@@ -47,7 +46,7 @@ pub fn parse(s: &str) -> Changelog {
 }
 
 fn parse_section(s: &str, heading: &Heading, blocks: &mut Peekable<Parser>) -> Option<Section> {
-    let section = match heading.inlines.as_slice() {
+    match heading.inlines.as_slice() {
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
             let changes = parse_changes(s, blocks);
@@ -83,8 +82,7 @@ fn parse_section(s: &str, heading: &Heading, blocks: &mut Peekable<Parser>) -> O
         _ => Some(Section::Invalid(InvalidSection {
             heading_span: heading.span,
         })),
-    };
-    section
+    }
 }
 
 fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> Vec<Changes> {
@@ -130,16 +128,14 @@ fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> Vec<Changes> {
         ));
     }
 
-    let changes = sections
+    sections
         .into_iter()
         .map(|(heading_span, kind, spanned)| Changes {
             heading_span,
             kind,
             changes: spanned,
         })
-        .collect();
-
-    changes
+        .collect()
 }
 
 fn get_heading_span(heading: &Heading) -> Option<Span> {
