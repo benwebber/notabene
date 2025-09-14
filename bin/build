@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+TARGET="${1:?target}"
+VERSION="${2:?version}"
+
+cargo build --all-features --release --target "${TARGET}" --verbose
+tar -cvzf "nb-${VERSION}-${TARGET}.tar.gz" -C "target/${TARGET}/release" nb
