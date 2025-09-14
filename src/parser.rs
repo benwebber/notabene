@@ -1,21 +1,27 @@
 //! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
-use crate::ast::{self, *};
-use crate::ir::*;
+use crate::ast::{self, Block, Heading, Inline, Literal};
+use crate::ir::{
+    Changelog, Changes, InvalidSection, InvalidTitle, Release, Section, Spanned, Unreleased,
+};
 use crate::span::{Span, SpanIterator};
 use std::cell::RefCell;
 use std::iter::Peekable;
+use std::rc::Rc;
 
 use pulldown_cmark as md;
 
 /// Parse a changelog.
 ///
 /// Parsing never fails.
-pub fn parse(s: &str) -> Changelog {
+pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
     let mut changelog = Changelog::default();
-    let broken_links = RefCell::new(Vec::new());
-    let callback = |link: md::BrokenLink| {
-        broken_links.borrow_mut().push(link.span.into());
-        None
+    let broken_links = Rc::new(RefCell::new(Vec::new()));
+    let callback = {
+        let broken_links = Rc::clone(&broken_links);
+        move |link: md::BrokenLink| {
+            broken_links.borrow_mut().push(link.span.into());
+            None
+        }
     };
     let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
     let parser = md::utils::TextMergeWithOffset::new(parser.into_offset_iter());
@@ -25,7 +31,7 @@ pub fn parse(s: &str) -> Changelog {
             Block::Heading(heading @ Heading { level: 1, .. }) => {
                 let section = match get_heading_span(&heading) {
                     Some(span) => {
-                        let spanned = Spanned::new(span, s[span.range()].to_string());
+                        let spanned = Spanned::new(span, &s[span.range()]);
                         Section::Title(spanned)
                     }
                     None => Section::InvalidTitle(InvalidTitle {
@@ -45,31 +51,33 @@ pub fn parse(s: &str) -> Changelog {
     }
     // `blocks` still holds a reference to `callback` through the parser.
     drop(blocks);
-    changelog.broken_links = broken_links.into_inner();
+    if let Ok(cell) = Rc::try_unwrap(broken_links) {
+        changelog.broken_links = cell.into_inner();
+    }
     changelog
 }
 
 fn parse_section<'a>(
-    s: &str,
+    s: &'a str,
     heading: &Heading,
     blocks: &mut Peekable<ast::Parser<'a>>,
-) -> Option<Section> {
+) -> Option<Section<'a>> {
     match heading.inlines.as_slice() {
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
             let changes = parse_changes(s, blocks);
             Some(Section::Unreleased(Unreleased {
-                heading_span: heading.span,
-                url: Some(l.target.clone()),
+                heading_span: heading.span.clone(),
+                url: Some(l.target.to_string()),
                 changes,
             }))
         }
         // Release
         [Inline::Link(l), Inline::Literal(t)] => {
             let mut release = Release {
-                heading_span: heading.span,
-                version: Spanned::new(l.content.span, s[l.content.span.range()].to_string()),
-                url: Some(l.target.clone()),
+                heading_span: heading.span.clone(),
+                version: Spanned::new(l.content.span, &s[l.content.span.range()]),
+                url: Some(l.target.to_string()),
                 ..Default::default()
             };
             let mut spans = SpanIterator::new(&s[t.span.range()]);
@@ -77,26 +85,26 @@ fn parse_section<'a>(
             spans.next();
             if let Some(span) = spans.next().map(|s| s.offset(t.span.start)) {
                 let date = &s[span.range()];
-                release.date = Some(Spanned::new(span, date.to_string()))
+                release.date = Some(Spanned::new(span, date))
             }
             if let Some(span) = spans.next().map(|s| s.offset(t.span.start)) {
                 let yanked = &s[span.range()];
-                release.yanked = Some(Spanned::new(span, yanked.to_string()));
+                release.yanked = Some(Spanned::new(span, yanked));
             }
             let changes = parse_changes(s, blocks);
             release.changes = changes;
             Some(Section::Release(release))
         }
         _ => Some(Section::Invalid(InvalidSection {
-            heading_span: heading.span,
+            heading_span: heading.span.clone(),
         })),
     }
 }
 
-fn parse_changes<'a>(s: &str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Changes> {
-    let mut sections: Vec<(Span, Spanned<String>, Vec<Spanned<String>>)> = Vec::new();
-    let mut current_kind: Option<String> = None;
-    let mut current_changes: Vec<Spanned<String>> = Vec::new();
+fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Changes<'a>> {
+    let mut sections: Vec<(Span, Spanned<&'a str>, Vec<Spanned<&'a str>>)> = Vec::new();
+    let mut current_kind: Option<&'a str> = None;
+    let mut current_changes: Vec<Spanned<&'a str>> = Vec::new();
     let mut current_heading_span: Span = Span::default();
 
     while let Some(block) = blocks.peek() {
@@ -110,7 +118,7 @@ fn parse_changes<'a>(s: &str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Cha
                         std::mem::take(&mut current_changes),
                     ));
                 }
-                current_kind = get_heading_text(s, heading).map(|s| s.to_string());
+                current_kind = get_heading_text(s, heading);
                 current_heading_span = heading.span;
                 blocks.next();
             }
@@ -119,7 +127,7 @@ fn parse_changes<'a>(s: &str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Cha
                     current_changes.extend(
                         l.items
                             .iter()
-                            .map(|i| Spanned::new(i.span, s[i.span.range()].to_string())),
+                            .map(|i| Spanned::new(i.span, &s[i.span.range()])),
                     );
                 }
                 blocks.next();

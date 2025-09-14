@@ -105,8 +105,8 @@ impl Check for ReleaseOutOfOrder {
         if let Section::Release(release) = section {
             self.info.push(ReleaseInfo {
                 span: release.heading_span,
-                version: release.version.value.clone(),
-                date: release.date.as_ref().map(|s| s.value.clone()),
+                version: release.version.value.to_string(),
+                date: release.date.as_ref().map(|s| s.value.to_string()),
             })
         }
     }
@@ -161,7 +161,7 @@ impl Check for DuplicateVersion {
 
     fn visit_section(&mut self, section: &Section) {
         if let Section::Release(release) = section {
-            if !self.versions.insert(release.version.value.clone()) {
+            if !self.versions.insert(release.version.value.to_string()) {
                 self.spans.push(release.version.span);
             }
         }
@@ -192,15 +192,15 @@ mod tests {
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(0, 9), "2038-01-19".to_string())),
+                    date: Some(Spanned::new(Span::new(0, 9), "2038-01-19")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(1, 10), "2001-01-00".to_string())),
+                    date: Some(Spanned::new(Span::new(1, 10), "2001-01-00")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(2, 5), "foo".to_string())),
+                    date: Some(Spanned::new(Span::new(2, 5), "foo")),
                     ..Default::default()
                 }),
             ],
@@ -222,11 +222,11 @@ mod tests {
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    yanked: Some(Spanned::new(Span::new(0, 9), "[YANKED]".to_string())),
+                    yanked: Some(Spanned::new(Span::new(0, 9), "[YANKED]")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    yanked: Some(Spanned::new(Span::new(1, 10), "[ZANKED]".to_string())),
+                    yanked: Some(Spanned::new(Span::new(1, 10), "[ZANKED]")),
                     ..Default::default()
                 }),
             ],
@@ -245,7 +245,7 @@ mod tests {
         let changelog = Changelog {
             sections: vec![
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(0, 11), "2025-01-01".to_string())),
+                    date: Some(Spanned::new(Span::new(0, 11), "2025-01-01")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
@@ -268,20 +268,20 @@ mod tests {
         let changelog = Changelog {
             sections: vec![
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::default(), "2025-12-31".to_string())),
+                    date: Some(Spanned::new(Span::default(), "2025-12-31")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::default(), "2025-01-01".to_string())),
+                    date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
                     heading_span: Span::new(1, usize::MAX),
-                    date: Some(Spanned::new(Span::default(), "2025-06-01".to_string())),
+                    date: Some(Spanned::new(Span::default(), "2025-06-01")),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    date: Some(Spanned::new(Span::default(), "2025-01-01".to_string())),
+                    date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
                 }),
             ],
@@ -300,15 +300,15 @@ mod tests {
         let changelog = Changelog {
             sections: vec![
                 Section::Release(Release {
-                    version: Spanned::new(Span::default(), "1.0.0".to_string()),
+                    version: Spanned::new(Span::default(), "1.0.0"),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    version: Spanned::new(Span::new(1, usize::MAX), "1.0.0".to_string()),
+                    version: Spanned::new(Span::new(1, usize::MAX), "1.0.0"),
                     ..Default::default()
                 }),
                 Section::Release(Release {
-                    version: Spanned::new(Span::default(), "0.1.0".to_string()),
+                    version: Spanned::new(Span::default(), "0.1.0"),
                     ..Default::default()
                 }),
             ],

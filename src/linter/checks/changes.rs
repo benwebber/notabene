@@ -18,7 +18,7 @@ impl Check for InvalidChangeType {
 
     fn visit_changes(&mut self, changes: &Changes) {
         if !matches!(
-            changes.kind.value.as_str(),
+            changes.kind.value,
             "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
         ) {
             self.spans.push(changes.kind.span);
@@ -46,7 +46,7 @@ impl Check for DuplicateChangeType {
     }
 
     fn visit_changes(&mut self, changes: &Changes) {
-        if !self.seen.insert(changes.kind.value.clone()) {
+        if !self.seen.insert(changes.kind.value.to_string()) {
             self.spans.push(changes.kind.span);
         }
     }
@@ -75,11 +75,11 @@ mod tests {
                 Section::Unreleased(Unreleased {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
                             ..Default::default()
                         },
                         Changes {
-                            kind: Spanned::new(Span::new(1, usize::MAX), "Foo".to_string()),
+                            kind: Spanned::new(Span::new(1, usize::MAX), "Foo"),
                             ..Default::default()
                         },
                     ],
@@ -88,11 +88,11 @@ mod tests {
                 Section::Release(Release {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
                             ..Default::default()
                         },
                         Changes {
-                            kind: Spanned::new(Span::new(2, usize::MAX), "Foo".to_string()),
+                            kind: Spanned::new(Span::new(2, usize::MAX), "Foo"),
                             ..Default::default()
                         },
                     ],
@@ -116,11 +116,11 @@ mod tests {
                 Section::Unreleased(Unreleased {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
                             ..Default::default()
                         },
                         Changes {
-                            kind: Spanned::new(Span::new(1, usize::MAX), "Added".to_string()),
+                            kind: Spanned::new(Span::new(1, usize::MAX), "Added"),
                             ..Default::default()
                         },
                     ],
@@ -129,11 +129,11 @@ mod tests {
                 Section::Release(Release {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
                             ..Default::default()
                         },
                         Changes {
-                            kind: Spanned::new(Span::new(2, usize::MAX), "Added".to_string()),
+                            kind: Spanned::new(Span::new(2, usize::MAX), "Added"),
                             ..Default::default()
                         },
                     ],

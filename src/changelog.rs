@@ -37,7 +37,7 @@ pub struct Changes {
 
 /// Create a `Changelog` from an [`ir::Changelog`].
 /// Use the first title and the first unreleased section as `title` and `unreleased`, respectively.
-impl From<ir::Changelog> for Changelog {
+impl<'a> From<ir::Changelog<'a>> for Changelog {
     fn from(changelog: ir::Changelog) -> Self {
         let mut title: Option<String> = None;
         let mut unreleased: Option<Unreleased> = None;
@@ -46,7 +46,7 @@ impl From<ir::Changelog> for Changelog {
             match section {
                 ir::Section::Title(t) => {
                     if title.is_none() {
-                        title = Some(t.into_inner())
+                        title = Some(t.into_inner().to_string())
                     }
                 }
                 ir::Section::Unreleased(u) => {
@@ -66,35 +66,35 @@ impl From<ir::Changelog> for Changelog {
     }
 }
 
-impl From<ir::Unreleased> for Unreleased {
+impl<'a> From<ir::Unreleased<'a>> for Unreleased {
     fn from(unreleased: ir::Unreleased) -> Self {
         Self {
-            url: unreleased.url,
+            url: unreleased.url.map(|s| s.to_string()),
             changes: unreleased.changes.into_iter().map(Into::into).collect(),
         }
     }
 }
 
-impl From<ir::Release> for Release {
+impl<'a> From<ir::Release<'a>> for Release {
     fn from(release: ir::Release) -> Self {
         Self {
-            version: release.version.into_inner(),
-            url: release.url,
-            date: release.date.map(|d| d.into_inner()),
+            version: release.version.into_inner().to_string(),
+            url: release.url.map(|s| s.to_string()),
+            date: release.date.map(|d| d.into_inner().to_string()),
             yanked: release.yanked.is_some(),
             changes: release.changes.into_iter().map(Into::into).collect(),
         }
     }
 }
 
-impl From<ir::Changes> for Changes {
+impl<'a> From<ir::Changes<'a>> for Changes {
     fn from(changes: ir::Changes) -> Self {
         Self {
-            kind: changes.kind.into_inner(),
+            kind: changes.kind.into_inner().to_string(),
             changes: changes
                 .changes
                 .into_iter()
-                .map(|c| c.into_inner())
+                .map(|c| c.into_inner().to_string())
                 .collect(),
         }
     }
@@ -111,7 +111,7 @@ mod tests {
     // Spans are not useful here, so create dummy spans.
     macro_rules! spanned {
         ($s:literal) => {
-            ir::Spanned::new(Span::new(0, 0), $s.to_string())
+            ir::Spanned::new(Span::new(0, 0), $s)
         };
     }
 

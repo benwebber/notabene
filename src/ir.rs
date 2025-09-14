@@ -9,55 +9,55 @@
 //! Preserving span information allows lint checks to include the context around diagnostics.
 use crate::span::Span;
 
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Default, Eq, Hash, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Default, Eq, Hash, PartialEq, Serialize)]
 pub(crate) struct Spanned<T> {
     pub span: Span,
     pub value: T,
 }
 
-#[derive(Debug, Default, Deserialize, Serialize)]
-pub(crate) struct Changelog {
-    pub sections: Vec<Section>,
+#[derive(Debug, Default, Serialize)]
+pub(crate) struct Changelog<'a> {
+    pub sections: Vec<Section<'a>>,
     pub broken_links: Vec<Span>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub enum Section {
-    Title(Spanned<String>),
-    Unreleased(Unreleased),
-    Release(Release),
+#[derive(Debug, Serialize)]
+pub enum Section<'a> {
+    Title(Spanned<&'a str>),
+    Unreleased(Unreleased<'a>),
+    Release(Release<'a>),
     Invalid(InvalidSection),
     // TODO: If Title held something like Vec<Inline>, it would be possible
     // to get rid of InvalidTitle and validate Title in the linter.
     InvalidTitle(InvalidTitle),
 }
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
-pub(crate) struct Unreleased {
+#[derive(Debug, Default, PartialEq, Serialize)]
+pub(crate) struct Unreleased<'a> {
     pub heading_span: Span,
     // TODO: Get span.
     pub url: Option<String>,
-    pub changes: Vec<Changes>,
+    pub changes: Vec<Changes<'a>>,
 }
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
-pub(crate) struct Release {
+#[derive(Debug, Default, PartialEq, Serialize)]
+pub(crate) struct Release<'a> {
     pub heading_span: Span,
-    pub version: Spanned<String>,
+    pub version: Spanned<&'a str>,
     // TODO: Get span.
     pub url: Option<String>,
-    pub date: Option<Spanned<String>>,
-    pub yanked: Option<Spanned<String>>,
-    pub changes: Vec<Changes>,
+    pub date: Option<Spanned<&'a str>>,
+    pub yanked: Option<Spanned<&'a str>>,
+    pub changes: Vec<Changes<'a>>,
 }
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
-pub(crate) struct Changes {
+#[derive(Debug, Default, PartialEq, Serialize)]
+pub(crate) struct Changes<'a> {
     pub heading_span: Span,
-    pub kind: Spanned<String>,
-    pub changes: Vec<Spanned<String>>,
+    pub kind: Spanned<&'a str>,
+    pub changes: Vec<Spanned<&'a str>>,
 }
 
 impl<T> Spanned<T> {
@@ -70,12 +70,12 @@ impl<T> Spanned<T> {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub(crate) struct InvalidSection {
     pub heading_span: Span,
 }
 
-#[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub(crate) struct InvalidTitle {
     pub heading_span: Span,
 }

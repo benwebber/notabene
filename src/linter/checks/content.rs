@@ -57,8 +57,8 @@ mod tests {
                 Section::Unreleased(Unreleased {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
-                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo".to_string())],
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
+                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo")],
                             ..Default::default()
                         },
                         // Empty changes.
@@ -77,8 +77,8 @@ mod tests {
                 Section::Release(Release {
                     changes: vec![
                         Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added".to_string()),
-                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo".to_string())],
+                            kind: Spanned::new(Span::new(0, 0), "Added"),
+                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo")],
                             ..Default::default()
                         },
                         // Empty changes.

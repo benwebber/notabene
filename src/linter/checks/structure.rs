@@ -143,7 +143,7 @@ mod tests {
         assert_yaml_snapshot!(lint(&changelog, &profile));
 
         let changelog = Changelog {
-            sections: vec![Section::Title(Spanned::<String>::default())],
+            sections: vec![Section::Title(Spanned::<&str>::default())],
             ..Default::default()
         };
         assert_yaml_snapshot!(lint(&changelog, &profile));
@@ -174,8 +174,8 @@ mod tests {
 
         let changelog = Changelog {
             sections: vec![
-                Section::Title(Spanned::<String>::default()),
-                Section::Title(Spanned::new(Span::new(2, 11), "Changelog".to_string())),
+                Section::Title(Spanned::<&str>::default()),
+                Section::Title(Spanned::new(Span::new(2, 11), "Changelog")),
             ],
             ..Default::default()
         };
