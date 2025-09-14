@@ -1,7 +1,8 @@
 //! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
-use crate::ast::*;
+use crate::ast::{self, *};
 use crate::ir::*;
 use crate::span::{Span, SpanIterator};
+use std::cell::RefCell;
 use std::iter::Peekable;
 
 use pulldown_cmark as md;
@@ -11,7 +12,14 @@ use pulldown_cmark as md;
 /// Parsing never fails.
 pub fn parse(s: &str) -> Changelog {
     let mut changelog = Changelog::default();
-    let mut blocks = Parser::new(s).peekable();
+    let broken_links = RefCell::new(Vec::new());
+    let callback = |link: md::BrokenLink| {
+        broken_links.borrow_mut().push(link.span.into());
+        None
+    };
+    let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
+    let parser = md::utils::TextMergeWithOffset::new(parser.into_offset_iter());
+    let mut blocks = ast::Parser::new(Box::new(parser)).peekable();
     while let Some(block) = blocks.next() {
         match block {
             Block::Heading(heading @ Heading { level: 1, .. }) => {
@@ -35,17 +43,17 @@ pub fn parse(s: &str) -> Changelog {
             _ => {}
         }
     }
-    // Detect broken links.
-    let callback = |link: md::BrokenLink| {
-        changelog.broken_links.push(link.span.into());
-        None
-    };
-    let parser = md::Parser::new_with_broken_link_callback(s, md::Options::empty(), Some(callback));
-    for _event in parser {}
+    // `blocks` still holds a reference to `callback` through the parser.
+    drop(blocks);
+    changelog.broken_links = broken_links.into_inner();
     changelog
 }
 
-fn parse_section(s: &str, heading: &Heading, blocks: &mut Peekable<Parser>) -> Option<Section> {
+fn parse_section<'a>(
+    s: &str,
+    heading: &Heading,
+    blocks: &mut Peekable<ast::Parser<'a>>,
+) -> Option<Section> {
     match heading.inlines.as_slice() {
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
@@ -85,7 +93,7 @@ fn parse_section(s: &str, heading: &Heading, blocks: &mut Peekable<Parser>) -> O
     }
 }
 
-fn parse_changes(s: &str, blocks: &mut Peekable<Parser>) -> Vec<Changes> {
+fn parse_changes<'a>(s: &str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Changes> {
     let mut sections: Vec<(Span, Spanned<String>, Vec<Spanned<String>>)> = Vec::new();
     let mut current_kind: Option<String> = None;
     let mut current_changes: Vec<Spanned<String>> = Vec::new();

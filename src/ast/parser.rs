@@ -4,18 +4,14 @@ use pulldown_cmark as md;
 use super::*;
 use crate::span::Span;
 
-/// A [pulldown-cmark](https://crates.io/crates/pulldown-cmark) parser that includes text offset
-/// information (for spans) and merges consecutive text nodes into one.
-type MdParser<'a> = md::utils::TextMergeWithOffset<'a, md::OffsetIter<'a>>;
+type EventSpanIterator<'a> = dyn Iterator<Item = (md::Event<'a>, std::ops::Range<usize>)> + 'a;
 
 pub struct Parser<'a> {
-    inner: MdParser<'a>,
+    inner: Box<EventSpanIterator<'a>>,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(s: &'a str) -> Self {
-        let parser = md::Parser::new(s).into_offset_iter();
-        let inner = md::utils::TextMergeWithOffset::new(parser);
+    pub fn new(inner: Box<EventSpanIterator<'a>>) -> Self {
         Self { inner }
     }
 }
@@ -26,7 +22,7 @@ impl Literal {
     }
 }
 
-impl Iterator for Parser<'_> {
+impl<'a> Iterator for Parser<'a> {
     type Item = Block;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -70,7 +66,7 @@ impl Iterator for Parser<'_> {
     }
 }
 
-fn parse_inlines(parser: &mut MdParser, until: md::TagEnd) -> Vec<Inline> {
+fn parse_inlines<'a>(parser: &mut EventSpanIterator<'a>, until: md::TagEnd) -> Vec<Inline> {
     let mut inlines = vec![];
     while let Some((event, span)) = parser.next() {
         match event {
@@ -96,7 +92,7 @@ fn parse_inlines(parser: &mut MdParser, until: md::TagEnd) -> Vec<Inline> {
     inlines
 }
 
-fn parse_items(parser: &mut MdParser) -> Vec<Literal> {
+fn parse_items<'a>(parser: &mut EventSpanIterator<'a>) -> Vec<Literal> {
     let mut items = vec![];
     while let Some((event, _)) = parser.next() {
         match event {
@@ -111,9 +107,9 @@ fn parse_items(parser: &mut MdParser) -> Vec<Literal> {
     items
 }
 
-fn read_span_until(parser: &mut MdParser, until: md::TagEnd) -> Span {
+fn read_span_until<'a>(parser: &mut EventSpanIterator<'a>, until: md::TagEnd) -> Span {
     let mut span = Span::default();
-    for (event, span_) in parser.by_ref() {
+    for (event, span_) in &mut *parser {
         match event {
             md::Event::End(tag) if tag == until => {
                 break;
@@ -134,9 +130,16 @@ mod tests {
 
     use super::*;
 
+    fn parser(s: &str) -> Parser {
+        let parser = md::Parser::new(s).into_offset_iter();
+        let inner = md::utils::TextMergeWithOffset::new(parser);
+        Parser::new(Box::new(inner))
+    }
+
     macro_rules! snapshot {
         ($s:literal) => {
-            let blocks: Vec<Block> = Parser::new(&$s.trim()).collect();
+            let parser = parser(&$s.trim());
+            let blocks: Vec<Block> = parser.collect();
             insta::assert_yaml_snapshot!(blocks);
         };
     }
