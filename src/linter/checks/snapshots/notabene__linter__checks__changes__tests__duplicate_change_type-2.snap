@@ -1,6 +1,6 @@
 ---
 source: src/linter/checks/changes.rs
-expression: "lint(&changelog, &profile)"
+expression: "lint(&changelog, &ruleset)"
 ---
 - rule: DuplicateChangeType
   span:

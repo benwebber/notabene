@@ -63,29 +63,29 @@ mod tests {
 
     use crate::ir::*;
     use crate::linter::lint;
-    use crate::profile::Profile;
+    use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_missing_unreleased() {
-        let profile = Profile::from([Rule::MissingUnreleased]);
+        let ruleset = RuleSet::from([Rule::MissingUnreleased]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![Section::Unreleased(Unreleased::default())],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_duplicate_unreleased() {
-        let profile = Profile::from([Rule::DuplicateUnreleased]);
+        let ruleset = RuleSet::from([Rule::DuplicateUnreleased]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -97,6 +97,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 }

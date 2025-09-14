@@ -3,7 +3,7 @@
 //! # Example
 //!
 //! ```
-//! use notabene::{Changelog, Profile, lint, parse};
+//! use notabene::{Changelog, RuleSet, lint, parse};
 //!
 //! let s = r#"
 //! ## Changelog
@@ -17,7 +17,7 @@
 //! [Unreleased]: https://example.org/
 //! "#;
 //! let parsed = parse(&s).unwrap();
-//! let diagnostics = lint(&parsed, None, &Profile::default());
+//! let diagnostics = lint(&parsed, None, &RuleSet::default());
 //! let changelog: Changelog = parsed.into();
 //!
 //! assert_eq!(changelog.title, Some("Changelog".into()));
@@ -33,8 +33,8 @@ pub(crate) mod diagnostic;
 pub mod ir;
 pub(crate) mod linter;
 pub(crate) mod parser;
-pub(crate) mod profile;
 pub(crate) mod rule;
+pub(crate) mod ruleset;
 pub(crate) mod span;
 pub(crate) mod unist;
 
@@ -46,8 +46,8 @@ pub mod error;
 pub use changelog::Changelog;
 pub use diagnostic::Diagnostic;
 pub use error::ParseError;
-pub use profile::Profile;
 pub use rule::Rule;
+pub use ruleset::RuleSet;
 pub use span::Span;
 
 /// Parse a changelog into its intermediate representation.
@@ -62,9 +62,9 @@ pub fn parse<'a>(s: &'a str) -> Result<ir::Changelog<'a>, ParseError> {
 pub fn lint<'a>(
     changelog: &ir::Changelog<'a>,
     path: Option<&Path>,
-    profile: &Profile,
+    ruleset: &RuleSet,
 ) -> Vec<Diagnostic> {
-    let mut diagnostics = linter::lint(&changelog, profile);
+    let mut diagnostics = linter::lint(&changelog, ruleset);
     diagnostics.sort_by_key(|d| d.span);
     for diagnostic in &mut diagnostics {
         diagnostic.path = path.map(|p| p.to_path_buf());

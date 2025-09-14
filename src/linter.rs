@@ -5,19 +5,18 @@ use crate::changelog;
 use crate::diagnostic::Diagnostic;
 use crate::ir::{Changelog, Section};
 use crate::parser::parse;
-use crate::profile::Profile;
+use crate::ruleset::RuleSet;
 
 mod check;
 mod checks;
 
 use check::Check;
 
-
-pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
+pub fn lint(changelog: &Changelog, ruleset: &RuleSet) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();
     let mut checks: Vec<_> = checks()
         .into_iter()
-        .filter(|check| profile.is_enabled(check.rule()))
+        .filter(|check| ruleset.is_enabled(check.rule()))
         .collect();
     for check in checks.iter_mut() {
         check.visit_changelog(changelog);

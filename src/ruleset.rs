@@ -3,11 +3,11 @@ use std::collections::HashSet;
 use crate::rule::Rule;
 
 /// A set of linter rules.
-pub struct Profile {
+pub struct RuleSet {
     pub rules: HashSet<Rule>,
 }
 
-impl Profile {
+impl RuleSet {
     pub fn new(rules: HashSet<Rule>) -> Self {
         Self { rules }
     }
@@ -17,13 +17,13 @@ impl Profile {
     }
 }
 
-impl Default for Profile {
+impl Default for RuleSet {
     fn default() -> Self {
         Self::from(Rule::ALL)
     }
 }
 
-impl<const N: usize> From<[Rule; N]> for Profile {
+impl<const N: usize> From<[Rule; N]> for RuleSet {
     fn from(rules: [Rule; N]) -> Self {
         Self::new(rules.iter().copied().collect())
     }

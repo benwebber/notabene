@@ -4,8 +4,8 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::profile::Profile;
 use crate::rule::Rule;
+use crate::ruleset::RuleSet;
 use crate::span::Index;
 use crate::{lint, parse};
 
@@ -44,10 +44,10 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         .difference(&config.lint.ignore.unwrap())
         .copied()
         .collect();
-    let profile = Profile::new(rules);
+    let ruleset = RuleSet::new(rules);
     let content = std::fs::read_to_string(&path)?;
     let ir = parse(&content).unwrap();
-    let diagnostics = lint(&ir, Some(&path), &profile);
+    let diagnostics = lint(&ir, Some(&path), &ruleset);
     if diagnostics.is_empty() {
         Ok(())
     } else {

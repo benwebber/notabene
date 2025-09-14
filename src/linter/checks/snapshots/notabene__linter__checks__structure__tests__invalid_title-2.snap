@@ -1,6 +1,6 @@
 ---
 source: src/linter/checks/structure.rs
-expression: "lint(&changelog, &profile)"
+expression: "lint(&changelog, &ruleset)"
 ---
 - rule: InvalidTitle
   span:

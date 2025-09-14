@@ -176,15 +176,15 @@ mod tests {
 
     use crate::ir::*;
     use crate::linter::lint;
-    use crate::profile::Profile;
+    use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_invalid_date() {
-        let profile = Profile::from([Rule::InvalidDate]);
+        let ruleset = RuleSet::from([Rule::InvalidDate]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -206,15 +206,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_invalid_yanked() {
-        let profile = Profile::from([Rule::InvalidYanked]);
+        let ruleset = RuleSet::from([Rule::InvalidYanked]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -232,15 +232,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_missing_date() {
-        let profile = Profile::from([Rule::MissingDate]);
+        let ruleset = RuleSet::from([Rule::MissingDate]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -255,15 +255,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_release_out_of_order() {
-        let profile = Profile::from([Rule::ReleaseOutOfOrder]);
+        let ruleset = RuleSet::from([Rule::ReleaseOutOfOrder]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -287,15 +287,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_duplicate_version() {
-        let profile = Profile::from([Rule::DuplicateVersion]);
+        let ruleset = RuleSet::from([Rule::DuplicateVersion]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -314,6 +314,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 }

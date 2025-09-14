@@ -30,20 +30,20 @@ mod tests {
 
     use crate::ir::*;
     use crate::linter::lint;
-    use crate::profile::Profile;
+    use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_link_reference_does_not_exist() {
-        let profile = Profile::from([Rule::LinkReferenceDoesNotExist]);
+        let ruleset = RuleSet::from([Rule::LinkReferenceDoesNotExist]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             broken_links: vec![Span::new(1, usize::MAX)],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 }

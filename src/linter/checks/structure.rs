@@ -132,29 +132,29 @@ mod tests {
 
     use crate::ir::{self, *};
     use crate::linter::lint;
-    use crate::profile::Profile;
+    use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_missing_title() {
-        let profile = Profile::from([Rule::MissingTitle]);
+        let ruleset = RuleSet::from([Rule::MissingTitle]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![Section::Title(Spanned::<&str>::default())],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_invalid_title() {
-        let profile = Profile::from([Rule::InvalidTitle]);
+        let ruleset = RuleSet::from([Rule::InvalidTitle]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![Section::InvalidTitle(ir::InvalidTitle {
@@ -162,15 +162,15 @@ mod tests {
             })],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_duplicate_title() {
-        let profile = Profile::from([Rule::DuplicateTitle]);
+        let ruleset = RuleSet::from([Rule::DuplicateTitle]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -179,15 +179,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_invalid_section() {
-        let profile = Profile::from([Rule::InvalidSectionHeading]);
+        let ruleset = RuleSet::from([Rule::InvalidSectionHeading]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![Section::Invalid(InvalidSection {
@@ -195,15 +195,15 @@ mod tests {
             })],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_unreleased_not_first() {
-        let profile = Profile::from([Rule::UnreleasedOutOfOrder]);
+        let ruleset = RuleSet::from([Rule::UnreleasedOutOfOrder]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -215,6 +215,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 }

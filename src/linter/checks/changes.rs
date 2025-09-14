@@ -60,15 +60,15 @@ mod tests {
 
     use crate::ir::*;
     use crate::linter::lint;
-    use crate::profile::Profile;
+    use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_invalid_change_type() {
-        let profile = Profile::from([Rule::InvalidChangeType]);
+        let ruleset = RuleSet::from([Rule::InvalidChangeType]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -101,15 +101,15 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 
     #[test]
     fn test_duplicate_change_type() {
-        let profile = Profile::from([Rule::DuplicateChangeType]);
+        let ruleset = RuleSet::from([Rule::DuplicateChangeType]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
 
         let changelog = Changelog {
             sections: vec![
@@ -142,6 +142,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &profile));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset));
     }
 }
