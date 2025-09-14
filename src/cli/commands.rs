@@ -22,14 +22,12 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         .get_one::<PathBuf>("FILE")
         .unwrap_or(&PathBuf::from("CHANGELOG.md"))
         .clone();
-    let select: Option<HashSet<Rule>> = match matches.get_many::<Rule>("select") {
-        Some(values) => Some(values.copied().collect()),
-        None => None,
-    };
-    let ignore: Option<HashSet<Rule>> = match matches.get_many::<Rule>("ignore") {
-        Some(values) => Some(values.copied().collect()),
-        None => None,
-    };
+    let select: Option<HashSet<Rule>> = matches
+        .get_many::<Rule>("select")
+        .map(|values| values.copied().collect());
+    let ignore: Option<HashSet<Rule>> = matches
+        .get_many::<Rule>("ignore")
+        .map(|values| values.copied().collect());
     let output_format = matches.get_one::<Format>("output_format").copied();
     let cli_config = Config {
         lint: Lint {

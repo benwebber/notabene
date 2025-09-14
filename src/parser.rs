@@ -67,7 +67,7 @@ fn parse_section<'a>(
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
             let changes = parse_changes(s, blocks);
             Some(Section::Unreleased(Unreleased {
-                heading_span: heading.span.clone(),
+                heading_span: heading.span,
                 url: Some(l.target.to_string()),
                 changes,
             }))
@@ -75,7 +75,7 @@ fn parse_section<'a>(
         // Release
         [Inline::Link(l), Inline::Literal(t)] => {
             let mut release = Release {
-                heading_span: heading.span.clone(),
+                heading_span: heading.span,
                 version: Spanned::new(l.content.span, &s[l.content.span.range()]),
                 url: Some(l.target.to_string()),
                 ..Default::default()
@@ -96,7 +96,7 @@ fn parse_section<'a>(
             Some(Section::Release(release))
         }
         _ => Some(Section::Invalid(InvalidSection {
-            heading_span: heading.span.clone(),
+            heading_span: heading.span,
         })),
     }
 }

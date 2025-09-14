@@ -164,25 +164,6 @@ impl TryFrom<&str> for Rule {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    use std::collections::HashSet;
-
-    #[test]
-    fn test_rule_codes_unique() {
-        let mut codes = HashSet::new();
-        let mut duplicates: Vec<&str> = vec![];
-        for rule in Rule::ALL.iter() {
-            if !codes.insert(rule.code()) {
-                duplicates.push(rule.code());
-            }
-        }
-        assert_eq!(duplicates, Vec::<&str>::new());
-    }
-}
-
 impl<'de> Deserialize<'de> for Rule {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -209,5 +190,24 @@ impl<'de> Deserialize<'de> for Rule {
         }
 
         deserializer.deserialize_str(RuleVisitor)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_rule_codes_unique() {
+        let mut codes = HashSet::new();
+        let mut duplicates: Vec<&str> = vec![];
+        for rule in Rule::ALL.iter() {
+            if !codes.insert(rule.code()) {
+                duplicates.push(rule.code());
+            }
+        }
+        assert_eq!(duplicates, Vec::<&str>::new());
     }
 }

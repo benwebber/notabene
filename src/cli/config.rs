@@ -3,7 +3,6 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use toml;
-use toml::de;
 
 use crate::rule::Rule;
 
@@ -104,7 +103,7 @@ impl Lint {
         Self {
             select: other.select.clone().or(self.select.clone()),
             ignore: other.ignore.clone().or(self.ignore.clone()),
-            output_format: other.output_format.clone().or(self.output_format.clone()),
+            output_format: other.output_format.or(self.output_format),
         }
     }
 }

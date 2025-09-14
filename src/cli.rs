@@ -1,4 +1,3 @@
-use std::io::Result as IoResult;
 use std::path::PathBuf;
 
 use clap::builder::{Styles, ValueParser};

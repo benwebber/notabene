@@ -25,7 +25,7 @@ impl Check for InvalidDate {
         let format = format_description!("[year]-[month]-[day]");
         if let Section::Release(release) = section {
             if let Some(spanned) = &release.date {
-                if Date::parse(&spanned.value, &format).is_err() {
+                if Date::parse(spanned.value, &format).is_err() {
                     self.spans.push(spanned.span);
                 }
             }
