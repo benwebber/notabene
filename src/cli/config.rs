@@ -8,7 +8,7 @@ use toml::de;
 use crate::rule::Rule;
 
 use super::error::Result;
-use super::renderer::OutputFormat;
+use super::report::Format;
 
 #[derive(Debug, Default, PartialEq, Deserialize, Serialize)]
 #[serde(default)]
@@ -24,7 +24,7 @@ pub struct Lint {
     #[serde(default = "default_select")]
     pub select: Option<HashSet<Rule>>,
     pub ignore: Option<HashSet<Rule>>,
-    pub output_format: Option<OutputFormat>,
+    pub output_format: Option<Format>,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -135,7 +135,7 @@ mod tests {
                 lint: Lint {
                     select: Some(HashSet::from(Rule::ALL)),
                     ignore: Some(HashSet::new()),
-                    output_format: Some(OutputFormat::Short),
+                    output_format: Some(Format::Short),
                 }
             },
         );
@@ -151,7 +151,7 @@ mod tests {
             lint: Lint {
                 select: Some(HashSet::from([Rule::MissingTitle])),
                 ignore: Some(HashSet::from([Rule::InvalidTitle])),
-                output_format: Some(OutputFormat::Json),
+                output_format: Some(Format::Json),
             },
         };
         assert_eq!(default.merge(&user), user);
@@ -177,7 +177,7 @@ mod tests {
                 lint: Lint {
                     select: Some(HashSet::from([Rule::MissingTitle])),
                     ignore: Some(HashSet::from([Rule::InvalidTitle])),
-                    output_format: Some(OutputFormat::Json),
+                    output_format: Some(Format::Json),
                 }
             }
         );

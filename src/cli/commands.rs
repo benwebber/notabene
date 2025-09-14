@@ -11,7 +11,7 @@ use crate::span::Index;
 
 use super::config::{Config, Lint};
 use super::error::{Error, Result};
-use super::renderer::{OutputFormat, render};
+use super::report::{Format, report};
 
 pub fn check(matches: &ArgMatches) -> Result<()> {
     let mut config = Config::load(None).unwrap();
@@ -30,7 +30,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         Some(values) => Some(values.copied().collect()),
         None => None,
     };
-    let output_format = matches.get_one::<OutputFormat>("output_format").copied();
+    let output_format = matches.get_one::<Format>("output_format").copied();
     let cli_config = Config {
         lint: Lint {
             select,
@@ -57,7 +57,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         };
         let index = Index::new(&content);
         let mut output = io::stdout();
-        render(
+        report(
             &mut output,
             diagnostics.as_slice(),
             &content,

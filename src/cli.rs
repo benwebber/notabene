@@ -9,7 +9,7 @@ use crate::rule::{RULES_BY_CODE, Rule};
 mod commands;
 mod config;
 mod error;
-mod renderer;
+mod report;
 
 pub fn main() -> error::Result<()> {
     let matches = Command::new("nb")
@@ -85,8 +85,8 @@ fn parse_rule_code(code: &str) -> Result<Rule, String> {
         .copied()
 }
 
-fn parse_output_format(format: &str) -> Result<renderer::OutputFormat, String> {
-    use renderer::OutputFormat::*;
+fn parse_output_format(format: &str) -> Result<report::Format, String> {
+    use report::Format::*;
     match format.to_lowercase().as_str() {
         "full" => Ok(Full),
         "json" => Ok(Json),
