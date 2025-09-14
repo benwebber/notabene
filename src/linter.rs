@@ -1,12 +1,17 @@
 //! Linter implementation.
+use std::path::PathBuf;
+
+use crate::changelog;
 use crate::diagnostic::Diagnostic;
 use crate::ir::{Changelog, Section};
+use crate::parser::parse;
 use crate::profile::Profile;
 
 mod check;
 mod checks;
 
 use check::Check;
+
 
 pub fn lint(changelog: &Changelog, profile: &Profile) -> Vec<Diagnostic> {
     let mut diagnostics = Vec::new();

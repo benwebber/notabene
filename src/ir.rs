@@ -1,12 +1,4 @@
 //! Intermediate representation (IR) of a changelog.
-//!
-//! Parsing a changelog returns an [`ir::Changelog`](crate::ir::Changelog).
-//! This model differs from the [`Changelog`](crate::Changelog) in two significant ways:
-//!
-//!   * Elements include span information.
-//!   * It allows multiple titles and unreleased sections.
-//!
-//! Preserving span information allows lint checks to include the context around diagnostics.
 use crate::span::Span;
 
 use serde::Serialize;
@@ -17,14 +9,22 @@ pub(crate) struct Spanned<T> {
     pub value: T,
 }
 
+/// Intermediate representation (IR) of a changelog.
+///
+/// This model differs from the [`Changelog`](crate::Changelog) in two significant ways:
+///
+///   * Elements include span information.
+///   * It allows multiple titles and unreleased sections.
+///
+/// Preserving span information allows lint checks to include the context around diagnostics.
 #[derive(Debug, Default, Serialize)]
-pub(crate) struct Changelog<'a> {
-    pub sections: Vec<Section<'a>>,
-    pub broken_links: Vec<Span>,
+pub struct Changelog<'a> {
+    pub(crate) sections: Vec<Section<'a>>,
+    pub(crate) broken_links: Vec<Span>,
 }
 
 #[derive(Debug, Serialize)]
-pub enum Section<'a> {
+pub(crate) enum Section<'a> {
     Title(Spanned<&'a str>),
     Unreleased(Unreleased<'a>),
     Release(Release<'a>),

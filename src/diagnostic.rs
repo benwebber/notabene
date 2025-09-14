@@ -42,7 +42,7 @@ impl Diagnostic {
         }
     }
 
-    pub fn position(&self, index: &Index) -> Option<Position> {
+    pub(crate) fn position(&self, index: &Index) -> Option<Position> {
         self.span.map(|span| index.position(&span))
     }
 }

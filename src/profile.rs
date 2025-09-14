@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use crate::rule::Rule;
 
+/// A set of linter rules.
 pub struct Profile {
     pub rules: HashSet<Rule>,
 }

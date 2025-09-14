@@ -6,14 +6,14 @@ use serde::{Deserialize, Serialize};
 
 /// A [Position](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#position), broadly equivalent to a [`Span`](crate::span::Span).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub struct Position {
+pub(crate) struct Position {
     pub start: Point,
     pub end: Point,
 }
 
 /// A [Point](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#point).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub struct Point {
+pub(crate) struct Point {
     pub line: usize,
     pub column: usize,
     pub offset: usize,

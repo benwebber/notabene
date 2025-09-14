@@ -4,10 +4,10 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::parse_and_lint_file;
 use crate::profile::Profile;
 use crate::rule::Rule;
 use crate::span::Index;
+use crate::{lint, parse};
 
 use super::config::{Config, Lint};
 use super::error::{Error, Result};
@@ -45,14 +45,12 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         .copied()
         .collect();
     let profile = Profile::new(rules);
-    let (_, diagnostics) = parse_and_lint_file(&path, &profile).unwrap();
+    let content = std::fs::read_to_string(&path)?;
+    let ir = parse(&content).unwrap();
+    let diagnostics = lint(&ir, Some(&path), &profile);
     if diagnostics.is_empty() {
         Ok(())
     } else {
-        // TODO: How to avoid reading again to create index?
-        let Ok(content) = std::fs::read_to_string(&path) else {
-            todo!();
-        };
         let index = Index::new(&content);
         let mut output = io::stdout();
         report(

@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 mod index;
 mod iter;
 
-pub use index::Index;
+pub(crate) use index::Index;
 pub(crate) use iter::SpanIterator;
 
 /// A span within the source document.
