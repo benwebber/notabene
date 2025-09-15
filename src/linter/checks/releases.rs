@@ -172,19 +172,31 @@ impl Check for DuplicateVersion {
 mod tests {
     use super::*;
 
+    use std::path::Path;
+
     use insta::assert_yaml_snapshot;
 
     use crate::ir::*;
-    use crate::linter::lint;
+    use crate::linter::{Linter, lint};
     use crate::ruleset::RuleSet;
     use crate::span::Span;
+
+    macro_rules! lint {
+        ($changelog:ident,$rule:expr) => {
+            let ruleset = RuleSet::from([$rule]);
+            let path: Option<&Path> = None;
+            let linter = Linter::new(&ruleset);
+            assert_yaml_snapshot!(linter.lint(&$changelog));
+        };
+    }
 
     #[test]
     fn test_invalid_date() {
         let ruleset = RuleSet::from([Rule::InvalidDate]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -206,15 +218,16 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 
     #[test]
     fn test_invalid_yanked() {
         let ruleset = RuleSet::from([Rule::InvalidYanked]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -232,15 +245,16 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 
     #[test]
     fn test_missing_date() {
         let ruleset = RuleSet::from([Rule::MissingDate]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -255,15 +269,16 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 
     #[test]
     fn test_release_out_of_order() {
         let ruleset = RuleSet::from([Rule::ReleaseOutOfOrder]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -287,15 +302,16 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 
     #[test]
     fn test_duplicate_version() {
         let ruleset = RuleSet::from([Rule::DuplicateVersion]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -314,6 +330,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 }

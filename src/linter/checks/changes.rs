@@ -59,16 +59,17 @@ mod tests {
     use insta::assert_yaml_snapshot;
 
     use crate::ir::*;
-    use crate::linter::lint;
+    use crate::linter::{Linter, lint};
     use crate::ruleset::RuleSet;
     use crate::span::Span;
 
     #[test]
     fn test_invalid_change_type() {
         let ruleset = RuleSet::from([Rule::InvalidChangeType]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -101,15 +102,16 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 
     #[test]
     fn test_duplicate_change_type() {
         let ruleset = RuleSet::from([Rule::DuplicateChangeType]);
+        let linter = Linter::new(&ruleset);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
             sections: vec![
@@ -142,6 +144,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
+        assert_yaml_snapshot!(linter.lint(&changelog));
     }
 }

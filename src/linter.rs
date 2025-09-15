@@ -12,48 +12,79 @@ mod checks;
 
 use check::Check;
 
-/// Lint a changelog in its intermediate representation.
-pub fn lint(changelog: &Changelog, ruleset: &RuleSet, filename: Option<&Path>) -> Vec<Diagnostic> {
-    let mut diagnostics: Vec<Diagnostic> = Vec::new();
-    let mut checks: Vec<_> = checks()
-        .into_iter()
-        .filter(|check| ruleset.is_enabled(check.rule()))
-        .collect();
-    for check in checks.iter_mut() {
-        check.visit_changelog(changelog);
-    }
-    for section in &changelog.sections {
-        for check in checks.iter_mut() {
-            check.visit_section(section);
-            match section {
-                Section::Unreleased(unreleased) => {
-                    for changes in &unreleased.changes {
-                        check.visit_changes(changes);
-                    }
-                }
-                Section::Release(release) => {
-                    for changes in &release.changes {
-                        check.visit_changes(changes);
-                    }
-                }
-                _ => {}
-            }
+/// A changelog linter.
+#[derive(Debug)]
+pub struct Linter<'a> {
+    ruleset: &'a RuleSet,
+    filename: Option<PathBuf>,
+}
+
+impl<'a> Linter<'a> {
+    /// Create a new linter with the given ruleset.
+    pub fn new(ruleset: &'a RuleSet) -> Self {
+        Self {
+            ruleset,
+            filename: None,
         }
     }
-    let path = filename.map(|p| p.to_path_buf());
-    for check in checks.iter_mut() {
-        diagnostics.append(
-            &mut check
-                .diagnostics()
-                .into_iter()
-                .map(|mut d| {
-                    d.path = path.clone();
-                    d
-                })
-                .collect(),
-        );
+
+    /// Set the filename reported in diagnostics.
+    pub fn with_filename<P: Into<PathBuf>>(mut self, filename: Option<P>) -> Self {
+        Self {
+            filename: filename.map(|n| n.into()),
+            ..self
+        }
     }
-    diagnostics
+
+    /// Lint a changelog.
+    pub fn lint(&self, changelog: &Changelog) -> Vec<Diagnostic> {
+        let mut diagnostics: Vec<Diagnostic> = Vec::new();
+        let mut checks: Vec<_> = checks()
+            .into_iter()
+            .filter(|check| self.ruleset.is_enabled(check.rule()))
+            .collect();
+        for check in checks.iter_mut() {
+            check.visit_changelog(changelog);
+        }
+        for section in &changelog.sections {
+            for check in checks.iter_mut() {
+                check.visit_section(section);
+                match section {
+                    Section::Unreleased(unreleased) => {
+                        for changes in &unreleased.changes {
+                            check.visit_changes(changes);
+                        }
+                    }
+                    Section::Release(release) => {
+                        for changes in &release.changes {
+                            check.visit_changes(changes);
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+        for check in checks.iter_mut() {
+            diagnostics.append(
+                &mut check
+                    .diagnostics()
+                    .into_iter()
+                    .map(|mut d| {
+                        d.path = self.filename.clone();
+                        d
+                    })
+                    .collect(),
+            );
+        }
+        diagnostics
+    }
+}
+
+/// Lint a changelog with the default ruleset.
+pub fn lint(changelog: &Changelog) -> Vec<Diagnostic> {
+    let ruleset = RuleSet::default();
+    let linter = Linter::new(&ruleset);
+    linter.lint(changelog)
 }
 
 fn checks() -> Vec<Box<dyn Check>> {

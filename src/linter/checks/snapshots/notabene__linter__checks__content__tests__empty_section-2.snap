@@ -1,6 +1,6 @@
 ---
 source: src/linter/checks/content.rs
-expression: "lint(&changelog, &ruleset, None)"
+expression: "linter.lint(&changelog)"
 ---
 - rule: EmptySection
   span:

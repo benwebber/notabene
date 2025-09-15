@@ -1,5 +1,5 @@
 ---
 source: src/linter/checks/structure.rs
-expression: "lint(&changelog, &ruleset, None)"
+expression: "linter.lint(&changelog)"
 ---
 []

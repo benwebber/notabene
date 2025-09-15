@@ -1,23 +1,72 @@
 //! A fast linter for changelogs in the Keep a Changelog format.
 //!
-//! # Example
+//! # Examples
 //!
-//! ```
-//! use notabene::{Changelog, RuleSet, lint, parse};
+//! The examples below use this minimal changelog.
 //!
-//! let s = r#"
-//! ## Changelog
+//! ```markdown
+//! # Changelog
 //!
-//! ### [Unreleased]
+//! ## [Unreleased]
 //!
-//! #### Added
+//! ### Added
 //!
 //! * Add foo
 //!
 //! [Unreleased]: https://example.org/
-//! "#;
+//! ```
+//!
+//! ## Use the default rules
+//!
+//! ```
+//! use notabene::{Changelog, lint, parse};
+//!
+//! # let s = r#"
+//! #
+//! # # Changelog
+//! #
+//! # ## [Unreleased]
+//! #
+//! # ### Added
+//! #
+//! # * Add foo
+//! #
+//! # [Unreleased]: https://example.org/
+//! # "#;
 //! let parsed = parse(&s);
-//! let diagnostics = lint(&parsed, &RuleSet::default(), None);
+//! let diagnostics = lint(&parsed);
+//! let changelog: Changelog = parsed.into();
+//!
+//! assert_eq!(changelog.title, Some("Changelog".into()));
+//! let unreleased_changes = changelog.unreleased.unwrap().changes;
+//! assert_eq!(unreleased_changes[0].kind, "Added".to_string());
+//! assert_eq!(unreleased_changes[0].changes, vec!["Add foo".to_string()]);
+//! ```
+//!
+//! ## Use a custom set of rules
+//!
+//! ```
+//! use notabene::{Changelog, Linter, Rule, RuleSet, parse};
+//!
+//! # let s = r#"
+//! #
+//! # # Changelog
+//! #
+//! # ## [Unreleased]
+//! #
+//! # ### Added
+//! #
+//! # * Add foo
+//! #
+//! # [Unreleased]: https://example.org/
+//! # "#;
+//! let parsed = parse(&s);
+//! // A new RuleSet with one rule.
+//! let ruleset = RuleSet::from([Rule::MissingTitle]);
+//! // Configure a custom linter.
+//! // `with_filename()` will set the filename reported in diagnostics.
+//! let linter = Linter::new(&ruleset);
+//! let diagnostics = linter.lint(&parsed);
 //! let changelog: Changelog = parsed.into();
 //!
 //! assert_eq!(changelog.title, Some("Changelog".into()));
@@ -44,7 +93,7 @@ pub mod cli;
 
 pub use changelog::Changelog;
 pub use diagnostic::Diagnostic;
-pub use linter::lint;
+pub use linter::{Linter, lint};
 pub use parser::parse;
 pub use rule::Rule;
 pub use ruleset::RuleSet;

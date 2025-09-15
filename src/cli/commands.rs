@@ -7,7 +7,7 @@ use clap::ArgMatches;
 use crate::rule::Rule;
 use crate::ruleset::RuleSet;
 use crate::span::Index;
-use crate::{lint, parse};
+use crate::{Linter, parse};
 
 use super::config::{Config, Lint};
 use super::error::{Error, Result};
@@ -37,7 +37,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         },
     };
     config = config.merge(&cli_config);
-    let rules = config
+    let rules: HashSet<Rule> = config
         .lint
         .select
         .unwrap()
@@ -47,7 +47,8 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
     let ruleset = RuleSet::new(rules);
     let content = std::fs::read_to_string(&path)?;
     let ir = parse(&content);
-    let mut diagnostics = lint(&ir, &ruleset, Some(&path));
+    let linter = Linter::new(&ruleset).with_filename(Some(&path));
+    let mut diagnostics = linter.lint(&ir);
     if diagnostics.is_empty() {
         Ok(())
     } else {
