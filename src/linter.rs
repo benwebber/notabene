@@ -1,5 +1,5 @@
 //! Linter implementation.
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::changelog;
 use crate::diagnostic::Diagnostic;
@@ -12,8 +12,9 @@ mod checks;
 
 use check::Check;
 
-pub fn lint(changelog: &Changelog, ruleset: &RuleSet) -> Vec<Diagnostic> {
-    let mut diagnostics = Vec::new();
+/// Lint a changelog in its intermediate representation.
+pub fn lint(changelog: &Changelog, ruleset: &RuleSet, filename: Option<&Path>) -> Vec<Diagnostic> {
+    let mut diagnostics: Vec<Diagnostic> = Vec::new();
     let mut checks: Vec<_> = checks()
         .into_iter()
         .filter(|check| ruleset.is_enabled(check.rule()))
@@ -39,8 +40,18 @@ pub fn lint(changelog: &Changelog, ruleset: &RuleSet) -> Vec<Diagnostic> {
             }
         }
     }
+    let path = filename.map(|p| p.to_path_buf());
     for check in checks.iter_mut() {
-        diagnostics.append(&mut check.diagnostics());
+        diagnostics.append(
+            &mut check
+                .diagnostics()
+                .into_iter()
+                .map(|mut d| {
+                    d.path = path.clone();
+                    d
+                })
+                .collect(),
+        );
     }
     diagnostics
 }

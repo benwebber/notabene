@@ -47,12 +47,13 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
     let ruleset = RuleSet::new(rules);
     let content = std::fs::read_to_string(&path)?;
     let ir = parse(&content);
-    let diagnostics = lint(&ir, Some(&path), &ruleset);
+    let mut diagnostics = lint(&ir, &ruleset, Some(&path));
     if diagnostics.is_empty() {
         Ok(())
     } else {
         let index = Index::new(&content);
         let mut output = io::stdout();
+        diagnostics.sort_by_key(|d| d.span);
         report(
             &mut output,
             diagnostics.as_slice(),

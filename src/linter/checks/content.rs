@@ -48,7 +48,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::EmptySection]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -92,6 +92,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 }

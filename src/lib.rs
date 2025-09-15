@@ -17,7 +17,7 @@
 //! [Unreleased]: https://example.org/
 //! "#;
 //! let parsed = parse(&s);
-//! let diagnostics = lint(&parsed, None, &RuleSet::default());
+//! let diagnostics = lint(&parsed, &RuleSet::default(), None);
 //! let changelog: Changelog = parsed.into();
 //!
 //! assert_eq!(changelog.title, Some("Changelog".into()));
@@ -44,21 +44,8 @@ pub mod cli;
 
 pub use changelog::Changelog;
 pub use diagnostic::Diagnostic;
+pub use linter::lint;
 pub use parser::parse;
 pub use rule::Rule;
 pub use ruleset::RuleSet;
 pub use span::Span;
-
-/// Lint a changelog in its intermediate representation.
-pub fn lint<'a>(
-    changelog: &ir::Changelog<'a>,
-    path: Option<&Path>,
-    ruleset: &RuleSet,
-) -> Vec<Diagnostic> {
-    let mut diagnostics = linter::lint(&changelog, ruleset);
-    diagnostics.sort_by_key(|d| d.span);
-    for diagnostic in &mut diagnostics {
-        diagnostic.path = path.map(|p| p.to_path_buf());
-    }
-    diagnostics
-}

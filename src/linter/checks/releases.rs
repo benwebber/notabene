@@ -184,7 +184,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidDate]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -206,7 +206,7 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 
     #[test]
@@ -214,7 +214,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidYanked]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -232,7 +232,7 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 
     #[test]
@@ -240,7 +240,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::MissingDate]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -255,7 +255,7 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 
     #[test]
@@ -263,7 +263,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::ReleaseOutOfOrder]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -287,7 +287,7 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 
     #[test]
@@ -295,7 +295,7 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateVersion]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             sections: vec![
@@ -314,6 +314,6 @@ mod tests {
             ],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 }

@@ -38,12 +38,12 @@ mod tests {
         let ruleset = RuleSet::from([Rule::LinkReferenceDoesNotExist]);
 
         let changelog = Changelog::default();
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
 
         let changelog = Changelog {
             broken_links: vec![Span::new(1, usize::MAX)],
             ..Default::default()
         };
-        assert_yaml_snapshot!(lint(&changelog, &ruleset));
+        assert_yaml_snapshot!(lint(&changelog, &ruleset, None));
     }
 }

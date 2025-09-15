@@ -1,6 +1,6 @@
 ---
 source: src/linter/checks/releases.rs
-expression: "lint(&changelog, &ruleset)"
+expression: "lint(&changelog, &ruleset, None)"
 ---
 - rule: InvalidDate
   span:
