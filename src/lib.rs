@@ -16,7 +16,7 @@
 //!
 //! [Unreleased]: https://example.org/
 //! "#;
-//! let parsed = parse(&s).unwrap();
+//! let parsed = parse(&s);
 //! let diagnostics = lint(&parsed, None, &RuleSet::default());
 //! let changelog: Changelog = parsed.into();
 //!
@@ -41,22 +41,13 @@ pub(crate) mod unist;
 pub mod changelog;
 #[cfg(feature = "cli")]
 pub mod cli;
-pub mod error;
 
 pub use changelog::Changelog;
 pub use diagnostic::Diagnostic;
-pub use error::ParseError;
+pub use parser::parse;
 pub use rule::Rule;
 pub use ruleset::RuleSet;
 pub use span::Span;
-
-/// Parse a changelog into its intermediate representation.
-///
-/// Parsing a changelog will always succeed. This function returns a [`Result`] to support future
-/// fatal errors (e.g. if the document is not a changelog at all).
-pub fn parse<'a>(s: &'a str) -> Result<ir::Changelog<'a>, ParseError> {
-    Ok(parser::parse(s))
-}
 
 /// Lint a changelog in its intermediate representation.
 pub fn lint<'a>(

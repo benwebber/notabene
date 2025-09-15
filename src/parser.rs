@@ -10,9 +10,10 @@ use std::rc::Rc;
 
 use pulldown_cmark as md;
 
-/// Parse a changelog.
+/// Parse a changelog into its intermediate representation.
 ///
-/// Parsing never fails.
+/// Parsing never fails. Changelogs are Markdown documents, and every string is a valid Markdown
+/// document.
 pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
     let mut changelog = Changelog::default();
     let broken_links = Rc::new(RefCell::new(Vec::new()));

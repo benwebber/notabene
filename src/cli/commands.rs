@@ -46,7 +46,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         .collect();
     let ruleset = RuleSet::new(rules);
     let content = std::fs::read_to_string(&path)?;
-    let ir = parse(&content).unwrap();
+    let ir = parse(&content);
     let diagnostics = lint(&ir, Some(&path), &ruleset);
     if diagnostics.is_empty() {
         Ok(())
