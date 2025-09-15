@@ -3,15 +3,15 @@ use std::cmp::Ordering;
 use crate::span::Span;
 use crate::unist::{Point, Position};
 
-/// Indexes spans in the source document.
+/// Locates spans in the source document.
 ///
 /// This type is public so that the `nb` binary can use it. Do not depend on it for your own use.
-pub struct Index<'a> {
+pub struct Locator<'a> {
     source: &'a str,
     line_spans: Vec<Span>,
 }
 
-impl<'a> Index<'a> {
+impl<'a> Locator<'a> {
     pub fn new(source: &'a str) -> Self {
         let mut line_spans = Vec::new();
         let mut start = 0;
@@ -87,18 +87,18 @@ mod tests {
 bar
 
 quux";
-        let index = Index::new(s);
+        let locator = Locator::new(s);
         let spans: Vec<Span> = SpanIterator::new(s).collect();
         assert_eq!(
-            index.position(&spans[0]),
+            locator.position(&spans[0]),
             Position::new(Point::new(1, 1, 0), Point::new(1, 4, 3)),
         );
         assert_eq!(
-            index.position(&spans[1]),
+            locator.position(&spans[1]),
             Position::new(Point::new(3, 1, 5), Point::new(3, 4, 8)),
         );
         assert_eq!(
-            index.position(&spans[2]),
+            locator.position(&spans[2]),
             Position::new(Point::new(5, 1, 10), Point::new(5, 5, 14)),
         );
     }
@@ -106,14 +106,14 @@ quux";
     #[test]
     fn test_str() {
         let s = "foo bar baz\nfoobar foobaz";
-        let index = Index::new(s);
-        assert_eq!(index.str(&Span::new(4, 7)), "bar");
+        let locator = Locator::new(s);
+        assert_eq!(locator.str(&Span::new(4, 7)), "bar");
     }
 
     #[test]
     fn test_line() {
         let s = "foo bar baz\nfoobar foobaz";
-        let index = Index::new(s);
-        assert_eq!(index.line(2), "foobar foobaz");
+        let locator = Locator::new(s);
+        assert_eq!(locator.line(2), "foobar foobaz");
     }
 }

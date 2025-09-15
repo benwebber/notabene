@@ -3,10 +3,8 @@ use std::ops::Range;
 
 use serde::{Deserialize, Serialize};
 
-mod index;
 mod iter;
 
-pub(crate) use index::Index;
 pub(crate) use iter::SpanIterator;
 
 /// A span within the source document.

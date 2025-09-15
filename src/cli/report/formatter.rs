@@ -55,7 +55,7 @@ impl Formatter for FullFormatter {
         let mut buf = String::new();
         for diagnostic in diagnostics {
             render_simple(w, diagnostic, context)?;
-            if let Some(p) = diagnostic.position(context.index) {
+            if let Some(p) = diagnostic.position(context.locator) {
                 // The diagnostic has context. Render it like:
                 //     |
                 //  99 |
@@ -84,7 +84,7 @@ impl Formatter for FullFormatter {
                         "{:>width$} {} {}",
                         format!("{}", lines[0]).dimmed(),
                         "|".dimmed(),
-                        context.index.line(lines[0]),
+                        context.locator.line(lines[0]),
                         width = gutter_width
                     )
                     .unwrap();
@@ -95,7 +95,7 @@ impl Formatter for FullFormatter {
                     "{:>width$} {} {}",
                     format!("{}", lines[1]).dimmed(),
                     "|".dimmed(),
-                    context.index.line(lines[1]),
+                    context.locator.line(lines[1]),
                     width = gutter_width
                 )
                 .unwrap();
@@ -115,14 +115,14 @@ impl Formatter for FullFormatter {
                 )
                 .unwrap();
                 // 101 |
-                if lines[2] < context.index.lines() {
+                if lines[2] < context.locator.lines() {
                     // TODO: Make the index return None if the line number is 0.
                     writeln!(
                         &mut buf,
                         "{:>width$} {} {}",
                         format!("{}", lines[2]).dimmed(),
                         "|".dimmed(),
-                        context.index.line(lines[2]),
+                        context.locator.line(lines[2]),
                         width = gutter_width
                     )
                     .unwrap();
@@ -146,7 +146,7 @@ impl Formatter for JsonFormatter {
             .iter()
             .map(|diagnostic| JsonDiagnostic {
                 code: diagnostic.code().to_string(),
-                position: diagnostic.position(context.index),
+                position: diagnostic.position(context.locator),
                 path: context.path.map(|p| p.to_string_lossy().to_string()),
                 message: diagnostic.message(context.source),
             })
@@ -166,7 +166,7 @@ impl Formatter for JsonLinesFormatter {
             .iter()
             .map(|diagnostic| JsonDiagnostic {
                 code: diagnostic.code().to_string(),
-                position: diagnostic.position(context.index),
+                position: diagnostic.position(context.locator),
                 path: context.path.map(|p| p.to_string_lossy().to_string()),
                 message: diagnostic.message(context.source),
             })
@@ -185,11 +185,11 @@ pub fn render_simple(
     context: &Context,
 ) -> std::io::Result<()> {
     let line = diagnostic
-        .position(context.index)
+        .position(context.locator)
         .map(|p| p.start.line)
         .unwrap_or(1);
     let column = diagnostic
-        .position(context.index)
+        .position(context.locator)
         .map(|p| p.start.column)
         .unwrap_or(1);
     write!(

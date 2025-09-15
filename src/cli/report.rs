@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::diagnostic::Diagnostic;
-use crate::span::Index;
+use crate::locator::Locator;
 
 pub(crate) mod context;
 pub(crate) mod format;
@@ -17,13 +17,13 @@ pub fn report<W: Write>(
     diagnostics: &[Diagnostic],
     source: &str,
     path: Option<&Path>,
-    index: &Index,
+    locator: &Locator,
     format: Format,
 ) -> std::io::Result<()> {
     let context = Context {
         source,
         path,
-        index,
+        locator,
     };
     match format {
         Format::Short => formatter::ShortFormatter.format(w, diagnostics, &context),

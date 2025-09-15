@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use crate::span::Index;
+use crate::locator::Locator;
 
 pub struct Context<'a> {
     pub source: &'a str,
     pub path: Option<&'a Path>,
-    pub index: &'a Index<'a>,
+    pub locator: &'a Locator<'a>,
 }

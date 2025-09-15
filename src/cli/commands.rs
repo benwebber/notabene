@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
+use crate::locator::Locator;
 use crate::rule::Rule;
 use crate::ruleset::RuleSet;
-use crate::span::Index;
 use crate::{Linter, parse};
 
 use super::config::{Config, Lint};
@@ -52,7 +52,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
     if diagnostics.is_empty() {
         Ok(())
     } else {
-        let index = Index::new(&content);
+        let locator = Locator::new(&content);
         let mut output = io::stdout();
         diagnostics.sort_by_key(|d| d.span);
         report(
@@ -60,7 +60,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
             diagnostics.as_slice(),
             &content,
             Some(&path),
-            &index,
+            &locator,
             // TODO: Build final config.
             config.lint.output_format.unwrap(),
         )?;

@@ -3,8 +3,8 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use crate::locator::Locator;
 use crate::rule::Rule;
-use crate::span::Index;
 use crate::span::Span;
 use crate::unist::Position;
 
@@ -42,8 +42,8 @@ impl Diagnostic {
         }
     }
 
-    pub(crate) fn position(&self, index: &Index) -> Option<Position> {
-        self.span.map(|span| index.position(&span))
+    pub(crate) fn position(&self, locator: &Locator) -> Option<Position> {
+        self.span.map(|span| locator.position(&span))
     }
 }
 
@@ -97,10 +97,10 @@ mod tests {
 
     #[test]
     fn test_position() {
-        let index = Index::new("# Changelog");
+        let locator = Locator::new("# Changelog");
         let diagnostic = Diagnostic::new(Rule::DuplicateTitle, Some(Span::new(2, 11)));
         assert_eq!(
-            diagnostic.position(&index),
+            diagnostic.position(&locator),
             Some(Position::new(Point::new(1, 3, 2), Point::new(1, 12, 11)))
         );
     }

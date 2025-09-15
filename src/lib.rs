@@ -81,6 +81,7 @@ pub(crate) mod ast;
 pub(crate) mod diagnostic;
 pub mod ir;
 pub(crate) mod linter;
+pub mod locator;
 pub(crate) mod parser;
 pub(crate) mod rule;
 pub(crate) mod ruleset;
