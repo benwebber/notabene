@@ -1,11 +1,8 @@
 //! Linter implementation.
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::changelog;
 use crate::diagnostic::Diagnostic;
 use crate::ir::{Changelog, Section};
-use crate::location::Ranged;
-use crate::parser::parse;
 use crate::ruleset::RuleSet;
 
 mod check;
@@ -30,7 +27,7 @@ impl<'a> Linter<'a> {
     }
 
     /// Set the filename reported in diagnostics.
-    pub fn with_filename<P: Into<PathBuf>>(mut self, filename: Option<P>) -> Self {
+    pub fn with_filename<P: Into<PathBuf>>(self, filename: Option<P>) -> Self {
         Self {
             filename: filename.map(|n| n.into()),
             ..self

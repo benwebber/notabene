@@ -48,7 +48,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
     let content = std::fs::read_to_string(&path)?;
     let ir = parse(&content);
     let linter = Linter::new(&ruleset).with_filename(Some(&path));
-    let mut diagnostics = linter.lint(&ir);
+    let diagnostics = linter.lint(&ir);
     if diagnostics.is_empty() {
         Ok(())
     } else {

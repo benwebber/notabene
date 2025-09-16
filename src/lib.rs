@@ -75,8 +75,6 @@
 //! assert_eq!(unreleased_changes[0].changes, vec!["Add foo".to_string()]);
 //! ```
 
-use std::path::Path;
-
 pub(crate) mod ast;
 pub(crate) mod diagnostic;
 pub mod ir;

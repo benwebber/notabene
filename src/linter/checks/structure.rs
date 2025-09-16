@@ -131,7 +131,7 @@ mod tests {
     use insta::assert_yaml_snapshot;
 
     use crate::ir::{self, *};
-    use crate::linter::{Linter, lint};
+    use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
 

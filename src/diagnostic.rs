@@ -70,8 +70,6 @@ impl<L: Ranged<usize>> Diagnostic<L> {
 mod tests {
     use super::*;
 
-    use crate::location::Point;
-
     #[test]
     fn test_new() {
         assert_eq!(

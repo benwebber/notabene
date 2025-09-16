@@ -37,10 +37,7 @@ struct PyProjectTool {
 }
 
 impl Config {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
+    #[cfg(test)]
     pub fn empty() -> Self {
         Self {
             lint: Lint::empty(),
@@ -62,7 +59,6 @@ impl Config {
             config = config.merge(&pyproject.tool.nb);
         }
         if let Ok(s) = std::fs::read_to_string("nb.toml") {
-            let other = Config::from_str(&s)?;
             config = config.merge(&Config::from_str(&s)?);
         }
         // Return an error if opening the user-specified file fails.

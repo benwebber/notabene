@@ -172,23 +172,12 @@ impl Check for DuplicateVersion {
 mod tests {
     use super::*;
 
-    use std::path::Path;
-
     use insta::assert_yaml_snapshot;
 
     use crate::ir::*;
-    use crate::linter::{Linter, lint};
+    use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
-
-    macro_rules! lint {
-        ($changelog:ident,$rule:expr) => {
-            let ruleset = RuleSet::from([$rule]);
-            let path: Option<&Path> = None;
-            let linter = Linter::new(&ruleset);
-            assert_yaml_snapshot!(linter.lint(&$changelog));
-        };
-    }
 
     #[test]
     fn test_invalid_date() {

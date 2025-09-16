@@ -104,7 +104,7 @@ fn parse_section<'a>(
 }
 
 fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Changes<'a>> {
-    let mut sections: Vec<(Span, Spanned<&'a str>, Vec<Spanned<&'a str>>)> = Vec::new();
+    let mut sections: Vec<Changes> = Vec::new();
     let mut current_kind: Option<&'a str> = None;
     let mut current_changes: Vec<Spanned<&'a str>> = Vec::new();
     let mut current_heading_span: Span = Span::default();
@@ -114,11 +114,11 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
             Block::Heading(heading @ Heading { level: 3, .. }) => {
                 if let Some(kind) = current_kind.take() {
                     // TODO: more accurate span for kind
-                    sections.push((
-                        current_heading_span,
-                        Spanned::new(current_heading_span, kind),
-                        std::mem::take(&mut current_changes),
-                    ));
+                    sections.push(Changes {
+                        heading_span: current_heading_span,
+                        kind: Spanned::new(current_heading_span, kind),
+                        changes: std::mem::take(&mut current_changes),
+                    });
                 }
                 current_kind = get_heading_text(s, heading);
                 current_heading_span = heading.span;
@@ -139,21 +139,14 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
     }
 
     if let Some(kind) = current_kind.take() {
-        sections.push((
-            current_heading_span,
-            Spanned::new(current_heading_span, kind),
-            current_changes,
-        ));
+        sections.push(Changes {
+            heading_span: current_heading_span,
+            kind: Spanned::new(current_heading_span, kind),
+            changes: current_changes,
+        });
     }
 
     sections
-        .into_iter()
-        .map(|(heading_span, kind, spanned)| Changes {
-            heading_span,
-            kind,
-            changes: spanned,
-        })
-        .collect()
 }
 
 fn get_heading_span(heading: &Heading) -> Option<Span> {
