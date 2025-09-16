@@ -3,9 +3,10 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::location::{Locator, Position, Ranged};
 use crate::rule::Rule;
 use crate::span::Span;
+use crate::span::{Locator, Ranged};
+use crate::unist::Position;
 
 /// A rule violation.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]

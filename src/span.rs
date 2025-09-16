@@ -4,9 +4,12 @@ use std::ops::Range;
 use serde::{Deserialize, Serialize};
 
 mod iter;
+mod locator;
+mod ranged;
 
-use crate::location::Ranged;
 pub(crate) use iter::SpanIterator;
+pub use locator::Locator;
+pub(crate) use ranged::Ranged;
 
 /// A span within the source document.
 ///

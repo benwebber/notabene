@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::location::Locator;
+use crate::span::Locator;
 
 pub struct Context<'a> {
     pub source: &'a str,

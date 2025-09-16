@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::location::Locator;
 use crate::rule::Rule;
 use crate::ruleset::RuleSet;
+use crate::span::Locator;
 use crate::{Linter, parse};
 
 use super::config::{Config, Lint};
