@@ -8,6 +8,9 @@ mod iter;
 pub(crate) use iter::SpanIterator;
 
 /// A span within the source document.
+///
+/// Use [`Locator`][crate::locator::Locator] to convert a `Span` to a
+/// [`Position`][crate::unist::Position].
 #[derive(
     Copy, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize,
 )]

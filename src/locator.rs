@@ -1,11 +1,10 @@
 use std::cmp::Ordering;
+use std::ops::Range;
 
 use crate::span::Span;
 use crate::unist::{Point, Position};
 
 /// Locates spans in the source document.
-///
-/// This type is public so that the `nb` binary can use it. Do not depend on it for your own use.
 pub struct Locator<'a> {
     source: &'a str,
     line_spans: Vec<Span>,
@@ -26,7 +25,7 @@ impl<'a> Locator<'a> {
         Self { source, line_spans }
     }
 
-    /// Return a unist Point for the given offset.
+    /// Return the unist Point for the given offset.
     fn point(&self, offset: usize) -> Point {
         if self.line_spans.is_empty() {
             return Point::default();
@@ -53,23 +52,18 @@ impl<'a> Locator<'a> {
         )
     }
 
-    /// Return a unist Position for the given span.
+    /// Return the unist Position for the given span.
     pub fn position(&self, span: &Span) -> Position {
         Position::new(self.point(span.start), self.point(span.end))
     }
 
     /// Return the contents of line number `line`.
-    pub fn line(&self, line: usize) -> &'a str {
+    pub(crate) fn line(&self, line: usize) -> &'a str {
         &self.source[self.line_spans[line.saturating_sub(1)].range()]
     }
 
-    /// Return the contents of `span`.
-    pub fn str(&self, span: &Span) -> &'a str {
-        &self.source[span.range()]
-    }
-
     /// Return the number of lines in the source.
-    pub fn lines(&self) -> usize {
+    pub(crate) fn lines(&self) -> usize {
         self.line_spans.len()
     }
 }
@@ -101,13 +95,6 @@ quux";
             locator.position(&spans[2]),
             Position::new(Point::new(5, 1, 10), Point::new(5, 5, 14)),
         );
-    }
-
-    #[test]
-    fn test_str() {
-        let s = "foo bar baz\nfoobar foobaz";
-        let locator = Locator::new(s);
-        assert_eq!(locator.str(&Span::new(4, 7)), "bar");
     }
 
     #[test]

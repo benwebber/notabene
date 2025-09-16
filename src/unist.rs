@@ -4,16 +4,19 @@
 //! [`Span`][crate::span::Span] type.
 use serde::{Deserialize, Serialize};
 
-/// A [Position](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#position), broadly equivalent to a [`Span`](crate::span::Span).
+/// A [Position](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#position).
+///
+/// A `Position` differs from a [`Span`](crate::span::Span) because it includes line and column
+/// information as well as the byte offsets.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub(crate) struct Position {
+pub struct Position {
     pub start: Point,
     pub end: Point,
 }
 
 /// A [Point](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#point).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub(crate) struct Point {
+pub struct Point {
     pub line: usize,
     pub column: usize,
     pub offset: usize,
