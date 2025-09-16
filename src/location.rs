@@ -1,3 +1,4 @@
+//! Work with locations in the source document.
 use std::cmp::Ordering;
 use std::ops::Range;
 
@@ -9,19 +10,9 @@ pub trait Ranged<T> {
     fn range(&self) -> std::ops::Range<T>;
 }
 
-/// A span within the source document.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Deserialize, Serialize)]
-pub enum Location {
-    Span(Span),
-    Position(Position),
-}
-
-impl Ranged<usize> for Location {
-    fn range(&self) -> Range<usize> {
-        match self {
-            Self::Span(s) => s.range(),
-            Self::Position(p) => p.range(),
-        }
+impl Ranged<usize> for Range<usize> {
+    fn range(&self) -> Self {
+        self.clone()
     }
 }
 
@@ -62,21 +53,6 @@ impl Point {
             column,
             offset,
         }
-    }
-}
-
-impl Location {
-    pub fn range(&self) -> Range<usize> {
-        match self {
-            Self::Span(s) => s.start..s.end,
-            Self::Position(p) => p.start.offset..p.end.offset,
-        }
-    }
-}
-
-impl Default for Location {
-    fn default() -> Self {
-        Self::Span(Span::default())
     }
 }
 

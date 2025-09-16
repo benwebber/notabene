@@ -13,7 +13,7 @@ pub trait Formatter {
     fn format(
         &self,
         w: &mut dyn Write,
-        diagnostics: &[Diagnostic],
+        diagnostics: &[Diagnostic<Position>],
         context: &Context,
     ) -> std::io::Result<()>;
 }
@@ -35,7 +35,7 @@ impl Formatter for ShortFormatter {
     fn format(
         &self,
         w: &mut dyn Write,
-        diagnostics: &[Diagnostic],
+        diagnostics: &[Diagnostic<Position>],
         context: &Context,
     ) -> std::io::Result<()> {
         for diagnostic in diagnostics {
@@ -49,7 +49,7 @@ impl Formatter for FullFormatter {
     fn format(
         &self,
         w: &mut dyn Write,
-        diagnostics: &[Diagnostic],
+        diagnostics: &[Diagnostic<Position>],
         context: &Context,
     ) -> std::io::Result<()> {
         let mut buf = String::new();
@@ -139,7 +139,7 @@ impl Formatter for JsonFormatter {
     fn format(
         &self,
         w: &mut dyn Write,
-        diagnostics: &[Diagnostic],
+        diagnostics: &[Diagnostic<Position>],
         context: &Context,
     ) -> std::io::Result<()> {
         let json_diagnostics: Vec<JsonDiagnostic> = diagnostics
@@ -159,7 +159,7 @@ impl Formatter for JsonLinesFormatter {
     fn format(
         &self,
         w: &mut dyn Write,
-        diagnostics: &[Diagnostic],
+        diagnostics: &[Diagnostic<Position>],
         context: &Context,
     ) -> std::io::Result<()> {
         let json_diagnostics: Vec<JsonDiagnostic> = diagnostics
@@ -181,7 +181,7 @@ impl Formatter for JsonLinesFormatter {
 
 pub fn render_simple(
     w: &mut dyn Write,
-    diagnostic: &Diagnostic,
+    diagnostic: &Diagnostic<Position>,
     context: &Context,
 ) -> std::io::Result<()> {
     let line = diagnostic

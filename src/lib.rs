@@ -98,4 +98,3 @@ pub use location::Locator;
 pub use parser::parse;
 pub use rule::Rule;
 pub use ruleset::RuleSet;
-pub use span::Span;

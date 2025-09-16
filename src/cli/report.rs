@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::diagnostic::Diagnostic;
-use crate::location::Locator;
+use crate::location::{Locator, Position};
 
 pub(crate) mod context;
 pub(crate) mod format;
@@ -14,7 +14,7 @@ pub(crate) use formatter::Formatter;
 
 pub fn report<W: Write>(
     w: &mut W,
-    diagnostics: &[Diagnostic],
+    diagnostics: &[Diagnostic<Position>],
     source: &str,
     path: Option<&Path>,
     locator: &Locator,

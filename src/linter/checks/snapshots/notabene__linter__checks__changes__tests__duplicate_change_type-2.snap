@@ -4,13 +4,11 @@ expression: linter.lint(&changelog)
 ---
 - rule: DuplicateChangeType
   location:
-    Span:
-      start: 1
-      end: 18446744073709551615
+    start: 1
+    end: 18446744073709551615
   path: ~
 - rule: DuplicateChangeType
   location:
-    Span:
-      start: 2
-      end: 18446744073709551615
+    start: 2
+    end: 18446744073709551615
   path: ~

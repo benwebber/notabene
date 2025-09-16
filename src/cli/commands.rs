@@ -53,6 +53,10 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
         Ok(())
     } else {
         let locator = Locator::new(&content);
+        let mut diagnostics: Vec<_> = diagnostics
+            .into_iter()
+            .map(|d| d.locate(&locator))
+            .collect();
         let mut output = io::stdout();
         diagnostics.sort_by_key(|d| d.location);
         report(

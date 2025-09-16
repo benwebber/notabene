@@ -3,40 +3,54 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::location::{Location, Locator, Position, Ranged};
+use crate::location::{Locator, Position, Ranged};
 use crate::rule::Rule;
 use crate::span::Span;
 
 /// A rule violation.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-pub struct Diagnostic {
+pub struct Diagnostic<L = Span> {
     /// The rule that was violated.
     pub rule: Rule,
     /// Where the violation occurred in the source document.
-    pub location: Option<Location>,
+    pub location: Option<L>,
     /// The source path, used in reporting.
     pub path: Option<PathBuf>,
 }
 
 impl Diagnostic {
-    pub fn new(rule: Rule, location: Option<Location>) -> Self {
+    /// Create a new diagnostic from a `Span`.
+    pub fn new(rule: Rule, location: Option<Span>) -> Self {
         Self {
             rule,
             location,
             path: None,
         }
     }
+}
 
+impl<L> Diagnostic<L> {
+    /// Return the diagnostic rule code.
     pub fn code(&self) -> &str {
         self.rule.code()
     }
+}
 
+impl<Span: Ranged<usize>> Diagnostic<Span> {
+    /// Locate a diagnostic in the source document.
+    pub fn locate(self, locator: &Locator) -> Diagnostic<Position> {
+        Diagnostic {
+            rule: self.rule,
+            location: self.location.map(|s| locator.position(&s.range())),
+            path: self.path,
+        }
+    }
+}
+
+impl<L: Ranged<usize>> Diagnostic<L> {
+    /// Return a formatted message.
     pub fn message(&self, source: &str) -> String {
-        let range = match self.location {
-            Some(Location::Span(span)) => Some(span.range()),
-            Some(Location::Position(pos)) => Some(pos.start.offset..pos.end.offset),
-            _ => None,
-        };
+        let range = self.location.as_ref().map(|l| l.range());
         match range {
             Some(range) => {
                 let snippet = &source[range];
@@ -46,12 +60,9 @@ impl Diagnostic {
         }
     }
 
+    /// Return the unist Position of the diagnostic.
     pub fn position(&self, locator: &Locator) -> Option<Position> {
-        match self.location {
-            Some(Location::Position(p)) => Some(p),
-            Some(Location::Span(s)) => Some(locator.position(&s)),
-            _ => None,
-        }
+        self.location.as_ref().map(|l| locator.position(&l.range()))
     }
 }
 
@@ -72,10 +83,10 @@ mod tests {
             }
         );
         assert_eq!(
-            Diagnostic::new(Rule::MissingTitle, Some(Location::default())),
+            Diagnostic::new(Rule::MissingTitle, Some(Span::default())),
             Diagnostic {
                 rule: Rule::MissingTitle,
-                location: Some(Location::default()),
+                location: Some(Span::default()),
                 path: None
             }
         );
@@ -96,8 +107,7 @@ mod tests {
         assert_eq!(diagnostic.message(source), Rule::MissingTitle.message());
 
         let source = "# Changelog";
-        let diagnostic =
-            Diagnostic::new(Rule::DuplicateTitle, Some(Location::Span(Span::new(2, 11))));
+        let diagnostic = Diagnostic::new(Rule::DuplicateTitle, Some(Span::new(2, 11)));
         assert_eq!(
             diagnostic.message(source),
             Rule::DuplicateTitle.message().replace("{}", "Changelog")

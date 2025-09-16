@@ -4,7 +4,6 @@ expression: linter.lint(&changelog)
 ---
 - rule: DuplicateTitle
   location:
-    Span:
-      start: 2
-      end: 11
+    start: 2
+    end: 11
   path: ~
