@@ -5,7 +5,7 @@ use owo_colors::{OwoColorize, Stream};
 use serde::Serialize;
 
 use crate::diagnostic::Diagnostic;
-use crate::unist::Position;
+use crate::span::Position;
 
 use super::Context;
 

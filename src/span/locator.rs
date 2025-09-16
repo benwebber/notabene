@@ -1,8 +1,6 @@
 use std::cmp::Ordering;
 
-use super::{Ranged, Span};
-
-use crate::unist::{Point, Position};
+use super::{Point, Position, Ranged, Span};
 
 /// Locates spans in the source document.
 pub struct Locator<'a> {

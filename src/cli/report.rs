@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::diagnostic::Diagnostic;
 use crate::span::Locator;
-use crate::unist::Position;
+use crate::span::Position;
 
 pub(crate) mod context;
 pub(crate) mod format;

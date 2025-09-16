@@ -82,8 +82,7 @@ pub(crate) mod linter;
 pub(crate) mod parser;
 pub(crate) mod rule;
 pub(crate) mod ruleset;
-pub(crate) mod span;
-pub mod unist;
+pub mod span;
 
 pub mod changelog;
 #[cfg(feature = "cli")]

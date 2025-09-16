@@ -6,15 +6,16 @@ use serde::{Deserialize, Serialize};
 mod iter;
 mod locator;
 mod ranged;
+mod unist;
 
 pub(crate) use iter::SpanIterator;
 pub use locator::Locator;
 pub(crate) use ranged::Ranged;
+pub use unist::{Point, Position};
 
 /// A span within the source document.
 ///
-/// Use [`Locator`][crate::location::Locator] to convert a `Span` to a
-/// [`Position`][crate::location::Position].
+/// Use [`Locator`] to convert a `Span` to a [`Position`].
 #[derive(
     Copy, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize,
 )]

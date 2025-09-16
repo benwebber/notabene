@@ -4,11 +4,16 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::rule::Rule;
+use crate::span::Position;
 use crate::span::Span;
 use crate::span::{Locator, Ranged};
-use crate::unist::Position;
 
 /// A rule violation.
+///
+/// A `Diagnostic` can hold either a [`Span`] or [`Position`].
+/// [`Diagnostic::new`] accepts a `Span`.
+///
+/// Use [`Diagnostic::locate`] to convert a `Diagnostic<Span>` to a `Diagnostic<Position>`.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
 pub struct Diagnostic<L = Span> {
     /// The rule that was violated.
