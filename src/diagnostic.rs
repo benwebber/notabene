@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::location::{Location, Locator, Position};
+use crate::location::{Location, Locator, Position, Ranged};
 use crate::rule::Rule;
 use crate::span::Span;
 

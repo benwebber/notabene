@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use crate::changelog;
 use crate::diagnostic::Diagnostic;
 use crate::ir::{Changelog, Section};
+use crate::location::Ranged;
 use crate::parser::parse;
 use crate::ruleset::RuleSet;
 

@@ -3,6 +3,7 @@ use crate::ast::{self, Block, Heading, Inline, Literal};
 use crate::ir::{
     Changelog, Changes, InvalidSection, InvalidTitle, Release, Section, Spanned, Unreleased,
 };
+use crate::location::Ranged;
 use crate::span::{Span, SpanIterator};
 use std::cell::RefCell;
 use std::iter::Peekable;

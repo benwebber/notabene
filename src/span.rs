@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 mod iter;
 
+use crate::location::Ranged;
 pub(crate) use iter::SpanIterator;
 
 /// A span within the source document.
@@ -21,6 +22,12 @@ pub struct Span {
     pub end: usize,
 }
 
+impl Ranged<usize> for Span {
+    fn range(&self) -> Range<usize> {
+        (*self).into()
+    }
+}
+
 impl Span {
     pub fn new(start: usize, end: usize) -> Self {
         Self { start, end }
@@ -32,11 +39,6 @@ impl Span {
             start: offset + self.start,
             end: offset + self.end,
         }
-    }
-
-    /// Convert a span into a `Range`, suitable for indexing a `&str`.
-    pub fn range(&self) -> Range<usize> {
-        (*self).into()
     }
 }
 

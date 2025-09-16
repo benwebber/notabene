@@ -5,11 +5,24 @@ use serde::{Deserialize, Serialize};
 
 use crate::span::Span;
 
+pub trait Ranged<T> {
+    fn range(&self) -> std::ops::Range<T>;
+}
+
 /// A span within the source document.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Deserialize, Serialize)]
 pub enum Location {
     Span(Span),
     Position(Position),
+}
+
+impl Ranged<usize> for Location {
+    fn range(&self) -> Range<usize> {
+        match self {
+            Self::Span(s) => s.range(),
+            Self::Position(p) => p.range(),
+        }
+    }
 }
 
 /// A unist [Position](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#position).
@@ -33,6 +46,12 @@ pub struct Point {
 impl Position {
     pub fn new(start: Point, end: Point) -> Self {
         Position { start, end }
+    }
+}
+
+impl Ranged<usize> for Position {
+    fn range(&self) -> Range<usize> {
+        self.start.offset..self.end.offset
     }
 }
 
@@ -110,8 +129,9 @@ impl<'a> Locator<'a> {
     }
 
     /// Return the unist Position for the given span.
-    pub fn position(&self, span: &Span) -> Position {
-        Position::new(self.point(span.start), self.point(span.end))
+    pub fn position<R: Ranged<usize>>(&self, ranged: &R) -> Position {
+        let range = ranged.range();
+        Position::new(self.point(range.start), self.point(range.end))
     }
 
     /// Return the contents of line number `line`.
