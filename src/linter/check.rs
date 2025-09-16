@@ -1,5 +1,6 @@
 use crate::diagnostic::Diagnostic;
 use crate::ir;
+use crate::location::Location;
 use crate::rule::Rule;
 use crate::span::Span;
 
@@ -25,7 +26,7 @@ pub(crate) trait Check {
     fn diagnostics(&self) -> Vec<Diagnostic> {
         self.spans()
             .iter()
-            .map(|span| Diagnostic::new(self.rule(), Some(*span)))
+            .map(|span| Diagnostic::new(self.rule(), Some(Location::Span(*span))))
             .collect()
     }
 }

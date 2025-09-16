@@ -1,9 +1,10 @@
 ---
 source: src/linter/checks/structure.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 - rule: InvalidSectionHeading
-  span:
-    start: 1
-    end: 18446744073709551615
+  location:
+    Span:
+      start: 1
+      end: 18446744073709551615
   path: ~

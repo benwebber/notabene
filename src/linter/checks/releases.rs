@@ -7,6 +7,8 @@ use version_compare::{Cmp, Version};
 
 use super::preamble::*;
 
+use crate::location::Location;
+
 #[derive(Default)]
 pub struct InvalidDate {
     spans: Vec<Span>,
@@ -139,7 +141,7 @@ impl Check for ReleaseOutOfOrder {
                 };
                 if out_of_order { Some(curr.span) } else { None }
             })
-            .map(|span| Diagnostic::new(self.rule(), Some(span)))
+            .map(|span| Diagnostic::new(self.rule(), Some(Location::Span(span))))
             .collect()
     }
 }

@@ -1,7 +1,7 @@
 ---
 source: src/linter/checks/unreleased.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 - rule: MissingUnreleased
-  span: ~
+  location: ~
   path: ~

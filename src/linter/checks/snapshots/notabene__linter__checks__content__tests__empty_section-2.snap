@@ -1,19 +1,22 @@
 ---
 source: src/linter/checks/content.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 - rule: EmptySection
-  span:
-    start: 2
-    end: 18446744073709551615
+  location:
+    Span:
+      start: 2
+      end: 18446744073709551615
   path: ~
 - rule: EmptySection
-  span:
-    start: 3
-    end: 18446744073709551615
+  location:
+    Span:
+      start: 3
+      end: 18446744073709551615
   path: ~
 - rule: EmptySection
-  span:
-    start: 4
-    end: 18446744073709551615
+  location:
+    Span:
+      start: 4
+      end: 18446744073709551615
   path: ~

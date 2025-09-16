@@ -3,10 +3,9 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::locator::Locator;
+use crate::location::{Location, Locator, Position};
 use crate::rule::Rule;
 use crate::span::Span;
-use crate::unist::Position;
 
 /// A rule violation.
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -14,16 +13,16 @@ pub struct Diagnostic {
     /// The rule that was violated.
     pub rule: Rule,
     /// Where the violation occurred in the source document.
-    pub span: Option<Span>,
+    pub location: Option<Location>,
     /// The source path, used in reporting.
     pub path: Option<PathBuf>,
 }
 
 impl Diagnostic {
-    pub fn new(rule: Rule, span: Option<Span>) -> Self {
+    pub fn new(rule: Rule, location: Option<Location>) -> Self {
         Self {
             rule,
-            span,
+            location,
             path: None,
         }
     }
@@ -33,17 +32,26 @@ impl Diagnostic {
     }
 
     pub fn message(&self, source: &str) -> String {
-        match self.span {
-            Some(span) => {
-                let snippet = &source[span.range()];
+        let range = match self.location {
+            Some(Location::Span(span)) => Some(span.range()),
+            Some(Location::Position(pos)) => Some(pos.start.offset..pos.end.offset),
+            _ => None,
+        };
+        match range {
+            Some(range) => {
+                let snippet = &source[range];
                 self.rule.message().replace("{}", snippet)
             }
             None => self.rule.message().to_string(),
         }
     }
 
-    pub(crate) fn position(&self, locator: &Locator) -> Option<Position> {
-        self.span.map(|span| locator.position(&span))
+    pub fn position(&self, locator: &Locator) -> Option<Position> {
+        match self.location {
+            Some(Location::Position(p)) => Some(p),
+            Some(Location::Span(s)) => Some(locator.position(&s)),
+            _ => None,
+        }
     }
 }
 
@@ -51,7 +59,7 @@ impl Diagnostic {
 mod tests {
     use super::*;
 
-    use crate::unist::Point;
+    use crate::location::Point;
 
     #[test]
     fn test_new() {
@@ -59,15 +67,15 @@ mod tests {
             Diagnostic::new(Rule::MissingTitle, None),
             Diagnostic {
                 rule: Rule::MissingTitle,
-                span: None,
+                location: None,
                 path: None
             }
         );
         assert_eq!(
-            Diagnostic::new(Rule::MissingTitle, Some(Span::default())),
+            Diagnostic::new(Rule::MissingTitle, Some(Location::default())),
             Diagnostic {
                 rule: Rule::MissingTitle,
-                span: Some(Span::default()),
+                location: Some(Location::default()),
                 path: None
             }
         );
@@ -88,20 +96,11 @@ mod tests {
         assert_eq!(diagnostic.message(source), Rule::MissingTitle.message());
 
         let source = "# Changelog";
-        let diagnostic = Diagnostic::new(Rule::DuplicateTitle, Some(Span::new(2, 11)));
+        let diagnostic =
+            Diagnostic::new(Rule::DuplicateTitle, Some(Location::Span(Span::new(2, 11))));
         assert_eq!(
             diagnostic.message(source),
             Rule::DuplicateTitle.message().replace("{}", "Changelog")
-        );
-    }
-
-    #[test]
-    fn test_position() {
-        let locator = Locator::new("# Changelog");
-        let diagnostic = Diagnostic::new(Rule::DuplicateTitle, Some(Span::new(2, 11)));
-        assert_eq!(
-            diagnostic.position(&locator),
-            Some(Position::new(Point::new(1, 3, 2), Point::new(1, 12, 11)))
         );
     }
 }

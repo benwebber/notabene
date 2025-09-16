@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::diagnostic::Diagnostic;
-use crate::locator::Locator;
+use crate::location::Locator;
 
 pub(crate) mod context;
 pub(crate) mod format;

@@ -1,7 +1,7 @@
 ---
 source: src/linter/checks/structure.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 - rule: MissingTitle
-  span: ~
+  location: ~
   path: ~

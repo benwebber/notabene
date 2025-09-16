@@ -1,9 +1,10 @@
 ---
 source: src/linter/checks/structure.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 - rule: DuplicateTitle
-  span:
-    start: 2
-    end: 11
+  location:
+    Span:
+      start: 2
+      end: 11
   path: ~

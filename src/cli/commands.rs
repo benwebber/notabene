@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use clap::ArgMatches;
 
-use crate::locator::Locator;
+use crate::location::Locator;
 use crate::rule::Rule;
 use crate::ruleset::RuleSet;
 use crate::{Linter, parse};
@@ -54,7 +54,7 @@ pub fn check(matches: &ArgMatches) -> Result<()> {
     } else {
         let locator = Locator::new(&content);
         let mut output = io::stdout();
-        diagnostics.sort_by_key(|d| d.span);
+        diagnostics.sort_by_key(|d| d.location);
         report(
             &mut output,
             diagnostics.as_slice(),

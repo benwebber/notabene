@@ -1,8 +1,65 @@
 use std::cmp::Ordering;
 use std::ops::Range;
 
+use serde::{Deserialize, Serialize};
+
 use crate::span::Span;
-use crate::unist::{Point, Position};
+
+/// A span within the source document.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Deserialize, Serialize)]
+pub enum Location {
+    Span(Span),
+    Position(Position),
+}
+
+/// A unist [Position](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#position).
+///
+/// Like `Span`, `Position` represents a span within the source document. `Position` also includes
+/// line and column information.
+#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
+pub struct Position {
+    pub start: Point,
+    pub end: Point,
+}
+
+/// A unist [Point](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#point).
+#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
+pub struct Point {
+    pub line: usize,
+    pub column: usize,
+    pub offset: usize,
+}
+
+impl Position {
+    pub fn new(start: Point, end: Point) -> Self {
+        Position { start, end }
+    }
+}
+
+impl Point {
+    pub fn new(line: usize, column: usize, offset: usize) -> Self {
+        Self {
+            line,
+            column,
+            offset,
+        }
+    }
+}
+
+impl Location {
+    pub fn range(&self) -> Range<usize> {
+        match self {
+            Self::Span(s) => s.start..s.end,
+            Self::Position(p) => p.start.offset..p.end.offset,
+        }
+    }
+}
+
+impl Default for Location {
+    fn default() -> Self {
+        Self::Span(Span::default())
+    }
+}
 
 /// Locates spans in the source document.
 pub struct Locator<'a> {
