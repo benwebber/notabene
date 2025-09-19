@@ -1,3 +1,4 @@
+use crate::changelog::v2::parsed;
 use crate::diagnostic::Diagnostic;
 use crate::ir;
 use crate::rule::Rule;
@@ -11,6 +12,11 @@ pub(crate) trait Check {
     fn spans(&self) -> &[Span] {
         &[]
     }
+
+    fn visit_changelog_v2(&mut self, _unreleased: &parsed::Changelog) {}
+    fn visit_unreleased(&mut self, _unreleased: &parsed::Unreleased) {}
+    fn visit_release(&mut self, _unreleased: &parsed::Release) {}
+    fn visit_changes_v2(&mut self, _unreleased: &parsed::Changes) {}
 
     /// Evaluate this check for the entire `Changelog`.
     fn visit_changelog(&mut self, _changelog: &ir::Changelog) {}

@@ -1,4 +1,4 @@
 mod v1;
-mod v2;
+pub(crate) mod v2;
 
 pub use v1::*;
