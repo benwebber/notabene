@@ -39,6 +39,8 @@ pub enum InvalidSpan {
     InvalidHeading(Span),
     InvalidLinkReference(Span),
     DuplicateUnreleased(Span),
+    DuplicateTitle(Span),
+    UnreleasedOutOfOrder(Span),
 }
 
 impl<'a> traits::Changelog for Changelog<'a> {
@@ -152,18 +154,26 @@ impl<'a> From<&'a ir::Changelog<'a>> for Changelog<'a> {
         let mut invalid_spans: Vec<InvalidSpan> = Vec::new();
         for section in ir.sections.iter() {
             match section {
-                ir::Section::Title(t) => {
-                    if title.is_none() {
+                ir::Section::Title(t) => match title {
+                    Some(_) => invalid_spans.push(InvalidSpan::DuplicateTitle(t.span)),
+                    None => {
                         title = Some(SpannedStr {
                             span: t.span,
                             value: t.value,
                         })
                     }
-                }
-                ir::Section::Unreleased(u) => match unreleased {
-                    Some(_) => invalid_spans.push(InvalidSpan::DuplicateUnreleased(u.heading_span)),
-                    None => unreleased = Some(u.into()),
                 },
+                ir::Section::Unreleased(u) => {
+                    if !releases.is_empty() {
+                        invalid_spans.push(InvalidSpan::UnreleasedOutOfOrder(u.heading_span));
+                    }
+                    match unreleased {
+                        Some(_) => {
+                            invalid_spans.push(InvalidSpan::DuplicateUnreleased(u.heading_span))
+                        }
+                        None => unreleased = Some(u.into()),
+                    };
+                }
                 ir::Section::Release(r) => releases.push(r.into()),
                 ir::Section::Invalid(i) => {
                     invalid_spans.push(InvalidSpan::InvalidHeading(i.heading_span))

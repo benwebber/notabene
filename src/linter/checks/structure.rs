@@ -1,6 +1,8 @@
 //! `E000` Structure
 use super::preamble::*;
 
+use crate::changelog::v2::Changelog;
+
 #[derive(Default)]
 pub struct MissingTitle {
     found: bool,
@@ -11,11 +13,11 @@ impl Check for MissingTitle {
         Rule::MissingTitle
     }
 
-    fn visit_section(&mut self, section: &Section) {
+    fn visit_changelog_v2(&mut self, changelog: &parsed::Changelog) {
         if self.found {
             return;
         }
-        if matches!(section, Section::Title(_)) {
+        if changelog.title().is_some() {
             self.found = true;
         }
     }
@@ -43,9 +45,9 @@ impl Check for InvalidTitle {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::InvalidTitle(invalid) = section {
-            self.spans.push(invalid.heading_span);
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::InvalidTitle(s) = span {
+            self.spans.push(*s);
         }
     }
 }
@@ -65,13 +67,9 @@ impl Check for DuplicateTitle {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Title(spanned) = section {
-            if self.found {
-                self.spans.push(spanned.span);
-            } else {
-                self.found = true;
-            }
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::DuplicateTitle(s) = span {
+            self.spans.push(*s);
         }
     }
 }
@@ -90,9 +88,9 @@ impl Check for InvalidSectionHeading {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Invalid(invalid) = section {
-            self.spans.push(invalid.heading_span);
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::InvalidHeading(s) = span {
+            self.spans.push(*s);
         }
     }
 }
@@ -112,14 +110,9 @@ impl Check for UnreleasedOutOfOrder {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if self.found {
-            return;
-        }
-        match section {
-            Section::Unreleased(_) => self.found = true,
-            Section::Release(release) => self.spans.push(release.heading_span),
-            _ => {}
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::UnreleasedOutOfOrder(s) = span {
+            self.spans.push(*s);
         }
     }
 }
@@ -140,10 +133,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::MissingTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ir::Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ir::Changelog {
             sections: vec![Section::Title(Spanned::<&str>::default())],
             ..Default::default()
         };
@@ -155,10 +148,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ir::Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ir::Changelog {
             sections: vec![Section::InvalidTitle(ir::InvalidTitle {
                 heading_span: Span::new(1, usize::MAX),
             })],
@@ -172,13 +165,13 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ir::Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ir::Changelog {
             sections: vec![
                 Section::Title(Spanned::<&str>::default()),
-                Section::Title(Spanned::new(Span::new(2, 11), "Changelog")),
+                Section::Title(Spanned::new(Span::new(2, 11), "ir::Changelog")),
             ],
             ..Default::default()
         };
@@ -190,10 +183,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidSectionHeading]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ir::Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ir::Changelog {
             sections: vec![Section::Invalid(InvalidSection {
                 heading_span: Span::new(1, usize::MAX),
             })],
@@ -207,16 +200,17 @@ mod tests {
         let ruleset = RuleSet::from([Rule::UnreleasedOutOfOrder]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ir::Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ir::Changelog {
             sections: vec![
-                Section::Release(Release {
+                Section::Unreleased(Unreleased::default()),
+                Section::Release(Release::default()),
+                Section::Unreleased(Unreleased {
                     heading_span: Span::new(1, usize::MAX),
                     ..Default::default()
                 }),
-                Section::Unreleased(Unreleased::default()),
             ],
             ..Default::default()
         };
