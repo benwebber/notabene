@@ -1,5 +1,5 @@
 //! Work with spans within the source document.
-use std::ops::Range;
+use std::ops::{Deref, Range};
 
 use serde::{Deserialize, Serialize};
 
@@ -26,9 +26,23 @@ pub struct Span {
     pub end: usize,
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Serialize)]
+pub(crate) struct Spanned<T> {
+    pub span: Span,
+    pub value: T,
+}
+
 impl Ranged<usize> for Span {
     fn range(&self) -> Range<usize> {
         (*self).into()
+    }
+}
+
+impl<'a> Deref for Spanned<&'a str> {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        self.value
     }
 }
 

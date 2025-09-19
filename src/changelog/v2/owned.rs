@@ -1,27 +1,27 @@
 use super::traits;
 
 pub struct Changelog {
-    title: Option<String>,
-    unreleased: Option<Unreleased>,
-    releases: Vec<Release>,
+    pub(crate) title: Option<String>,
+    pub(crate) unreleased: Option<Unreleased>,
+    pub(crate) releases: Vec<Release>,
 }
 
 pub struct Unreleased {
-    url: Option<String>,
-    changes: Vec<Changes>,
+    pub(crate) url: Option<String>,
+    pub(crate) changes: Vec<Changes>,
 }
 
 pub struct Release {
-    version: String,
-    url: Option<String>,
-    date: Option<String>,
-    yanked: bool,
-    changes: Vec<Changes>,
+    pub(crate) version: String,
+    pub(crate) url: Option<String>,
+    pub(crate) date: Option<String>,
+    pub(crate) yanked: bool,
+    pub(crate) changes: Vec<Changes>,
 }
 
 pub struct Changes {
-    kind: String,
-    items: Vec<String>,
+    pub(crate) kind: String,
+    pub(crate) items: Vec<String>,
 }
 
 impl traits::Changelog for Changelog {
