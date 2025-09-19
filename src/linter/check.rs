@@ -13,10 +13,11 @@ pub(crate) trait Check {
         &[]
     }
 
-    fn visit_changelog_v2(&mut self, _unreleased: &parsed::Changelog) {}
+    fn visit_changelog_v2(&mut self, _changelog: &parsed::Changelog) {}
     fn visit_unreleased(&mut self, _unreleased: &parsed::Unreleased) {}
-    fn visit_release(&mut self, _unreleased: &parsed::Release) {}
-    fn visit_changes_v2(&mut self, _unreleased: &parsed::Changes) {}
+    fn visit_release(&mut self, _release: &parsed::Release) {}
+    fn visit_changes_v2(&mut self, _changes: &parsed::Changes) {}
+    fn visit_invalid_span(&mut self, _span: &parsed::InvalidSpan) {}
 
     /// Evaluate this check for the entire `Changelog`.
     fn visit_changelog(&mut self, _changelog: &ir::Changelog) {}

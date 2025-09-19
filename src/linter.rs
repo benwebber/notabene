@@ -1,6 +1,7 @@
 //! Linter implementation.
 use std::path::PathBuf;
 
+use crate::changelog::v2::{Changelog as ChangelogT, Changes, Release, Unreleased, parsed};
 use crate::diagnostic::Diagnostic;
 use crate::ir::{Changelog, Section};
 use crate::ruleset::RuleSet;
@@ -36,6 +37,7 @@ impl<'a> Linter<'a> {
 
     /// Lint a changelog.
     pub fn lint(&self, changelog: &Changelog) -> Vec<Diagnostic> {
+        let changelog_v2 = parsed::Changelog::from(changelog);
         let mut diagnostics: Vec<Diagnostic> = Vec::new();
         let mut checks: Vec<_> = checks()
             .into_iter()
@@ -43,6 +45,16 @@ impl<'a> Linter<'a> {
             .collect();
         for check in checks.iter_mut() {
             check.visit_changelog(changelog);
+            check.visit_changelog_v2(&changelog_v2);
+            if let Some(unreleased) = changelog_v2.unreleased() {
+                check.visit_unreleased(&unreleased);
+                for changes in unreleased.changes() {
+                    check.visit_changes_v2(changes);
+                }
+            }
+            for span in &changelog_v2.invalid_spans {
+                check.visit_invalid_span(span);
+            }
         }
         for section in &changelog.sections {
             for check in checks.iter_mut() {
@@ -59,6 +71,14 @@ impl<'a> Linter<'a> {
                         }
                     }
                     _ => {}
+                }
+            }
+        }
+        for release in changelog_v2.releases() {
+            for check in checks.iter_mut() {
+                check.visit_release(release);
+                for changes in release.changes() {
+                    check.visit_changes_v2(changes);
                 }
             }
         }
