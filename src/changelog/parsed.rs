@@ -18,7 +18,7 @@ pub struct ParsedChangelog<'a> {
 #[derive(Default, Serialize)]
 pub struct ParsedUnreleased<'a> {
     pub(crate) heading_span: Span,
-    pub(crate) url: Option<SpannedStr<'a>>,
+    pub(crate) url: Option<String>,
     pub(crate) changes: Vec<ParsedChanges<'a>>,
 }
 
@@ -26,7 +26,7 @@ pub struct ParsedUnreleased<'a> {
 pub struct ParsedRelease<'a> {
     pub(crate) heading_span: Span,
     pub(crate) version: SpannedStr<'a>,
-    pub(crate) url: Option<SpannedStr<'a>>,
+    pub(crate) url: Option<String>,
     pub(crate) date: Option<SpannedStr<'a>>,
     pub(crate) yanked: Option<SpannedStr<'a>>,
     pub(crate) changes: Vec<ParsedChanges<'a>>,
@@ -125,7 +125,7 @@ impl<'a> ParsedChangelog<'a> {
 impl<'a> ParsedUnreleased<'a> {
     fn to_owned(&self) -> owned::OwnedUnreleased {
         owned::OwnedUnreleased {
-            url: self.url.map(|s| s.value.to_owned()),
+            url: self.url.as_ref().map(|s| s.clone()),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),
         }
     }
@@ -135,7 +135,7 @@ impl<'a> ParsedRelease<'a> {
     fn to_owned(&self) -> owned::OwnedRelease {
         owned::OwnedRelease {
             version: self.version.value.to_owned(),
-            url: self.url.map(|s| s.value.to_owned()),
+            url: self.url.as_ref().map(|s| s.clone()),
             date: self.date.map(|s| s.value.to_owned()),
             yanked: self.yanked(),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),

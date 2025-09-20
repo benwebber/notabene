@@ -11,11 +11,7 @@ unreleased:
   heading_span:
     start: 22
     end: 39
-  url:
-    span:
-      start: 25
-      end: 37
-    value: Unreleased
+  url: "https://example.org/unreleased"
   changes:
     - heading_span:
         start: 41
@@ -39,11 +35,7 @@ releases:
         start: 72
         end: 77
       value: 1.0.0
-    url:
-      span:
-        start: 71
-        end: 78
-      value: 1.0.0
+    url: "https://example.org/release/1.0.0"
     date:
       span:
         start: 81
@@ -76,11 +68,7 @@ releases:
         start: 129
         end: 134
       value: 0.1.0
-    url:
-      span:
-        start: 128
-        end: 135
-      value: 0.1.0
+    url: "https://example.org/release/0.1.0"
     date:
       span:
         start: 138

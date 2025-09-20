@@ -85,7 +85,7 @@ fn parse_section<'a>(
             let changes = parse_changes(s, blocks);
             Section::Unreleased(ParsedUnreleased {
                 heading_span: heading.span,
-                url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
+                url: Some(l.target.clone()),
                 changes,
             })
         }
@@ -94,7 +94,7 @@ fn parse_section<'a>(
             let mut release = ParsedRelease {
                 heading_span: heading.span,
                 version: Spanned::new(l.content.span, &s[l.content.span.range()]),
-                url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
+                url: Some(l.target.clone()),
                 date: None,
                 yanked: None,
                 changes: vec![],
