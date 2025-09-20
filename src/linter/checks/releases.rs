@@ -7,6 +7,8 @@ use version_compare::{Cmp, Version};
 
 use super::preamble::*;
 
+use crate::changelog::v2::parsed;
+
 #[derive(Default)]
 pub struct InvalidDate {
     spans: Vec<Span>,
@@ -21,13 +23,11 @@ impl Check for InvalidDate {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
+    fn visit_release(&mut self, release: &parsed::Release) {
         let format = format_description!("[year]-[month]-[day]");
-        if let Section::Release(release) = section {
-            if let Some(spanned) = &release.date {
-                if Date::parse(spanned.value, &format).is_err() {
-                    self.spans.push(spanned.span);
-                }
+        if let Some(spanned) = &release.date {
+            if Date::parse(spanned.value, &format).is_err() {
+                self.spans.push(spanned.span);
             }
         }
     }
@@ -47,12 +47,10 @@ impl Check for InvalidYanked {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Release(release) = section {
-            if let Some(spanned) = &release.yanked {
-                if spanned.value != "[YANKED]" {
-                    self.spans.push(spanned.span);
-                }
+    fn visit_release(&mut self, release: &parsed::Release) {
+        if let Some(spanned) = &release.yanked {
+            if spanned.value != "[YANKED]" {
+                self.spans.push(spanned.span);
             }
         }
     }
@@ -72,11 +70,9 @@ impl Check for MissingDate {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Release(release) = section {
-            if release.date.is_none() {
-                self.spans.push(release.heading_span);
-            }
+    fn visit_release(&mut self, release: &parsed::Release) {
+        if release.date.is_none() {
+            self.spans.push(release.heading_span);
         }
     }
 }
@@ -101,14 +97,12 @@ impl Check for ReleaseOutOfOrder {
         unimplemented!()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Release(release) = section {
-            self.info.push(ReleaseInfo {
-                span: release.heading_span,
-                version: release.version.value.to_string(),
-                date: release.date.as_ref().map(|s| s.value.to_string()),
-            })
-        }
+    fn visit_release(&mut self, release: &parsed::Release) {
+        self.info.push(ReleaseInfo {
+            span: release.heading_span,
+            version: release.version.value.to_string(),
+            date: release.date.as_ref().map(|s| s.value.to_string()),
+        });
     }
 
     fn diagnostics(&self) -> Vec<Diagnostic> {
@@ -159,11 +153,9 @@ impl Check for DuplicateVersion {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Release(release) = section {
-            if !self.versions.insert(release.version.value.to_string()) {
-                self.spans.push(release.version.span);
-            }
+    fn visit_release(&mut self, release: &parsed::Release) {
+        if !self.versions.insert(release.version.value.to_string()) {
+            self.spans.push(release.version.span);
         }
     }
 }

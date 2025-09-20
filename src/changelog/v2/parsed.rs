@@ -1,6 +1,7 @@
 use crate::ir;
 use crate::span::{Span, Spanned};
 
+use super::traits::Release as _;
 use super::{owned, traits};
 
 type SpannedStr<'a> = Spanned<&'a str>;
@@ -23,7 +24,7 @@ pub struct Release<'a> {
     pub(crate) version: SpannedStr<'a>,
     pub(crate) url: Option<SpannedStr<'a>>,
     pub(crate) date: Option<SpannedStr<'a>>,
-    pub(crate) yanked: bool,
+    pub(crate) yanked: Option<SpannedStr<'a>>,
     pub(crate) changes: Vec<Changes<'a>>,
 }
 
@@ -84,7 +85,7 @@ impl<'a> traits::Release for Release<'a> {
     }
 
     fn yanked(&self) -> bool {
-        self.yanked
+        self.yanked.map_or(false, |s| s.value == "[YANKED]")
     }
 
     fn changes(&self) -> &[Self::Changes] {
@@ -127,7 +128,7 @@ impl<'a> Release<'a> {
             version: self.version.value.to_owned(),
             url: self.url.map(|s| s.value.to_owned()),
             date: self.date.map(|s| s.value.to_owned()),
-            yanked: self.yanked,
+            yanked: self.yanked(),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),
         }
     }
@@ -227,7 +228,13 @@ impl<'a> From<&'a ir::Release<'a>> for Release<'a> {
             }),
             None => None,
         };
-        let yanked = ir.yanked.is_some();
+        let yanked = match &ir.yanked {
+            Some(s) => Some(SpannedStr {
+                span: s.span,
+                value: s.value,
+            }),
+            None => None,
+        };
         let changes = ir.changes.iter().map(|c| Changes::from(c)).collect();
         Self {
             heading_span: ir.heading_span,
