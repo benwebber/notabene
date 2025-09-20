@@ -1,3 +1,4 @@
+use crate::changelog::v2::parsed;
 use crate::ir::Changelog;
 use crate::linter::Check;
 use crate::rule::Rule;
@@ -17,8 +18,10 @@ impl Check for LinkReferenceDoesNotExist {
         self.spans.as_slice()
     }
 
-    fn visit_changelog(&mut self, changelog: &Changelog) {
-        self.spans.extend_from_slice(&changelog.broken_links);
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::InvalidLinkReference(s) = span {
+            self.spans.push(*s);
+        }
     }
 }
 
