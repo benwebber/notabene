@@ -11,13 +11,8 @@ impl Check for MissingUnreleased {
         Rule::MissingUnreleased
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if self.found {
-            return;
-        }
-        if matches!(section, Section::Unreleased(_)) {
-            self.found = true;
-        }
+    fn visit_changelog_v2(&mut self, changelog: &parsed::Changelog) {
+        self.found = changelog.unreleased.is_some();
     }
 
     fn diagnostics(&self) -> Vec<Diagnostic> {
@@ -44,13 +39,9 @@ impl Check for DuplicateUnreleased {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Unreleased(unreleased) = section {
-            if self.found {
-                self.spans.push(unreleased.heading_span);
-            } else {
-                self.found = true;
-            }
+    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
+        if let parsed::InvalidSpan::DuplicateUnreleased(s) = span {
+            self.spans.push(*s);
         }
     }
 }

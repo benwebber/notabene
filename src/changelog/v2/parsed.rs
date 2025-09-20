@@ -38,6 +38,7 @@ pub enum InvalidSpan {
     InvalidTitle(Span),
     InvalidHeading(Span),
     InvalidLinkReference(Span),
+    DuplicateUnreleased(Span),
 }
 
 impl<'a> traits::Changelog for Changelog<'a> {
@@ -159,11 +160,10 @@ impl<'a> From<&'a ir::Changelog<'a>> for Changelog<'a> {
                         })
                     }
                 }
-                ir::Section::Unreleased(u) => {
-                    if unreleased.is_none() {
-                        unreleased = Some(u.into())
-                    }
-                }
+                ir::Section::Unreleased(u) => match unreleased {
+                    Some(_) => invalid_spans.push(InvalidSpan::DuplicateUnreleased(u.heading_span)),
+                    None => unreleased = Some(u.into()),
+                },
                 ir::Section::Release(r) => releases.push(r.into()),
                 ir::Section::Invalid(i) => {
                     invalid_spans.push(InvalidSpan::InvalidHeading(i.heading_span))
