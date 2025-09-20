@@ -13,11 +13,13 @@ pub struct Changelog<'a> {
 }
 
 pub struct Unreleased<'a> {
+    pub(crate) heading_span: Span,
     pub(crate) url: Option<SpannedStr<'a>>,
     pub(crate) changes: Vec<Changes<'a>>,
 }
 
 pub struct Release<'a> {
+    pub(crate) heading_span: Span,
     pub(crate) version: SpannedStr<'a>,
     pub(crate) url: Option<SpannedStr<'a>>,
     pub(crate) date: Option<SpannedStr<'a>>,
@@ -26,6 +28,7 @@ pub struct Release<'a> {
 }
 
 pub struct Changes<'a> {
+    pub(crate) heading_span: Span,
     pub(crate) kind: SpannedStr<'a>,
     pub(crate) items: Vec<SpannedStr<'a>>,
 }
@@ -195,7 +198,11 @@ impl<'a> From<&'a ir::Unreleased<'a>> for Unreleased<'a> {
             None => None,
         };
         let changes = ir.changes.iter().map(|c| Changes::from(c)).collect();
-        Self { url, changes }
+        Self {
+            heading_span: ir.heading_span,
+            url,
+            changes,
+        }
     }
 }
 
@@ -223,6 +230,7 @@ impl<'a> From<&'a ir::Release<'a>> for Release<'a> {
         let yanked = ir.yanked.is_some();
         let changes = ir.changes.iter().map(|c| Changes::from(c)).collect();
         Self {
+            heading_span: ir.heading_span,
             version,
             url,
             date,
@@ -246,6 +254,10 @@ impl<'a> From<&'a ir::Changes<'a>> for Changes<'a> {
                 value: s.value,
             })
             .collect();
-        Self { kind, items }
+        Self {
+            heading_span: ir.heading_span,
+            kind,
+            items,
+        }
     }
 }
