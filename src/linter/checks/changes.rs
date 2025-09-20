@@ -2,6 +2,8 @@ use std::collections::HashSet;
 
 use super::preamble::*;
 
+use crate::changelog::v2::parsed;
+
 #[derive(Default)]
 pub struct InvalidChangeType {
     spans: Vec<Span>,
@@ -16,7 +18,7 @@ impl Check for InvalidChangeType {
         self.spans.as_slice()
     }
 
-    fn visit_changes(&mut self, changes: &Changes) {
+    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
         if !matches!(
             changes.kind.value,
             "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
@@ -41,11 +43,15 @@ impl Check for DuplicateChangeType {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, _section: &Section) {
+    fn visit_unreleased(&mut self, _unreleased: &parsed::Unreleased) {
         self.seen.clear();
     }
 
-    fn visit_changes(&mut self, changes: &Changes) {
+    fn visit_release(&mut self, _unreleased: &parsed::Release) {
+        self.seen.clear();
+    }
+
+    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
         if !self.seen.insert(changes.kind.value.to_string()) {
             self.spans.push(changes.kind.span);
         }
