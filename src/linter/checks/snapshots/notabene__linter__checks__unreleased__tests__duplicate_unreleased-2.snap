@@ -4,6 +4,6 @@ expression: linter.lint(&changelog)
 ---
 - rule: DuplicateUnreleased
   location:
-    start: 0
-    end: 17
+    start: 1
+    end: 18446744073709551615
   path: ~

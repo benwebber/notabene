@@ -52,7 +52,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::*;
+    use crate::changelog::v2::parsed::{Changelog, InvalidSpan, Unreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
@@ -66,7 +66,7 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![Section::Unreleased(Unreleased::default())],
+            unreleased: Some(Unreleased::default()),
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -81,13 +81,7 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Unreleased(Unreleased::default()),
-                Section::Unreleased(Unreleased {
-                    heading_span: Span::new(0, 17),
-                    ..Default::default()
-                }),
-            ],
+            invalid_spans: vec![InvalidSpan::DuplicateUnreleased(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));

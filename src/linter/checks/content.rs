@@ -1,5 +1,4 @@
 use crate::changelog::v2::parsed;
-use crate::ir::{Changes, Section};
 use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
@@ -38,10 +37,10 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::{self, *};
+    use crate::changelog::v2::parsed::{Changelog, Changes, Release, Unreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
-    use crate::span::Span;
+    use crate::span::{Span, Spanned};
 
     #[test]
     fn test_empty_section() {
@@ -51,46 +50,61 @@ mod tests {
         let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
+        // Unreleased with no changes.
         let changelog = Changelog {
-            sections: vec![
-                // Unreleased can be empty.
-                Section::Unreleased(Unreleased::default()),
-                Section::Unreleased(ir::Unreleased {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo")],
-                            ..Default::default()
-                        },
-                        // Empty changes.
-                        Changes {
-                            heading_span: Span::new(2, usize::MAX),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-                // No changes.
-                Section::Release(ir::Release {
-                    heading_span: Span::new(3, usize::MAX),
-                    ..Default::default()
-                }),
-                Section::Release(ir::Release {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            changes: vec![Spanned::new(Span::new(0, 0), "Add foo")],
-                            ..Default::default()
-                        },
-                        // Empty changes.
-                        Changes {
-                            heading_span: Span::new(4, usize::MAX),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-            ],
+            unreleased: Some(Unreleased::default()),
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(linter.lint(&changelog));
+
+        // Unreleased with empty change section.
+        let changelog = Changelog {
+            unreleased: Some(Unreleased {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        items: vec![Spanned::new(Span::new(0, 0), "Add foo")],
+                        ..Default::default()
+                    },
+                    // Empty changes.
+                    Changes {
+                        heading_span: Span::new(1, usize::MAX),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(linter.lint(&changelog));
+
+        // Release with no changes.
+        let changelog = Changelog {
+            releases: vec![Release {
+                heading_span: Span::new(1, usize::MAX),
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        assert_yaml_snapshot!(linter.lint(&changelog));
+
+        // Release with empty change section.
+        let changelog = Changelog {
+            releases: vec![Release {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        items: vec![Spanned::new(Span::new(0, 0), "Add foo")],
+                        ..Default::default()
+                    },
+                    // Empty changes.
+                    Changes {
+                        heading_span: Span::new(1, usize::MAX),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));

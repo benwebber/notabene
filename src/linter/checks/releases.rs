@@ -166,10 +166,10 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::*;
+    use crate::changelog::v2::parsed::{Changelog, Release};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
-    use crate::span::Span;
+    use crate::span::{Span, Spanned};
 
     #[test]
     fn test_invalid_date() {
@@ -180,22 +180,22 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Release(Release {
+            releases: vec![
+                Release {
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     date: Some(Spanned::new(Span::new(0, 9), "2038-01-19")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(1, 10), "2001-01-00")),
+                },
+                Release {
+                    date: Some(Spanned::new(Span::new(1, usize::MAX), "2001-01-00")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
-                    date: Some(Spanned::new(Span::new(2, 5), "foo")),
+                },
+                Release {
+                    date: Some(Spanned::new(Span::new(2, usize::MAX), "foo")),
                     ..Default::default()
-                }),
+                },
             ],
             ..Default::default()
         };
@@ -211,18 +211,16 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Release(Release {
-                    ..Default::default()
-                }),
-                Section::Release(Release {
+            releases: vec![
+                Release::default(),
+                Release {
                     yanked: Some(Spanned::new(Span::new(0, 9), "[YANKED]")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
-                    yanked: Some(Spanned::new(Span::new(1, 10), "[ZANKED]")),
+                },
+                Release {
+                    yanked: Some(Spanned::new(Span::new(1, usize::MAX), "[ZANKED]")),
                     ..Default::default()
-                }),
+                },
             ],
             ..Default::default()
         };
@@ -238,15 +236,15 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Release(Release {
+            releases: vec![
+                Release {
                     date: Some(Spanned::new(Span::new(0, 11), "2025-01-01")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     heading_span: Span::new(1, usize::MAX),
                     ..Default::default()
-                }),
+                },
             ],
             ..Default::default()
         };
@@ -262,24 +260,24 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Release(Release {
+            releases: vec![
+                Release {
                     date: Some(Spanned::new(Span::default(), "2025-12-31")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     heading_span: Span::new(1, usize::MAX),
                     date: Some(Spanned::new(Span::default(), "2025-06-01")),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
-                }),
+                },
             ],
             ..Default::default()
         };
@@ -295,19 +293,19 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Release(Release {
+            releases: vec![
+                Release {
                     version: Spanned::new(Span::default(), "1.0.0"),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     version: Spanned::new(Span::new(1, usize::MAX), "1.0.0"),
                     ..Default::default()
-                }),
-                Section::Release(Release {
+                },
+                Release {
                     version: Spanned::new(Span::default(), "0.1.0"),
                     ..Default::default()
-                }),
+                },
             ],
             ..Default::default()
         };

@@ -1,9 +1,9 @@
 //! Linter implementation.
 use std::path::PathBuf;
 
-use crate::changelog::v2::{Changelog as ChangelogT, Changes, Release, Unreleased, parsed};
+use crate::changelog::v2::parsed;
+use crate::changelog::v2::traits::*;
 use crate::diagnostic::Diagnostic;
-use crate::ir::{Changelog, Section};
 use crate::ruleset::RuleSet;
 
 mod check;
@@ -36,26 +36,25 @@ impl<'a> Linter<'a> {
     }
 
     /// Lint a changelog.
-    pub fn lint(&self, changelog: &Changelog) -> Vec<Diagnostic> {
-        let changelog_v2 = parsed::Changelog::from(changelog);
+    pub fn lint(&self, changelog: &parsed::Changelog) -> Vec<Diagnostic> {
         let mut diagnostics: Vec<Diagnostic> = Vec::new();
         let mut checks: Vec<_> = checks()
             .into_iter()
             .filter(|check| self.ruleset.is_enabled(check.rule()))
             .collect();
         for check in checks.iter_mut() {
-            check.visit_changelog(&changelog_v2);
-            if let Some(unreleased) = changelog_v2.unreleased() {
+            check.visit_changelog(&changelog);
+            if let Some(unreleased) = changelog.unreleased() {
                 check.visit_unreleased(&unreleased);
                 for changes in unreleased.changes() {
                     check.visit_changes(changes);
                 }
             }
-            for span in &changelog_v2.invalid_spans {
+            for span in &changelog.invalid_spans {
                 check.visit_invalid_span(span);
             }
         }
-        for release in changelog_v2.releases() {
+        for release in changelog.releases() {
             for check in checks.iter_mut() {
                 check.visit_release(release);
                 for changes in release.changes() {
@@ -80,7 +79,7 @@ impl<'a> Linter<'a> {
 }
 
 /// Lint a changelog with the default ruleset.
-pub fn lint(changelog: &Changelog) -> Vec<Diagnostic> {
+pub fn lint(changelog: &parsed::Changelog) -> Vec<Diagnostic> {
     let ruleset = RuleSet::default();
     let linter = Linter::new(&ruleset);
     linter.lint(changelog)

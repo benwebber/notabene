@@ -4,6 +4,6 @@ expression: linter.lint(&changelog)
 ---
 - rule: DuplicateTitle
   location:
-    start: 2
-    end: 11
+    start: 1
+    end: 18446744073709551615
   path: ~

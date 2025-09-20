@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::ir;
 use crate::span::{Span, Spanned};
 
@@ -6,6 +8,7 @@ use super::{owned, traits};
 
 type SpannedStr<'a> = Spanned<&'a str>;
 
+#[derive(Default, Serialize)]
 pub struct Changelog<'a> {
     pub(crate) title: Option<SpannedStr<'a>>,
     pub(crate) unreleased: Option<Unreleased<'a>>,
@@ -13,12 +16,14 @@ pub struct Changelog<'a> {
     pub(crate) invalid_spans: Vec<InvalidSpan>,
 }
 
+#[derive(Default, Serialize)]
 pub struct Unreleased<'a> {
     pub(crate) heading_span: Span,
     pub(crate) url: Option<SpannedStr<'a>>,
     pub(crate) changes: Vec<Changes<'a>>,
 }
 
+#[derive(Default, Serialize)]
 pub struct Release<'a> {
     pub(crate) heading_span: Span,
     pub(crate) version: SpannedStr<'a>,
@@ -28,12 +33,14 @@ pub struct Release<'a> {
     pub(crate) changes: Vec<Changes<'a>>,
 }
 
+#[derive(Default, Serialize)]
 pub struct Changes<'a> {
     pub(crate) heading_span: Span,
     pub(crate) kind: SpannedStr<'a>,
     pub(crate) items: Vec<SpannedStr<'a>>,
 }
 
+#[derive(Serialize)]
 pub enum InvalidSpan {
     InvalidTitle(Span),
     InvalidHeading(Span),

@@ -64,10 +64,10 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::*;
+    use crate::changelog::v2::parsed::{Changelog, Changes, Release, Unreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
-    use crate::span::Span;
+    use crate::span::{Span, Spanned};
 
     #[test]
     fn test_invalid_change_type() {
@@ -78,34 +78,32 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Unreleased(Unreleased {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            ..Default::default()
-                        },
-                        Changes {
-                            kind: Spanned::new(Span::new(1, usize::MAX), "Foo"),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-                Section::Release(Release {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            ..Default::default()
-                        },
-                        Changes {
-                            kind: Spanned::new(Span::new(2, usize::MAX), "Foo"),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-            ],
+            unreleased: Some(Unreleased {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        ..Default::default()
+                    },
+                    Changes {
+                        kind: Spanned::new(Span::new(1, usize::MAX), "Foo"),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }),
+            releases: vec![Release {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        ..Default::default()
+                    },
+                    Changes {
+                        kind: Spanned::new(Span::new(2, usize::MAX), "Foo"),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -120,34 +118,32 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = Changelog {
-            sections: vec![
-                Section::Unreleased(Unreleased {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            ..Default::default()
-                        },
-                        Changes {
-                            kind: Spanned::new(Span::new(1, usize::MAX), "Added"),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-                Section::Release(Release {
-                    changes: vec![
-                        Changes {
-                            kind: Spanned::new(Span::new(0, 0), "Added"),
-                            ..Default::default()
-                        },
-                        Changes {
-                            kind: Spanned::new(Span::new(2, usize::MAX), "Added"),
-                            ..Default::default()
-                        },
-                    ],
-                    ..Default::default()
-                }),
-            ],
+            unreleased: Some(Unreleased {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        ..Default::default()
+                    },
+                    Changes {
+                        kind: Spanned::new(Span::new(1, usize::MAX), "Added"),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }),
+            releases: vec![Release {
+                changes: vec![
+                    Changes {
+                        kind: Spanned::new(Span::new(0, 0), "Added"),
+                        ..Default::default()
+                    },
+                    Changes {
+                        kind: Spanned::new(Span::new(2, usize::MAX), "Added"),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));

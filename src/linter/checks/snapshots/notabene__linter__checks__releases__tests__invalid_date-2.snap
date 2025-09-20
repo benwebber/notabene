@@ -5,10 +5,10 @@ expression: linter.lint(&changelog)
 - rule: InvalidDate
   location:
     start: 1
-    end: 10
+    end: 18446744073709551615
   path: ~
 - rule: InvalidDate
   location:
     start: 2
-    end: 5
+    end: 18446744073709551615
   path: ~

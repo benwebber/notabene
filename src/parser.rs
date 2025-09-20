@@ -1,14 +1,18 @@
 //! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
 use crate::ast::{self, Block, Heading, Inline, Literal};
-use crate::ir::{
-    Changelog, Changes, InvalidSection, InvalidTitle, Release, Section, Spanned, Unreleased,
-};
-use crate::span::{Ranged, Span, SpanIterator};
+use crate::changelog::v2::parsed::{Changelog, Changes, InvalidSpan, Release, Unreleased};
+use crate::span::{Ranged, Span, SpanIterator, Spanned};
 use std::cell::RefCell;
 use std::iter::Peekable;
 use std::rc::Rc;
 
 use pulldown_cmark as md;
+
+enum Section<'a> {
+    Unreleased(Unreleased<'a>),
+    Release(Release<'a>),
+    Invalid(InvalidSpan),
+}
 
 /// Parse a changelog into its intermediate representation.
 ///
@@ -20,7 +24,9 @@ pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
     let callback = {
         let broken_links = Rc::clone(&broken_links);
         move |link: md::BrokenLink| {
-            broken_links.borrow_mut().push(link.span.into());
+            broken_links
+                .borrow_mut()
+                .push(InvalidSpan::InvalidLinkReference(link.span.into()));
             None
         }
     };
@@ -30,21 +36,29 @@ pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
     while let Some(block) = blocks.next() {
         match block {
             Block::Heading(heading @ Heading { level: 1, .. }) => {
-                let section = match get_heading_span(&heading) {
-                    Some(span) => {
-                        let spanned = Spanned::new(span, &s[span.range()]);
-                        Section::Title(spanned)
-                    }
-                    None => Section::InvalidTitle(InvalidTitle {
-                        heading_span: heading.span,
-                    }),
+                let span = match get_heading_span(&heading) {
+                    Some(span) => match changelog.title {
+                        Some(_) => changelog
+                            .invalid_spans
+                            .push(InvalidSpan::DuplicateTitle(span)),
+                        None => changelog.title = Some(Spanned::new(span, &s[span.range()])),
+                    },
+                    None => changelog
+                        .invalid_spans
+                        .push(InvalidSpan::InvalidTitle(heading.span)),
                 };
-                changelog.sections.push(section);
             }
             Block::Heading(heading @ Heading { level: 2, .. }) => {
                 let section = parse_section(s, &heading, &mut blocks);
-                if let Some(sec) = section {
-                    changelog.sections.push(sec);
+                match section {
+                    Section::Unreleased(u) => match changelog.unreleased {
+                        Some(_) => changelog
+                            .invalid_spans
+                            .push(InvalidSpan::DuplicateUnreleased(u.heading_span)),
+                        None => changelog.unreleased = Some(u),
+                    },
+                    Section::Release(r) => changelog.releases.push(r),
+                    Section::Invalid(i) => changelog.invalid_spans.push(i),
                 }
             }
             _ => {}
@@ -53,7 +67,7 @@ pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
     // `blocks` still holds a reference to `callback` through the parser.
     drop(blocks);
     if let Ok(cell) = Rc::try_unwrap(broken_links) {
-        changelog.broken_links = cell.into_inner();
+        changelog.invalid_spans.append(&mut cell.into_inner());
     }
     changelog
 }
@@ -62,24 +76,26 @@ fn parse_section<'a>(
     s: &'a str,
     heading: &Heading,
     blocks: &mut Peekable<ast::Parser<'a>>,
-) -> Option<Section<'a>> {
+) -> Section<'a> {
     match heading.inlines.as_slice() {
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
             let changes = parse_changes(s, blocks);
-            Some(Section::Unreleased(Unreleased {
+            Section::Unreleased(Unreleased {
                 heading_span: heading.span,
-                url: Some(l.target.to_string()),
+                url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
                 changes,
-            }))
+            })
         }
         // Release
         [Inline::Link(l), Inline::Literal(t)] => {
             let mut release = Release {
                 heading_span: heading.span,
                 version: Spanned::new(l.content.span, &s[l.content.span.range()]),
-                url: Some(l.target.to_string()),
-                ..Default::default()
+                url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
+                date: None,
+                yanked: None,
+                changes: vec![],
             };
             let mut spans = SpanIterator::new(&s[t.span.range()]);
             // Skip hyphen.
@@ -94,11 +110,9 @@ fn parse_section<'a>(
             }
             let changes = parse_changes(s, blocks);
             release.changes = changes;
-            Some(Section::Release(release))
+            Section::Release(release)
         }
-        _ => Some(Section::Invalid(InvalidSection {
-            heading_span: heading.span,
-        })),
+        _ => Section::Invalid(InvalidSpan::InvalidHeading(heading.span)),
     }
 }
 
@@ -116,7 +130,7 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
                     sections.push(Changes {
                         heading_span: current_heading_span,
                         kind: Spanned::new(current_heading_span, kind),
-                        changes: std::mem::take(&mut current_changes),
+                        items: std::mem::take(&mut current_changes),
                     });
                 }
                 current_kind = get_heading_text(s, heading);
@@ -141,7 +155,7 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
         sections.push(Changes {
             heading_span: current_heading_span,
             kind: Spanned::new(current_heading_span, kind),
-            changes: current_changes,
+            items: current_changes,
         });
     }
 

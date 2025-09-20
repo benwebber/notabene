@@ -32,6 +32,12 @@ pub(crate) struct Spanned<T> {
     pub value: T,
 }
 
+impl<T> Spanned<T> {
+    pub fn new(span: Span, value: T) -> Self {
+        Self { span, value }
+    }
+}
+
 impl Ranged<usize> for Span {
     fn range(&self) -> Range<usize> {
         (*self).into()

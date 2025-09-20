@@ -123,21 +123,21 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::{self, *};
+    use crate::changelog::v2::parsed::{Changelog, InvalidSpan};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
-    use crate::span::Span;
+    use crate::span::{Span, Spanned};
 
     #[test]
     fn test_missing_title() {
         let ruleset = RuleSet::from([Rule::MissingTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = ir::Changelog::default();
+        let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = ir::Changelog {
-            sections: vec![Section::Title(Spanned::<&str>::default())],
+        let changelog = Changelog {
+            title: Some(Spanned::<&str>::default()),
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -148,13 +148,11 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = ir::Changelog::default();
+        let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = ir::Changelog {
-            sections: vec![Section::InvalidTitle(ir::InvalidTitle {
-                heading_span: Span::new(1, usize::MAX),
-            })],
+        let changelog = Changelog {
+            invalid_spans: vec![InvalidSpan::InvalidTitle(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -165,14 +163,11 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = ir::Changelog::default();
+        let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = ir::Changelog {
-            sections: vec![
-                Section::Title(Spanned::<&str>::default()),
-                Section::Title(Spanned::new(Span::new(2, 11), "ir::Changelog")),
-            ],
+        let changelog = Changelog {
+            invalid_spans: vec![InvalidSpan::DuplicateTitle(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -183,13 +178,11 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidSectionHeading]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = ir::Changelog::default();
+        let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = ir::Changelog {
-            sections: vec![Section::Invalid(InvalidSection {
-                heading_span: Span::new(1, usize::MAX),
-            })],
+        let changelog = Changelog {
+            invalid_spans: vec![InvalidSpan::InvalidHeading(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -200,18 +193,11 @@ mod tests {
         let ruleset = RuleSet::from([Rule::UnreleasedOutOfOrder]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = ir::Changelog::default();
+        let changelog = Changelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = ir::Changelog {
-            sections: vec![
-                Section::Unreleased(Unreleased::default()),
-                Section::Release(Release::default()),
-                Section::Unreleased(Unreleased {
-                    heading_span: Span::new(1, usize::MAX),
-                    ..Default::default()
-                }),
-            ],
+        let changelog = Changelog {
+            invalid_spans: vec![InvalidSpan::UnreleasedOutOfOrder(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
