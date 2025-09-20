@@ -1,13 +1,13 @@
 //! A fast linter for changelogs in the Keep a Changelog format.
 //!
 //! ```rust
-//! use notabene::parse;
+//! use notabene::{Linter, parse};
 //! let s = "# Changelog ...";
 //! let changelog = parse(&s);
-//! let diagnostics = changelog.lint();
+//! let diagnostics = Linter::default().lint(&changelog);
 //! ```
 //!
-//! # Parse, lint, locate
+//! This crate provides a three-step workflow for working with changelogs:
 //!
 //! 1. **Parse** a changelog document into a structured type.
 //! 2. **Lint** the structured changelog to produce **diagnostics**.
@@ -30,7 +30,7 @@
 //! This changelog is invalid because the `[#12345]` link label has no corresponding reference
 //! definition.
 //!
-//! ## Parse
+//! # Parse
 //!
 //! Parse a changelog with [`parse`][].
 //!
@@ -51,12 +51,12 @@
 //!
 //! There are two ways to represent a changelog:
 //!
-//! * [`ParsedChangelog`](crate::changelog::ParsedChanglog), a borrowed version of the data
-//! * [`OwnedChangelog`](crate::changelog::ParsedChanglog), an owned version of the data
+//! * [`ParsedChangelog`](crate::changelog::ParsedChangelog), a borrowed version of the data
+//! * [`OwnedChangelog`](crate::changelog::OwnedChangelog), an owned version of the data
 //!
 //! Parsing is nearly a zero-copy operation and returns a `ParsedChangelog`. This version also
 //! includes location information about elements in the changelog for use in the linter. Use
-//! [`ParsedChangelog::to_owned`](ParsedChangelog::to_owned) if you need owned data.
+//! [`ParsedChangelog::to_owned`](crate::changelog::ParsedChangelog::to_owned) if you need owned data.
 //!
 //! This crate uses a trait-based API to access the changelog data of either type. The most
 //! convenient way to import the traits is to import the prelude:
@@ -82,13 +82,13 @@
 //! assert_eq!(unreleased.changes()[0].items().collect::<Vec<_>>()[0], "Add foo ([#12345])");
 //! ```
 //!
-//! ## Lint
+//! # Lint
 //!
-//! Lint a `ParsedChangelog` with
-//! [`ParsedChangelog::lint`](crate::changelog::ParsedChangelog::lint).
+//! Use [`Linter`] to lint a `ParsedChangelog`. [`Linter::default`] returns a linter configured
+//! with the default set of rules.
 //!
 //! ```rust
-//! # use notabene::parse;
+//! # use notabene::{Linter, parse};
 //! # use notabene::prelude::*;
 //! # let s = r#"# Changelog
 //! #
@@ -101,14 +101,14 @@
 //! # [Unreleased]: https://example.org/
 //! # "#;
 //! # let changelog = parse(&s);
-//! let diagnostics = changelog.lint();
+//! let diagnostics = Linter::default().lint(&changelog);
 //! ```
 //!
 //! The linter reports the invalid link as a [`Diagnostic`].
 //!
 //! ```
 //! use notabene::Rule;
-//! # use notabene::parse;
+//! # use notabene::{Linter, parse};
 //! # use notabene::prelude::*;
 //! # let s = r#"# Changelog
 //! #
@@ -121,18 +121,17 @@
 //! # [Unreleased]: https://example.org/
 //! # "#;
 //! # let changelog = parse(&s);
-//! # let diagnostics = changelog.lint();
+//! # let diagnostics = Linter::default().lint(&changelog);
 //! assert_eq!(diagnostics[0].rule, Rule::LinkReferenceDoesNotExist);
 //! assert_eq!(diagnostics[0].rule.code(), "E500");
 //! ```
 //!
-//! Use [`Linter`] to create a linter with a custom set of rules.
+//! Use [`Linter::new`] to create a linter with a custom set of rules.
 //!
 //! ```rust
-//! use notabene::{Linter, RuleSet};
+//! use notabene::RuleSet;
 //! # use notabene::Rule;
-//! # use notabene::parse;
-//! # use notabene::prelude::*;
+//! # use notabene::{Linter, parse, prelude::*};
 //! # let s = r#"# Changelog
 //! #
 //! # ## [Unreleased]
@@ -151,18 +150,18 @@
 //! assert_eq!(diagnostics, vec![]);
 //! ```
 //!
-//! ## Locate
+//! # Locate
 //!
 //! By default, diagnostics report the *spans* in the source document that matched a [`Rule`].
 //! A [`Span`](crate::span::Span) represents a range of byte offsets in the source document.
 //! The [`Position`](crate::span::Position) type includes the line and column corresponding to the
 //! offset.
 //!
-//! Use [`Diagnostic::locate`] to convert a `Diagnostic<Span>` to a `Diagnostic<Position>`.
-//! Or use [`Locator::locate_all`] to do the same for a collection of diagnostics.
+//! Use [`ParsedChangelog::locate_all`](crate::changelog::ParsedChangelog::locate_all) to convert a
+//! collection of `Diagnostic<Span>` to a `Vec<Diagnostic<Position>>`.
 //!
 //! ```
-//! # use notabene::{parse, prelude::*};
+//! # use notabene::{Linter, parse, prelude::*};
 //! # let s = r#"# Changelog
 //! #
 //! # ## [Unreleased]
@@ -174,12 +173,10 @@
 //! # [Unreleased]: https://example.org/
 //! # "#;
 //! # let changelog = parse(&s);
-//! # let diagnostics = changelog.lint();
+//! # let diagnostics = Linter::default().lint(&changelog);
 //! assert_eq!(diagnostics[0].range(), Some(52..60));
 //!
-//! use notabene::Locator;
-//! let locator = Locator::new(&s);
-//! let diagnostics = locator.locate_all(&diagnostics);
+//! let diagnostics = changelog.locate_all(&diagnostics);
 //! assert_eq!((diagnostics[0].range()), (Some(52..60)));
 //! assert_eq!((diagnostics[0].line(), diagnostics[0].column()), (Some(7), Some(12)));
 //! ```
@@ -201,4 +198,3 @@ pub use linter::Linter;
 pub use parser::parse;
 pub use rule::Rule;
 pub use ruleset::RuleSet;
-pub use span::Locator;

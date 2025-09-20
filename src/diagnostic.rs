@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use crate::changelog::ParsedChangelog;
 use crate::rule::Rule;
 use crate::span::{Locator, Position, Ranged, Span};
 
@@ -72,7 +73,7 @@ impl<L: Ranged<usize>> Diagnostic<L> {
     }
 
     /// Return the unist Position of the diagnostic.
-    pub fn position(&self, locator: &Locator) -> Option<Position> {
+    pub(crate) fn position(&self, locator: &Locator) -> Option<Position> {
         self.location.as_ref().map(|l| locator.position(&l.range()))
     }
 }

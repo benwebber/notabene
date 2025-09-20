@@ -3,7 +3,7 @@
 //! These types also contain location information, used by the [`Linter`](crate::linter::Linter).
 use serde::Serialize;
 
-use crate::span::{Span, Spanned};
+use crate::span::{Locator, Span, Spanned};
 
 use super::traits::Release as _;
 use super::{owned, traits};
@@ -12,6 +12,7 @@ type SpannedStr<'a> = Spanned<&'a str>;
 
 #[derive(Debug, Default, PartialEq, Serialize)]
 pub struct ParsedChangelog<'a> {
+    pub(crate) source: &'a str,
     pub(crate) title: Option<SpannedStr<'a>>,
     pub(crate) unreleased: Option<ParsedUnreleased<'a>>,
     pub(crate) releases: Vec<ParsedRelease<'a>>,
@@ -120,8 +121,22 @@ impl<'a> ParsedChangelog<'a> {
         crate::parser::parse(s)
     }
 
-    pub fn lint(&self) -> Vec<crate::diagnostic::Diagnostic> {
-        crate::linter::lint(self)
+    pub(crate) fn locator(&self) -> Locator<'a> {
+        Locator::new(self.source)
+    }
+
+    pub(crate) fn locate(
+        &self,
+        diagnostic: &crate::Diagnostic<Span>,
+    ) -> crate::Diagnostic<crate::span::Position> {
+        self.locator().locate(diagnostic)
+    }
+
+    pub fn locate_all(
+        &self,
+        diagnostics: &[crate::Diagnostic],
+    ) -> Vec<crate::Diagnostic<crate::span::Position>> {
+        diagnostics.into_iter().map(|d| self.locate(&d)).collect()
     }
 
     pub fn to_owned(&self) -> owned::OwnedChangelog {

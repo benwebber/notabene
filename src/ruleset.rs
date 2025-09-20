@@ -1,6 +1,9 @@
 use std::collections::HashSet;
+use std::sync::LazyLock;
 
 use crate::rule::Rule;
+
+static DEFAULT: LazyLock<RuleSet> = LazyLock::new(|| RuleSet::from(Rule::ALL));
 
 /// A set of linter rules.
 #[derive(Debug)]
@@ -17,6 +20,10 @@ impl RuleSet {
 
     pub fn is_enabled(&self, rule: Rule) -> bool {
         self.rules.contains(&rule)
+    }
+
+    pub(crate) fn default_static() -> &'static Self {
+        &DEFAULT
     }
 }
 

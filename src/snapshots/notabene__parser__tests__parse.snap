@@ -2,6 +2,7 @@
 source: src/parser.rs
 expression: changelog
 ---
+source: "\n# Title 1\n# Title 2\n\n## [Unreleased][]\n\n### Removed\n\n* Remove foo\n\n## [1.0.0] - 2025-01-01\n\n### Added\n\n* Add foo\n* Add bar\n\n## [0.1.0] - 2024-01-01\n\n### Added\n\n* Add baz\n* Add quux\n\n## [broken] - 2024-01-01\n\n[Unreleased]: https://example.org/unreleased\n[1.0.0]: https://example.org/release/1.0.0\n[0.1.0]: https://example.org/release/0.1.0\n        "
 title:
   span:
     start: 3

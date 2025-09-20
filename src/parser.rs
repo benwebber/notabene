@@ -18,15 +18,16 @@ enum Section<'a> {
 
 /// Parse a changelog.
 ///
-/// This function is infallible. It attempts to parse the document as best as possible, capturing
-/// structural and semantic errors for the linter.
+/// This function is infallible. It will return a `ParsedChangelog` even if the document is
+/// completely malformed. `ParsedChangelog captures structural and semantic errors for the linter.
 ///
 /// This function returns a borrowed version of the changelog.
 /// To convert the result into an owned version, use [`ParsedChangelog::to_owned`].
 ///
-/// To report structural and semantic errors, use [`ParsedChangelog::lint`].
+/// Use [`Linter`](crate::Linter) to report structural and semantic diagnostics.
 pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
     let mut changelog = ParsedChangelog::default();
+    changelog.source = s;
     let broken_links = Rc::new(RefCell::new(Vec::new()));
     let callback = {
         let broken_links = Rc::clone(&broken_links);
