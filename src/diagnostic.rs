@@ -4,9 +4,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::rule::Rule;
-use crate::span::Position;
-use crate::span::Span;
-use crate::span::{Locator, Ranged};
+use crate::span::{Locator, Position, Ranged, Span};
 
 /// A rule violation.
 ///
@@ -69,6 +67,16 @@ impl<L: Ranged<usize>> Diagnostic<L> {
     /// Return the unist Position of the diagnostic.
     pub fn position(&self, locator: &Locator) -> Option<Position> {
         self.location.as_ref().map(|l| locator.position(&l.range()))
+    }
+}
+
+impl Diagnostic<Position> {
+    pub fn line(&self) -> Option<usize> {
+        self.location.map(|p| p.start.line)
+    }
+
+    pub fn column(&self) -> Option<usize> {
+        self.location.map(|p| p.start.column)
     }
 }
 
