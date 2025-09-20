@@ -21,15 +21,13 @@ impl Check for EmptySection {
 
     fn visit_release(&mut self, release: &parsed::Release) {
         if release.changes.is_empty() {
-            self.spans.push(release.version.span);
+            self.spans.push(release.heading_span);
         }
     }
 
     fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
-        // TODO: Fix the location of these diagnostics.
-        // `changes` could be a `Spanned<Changes>`.
         if changes.items.is_empty() {
-            self.spans.push(changes.kind.span)
+            self.spans.push(changes.heading_span)
         }
     }
 }

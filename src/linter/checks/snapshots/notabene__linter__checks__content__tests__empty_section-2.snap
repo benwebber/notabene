@@ -4,11 +4,11 @@ expression: linter.lint(&changelog)
 ---
 - rule: EmptySection
   location:
-    start: 0
-    end: 0
+    start: 3
+    end: 18446744073709551615
   path: ~
 - rule: EmptySection
   location:
-    start: 0
-    end: 0
+    start: 4
+    end: 18446744073709551615
   path: ~
