@@ -10,7 +10,7 @@ mod unist;
 
 pub(crate) use iter::SpanIterator;
 pub use locator::Locator;
-pub(crate) use ranged::Ranged;
+pub use ranged::Ranged;
 pub use unist::{Point, Position};
 
 /// A span within the source document.

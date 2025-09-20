@@ -1,3 +1,4 @@
+//! Owned versions of changelog types.
 use super::traits;
 
 pub struct OwnedChangelog {

@@ -16,10 +16,15 @@ enum Section<'a> {
     Invalid(InvalidSpan),
 }
 
-/// Parse a changelog into its intermediate representation.
+/// Parse a changelog.
 ///
-/// Parsing never fails. Changelogs are Markdown documents, and every string is a valid Markdown
-/// document.
+/// This function is infallible. It attempts to parse the document as best as possible, capturing
+/// structural and semantic errors for the linter.
+///
+/// This function returns a borrowed version of the changelog.
+/// To convert the result into an owned version, use [`ParsedChangelog::to_owned`].
+///
+/// To report structural and semantic errors, use [`ParsedChangelog::lint`].
 pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
     let mut changelog = ParsedChangelog::default();
     let broken_links = Rc::new(RefCell::new(Vec::new()));

@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use crate::diagnostic::Diagnostic;
+
 use super::{Point, Position, Ranged, Span};
 
 /// Locates spans in the source document.
@@ -48,6 +50,16 @@ impl<'a> Locator<'a> {
             offset.saturating_sub(self.line_spans[i].start) + 1,
             offset,
         )
+    }
+
+    /// Locate a diagnostic.
+    pub fn locate(&self, diagnostic: &Diagnostic) -> Diagnostic<Position> {
+        diagnostic.clone().locate(&self)
+    }
+
+    /// Locate all diagnostics.
+    pub fn locate_all(&self, diagnostics: &[Diagnostic]) -> Vec<Diagnostic<Position>> {
+        diagnostics.into_iter().map(|d| self.locate(&d)).collect()
     }
 
     /// Return the unist Position for the given span.

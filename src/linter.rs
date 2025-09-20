@@ -79,7 +79,7 @@ impl<'a> Linter<'a> {
 }
 
 /// Lint a changelog with the default ruleset.
-pub fn lint(changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
+pub(crate) fn lint(changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
     let ruleset = RuleSet::default();
     let linter = Linter::new(&ruleset);
     linter.lint(changelog)

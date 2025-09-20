@@ -1,6 +1,7 @@
+//! Represent changelogs in Keep a Changelog format.
 pub mod owned;
 pub mod parsed;
-pub mod traits;
+pub(crate) mod traits;
 
 pub use owned::OwnedChangelog;
 pub use parsed::ParsedChangelog;

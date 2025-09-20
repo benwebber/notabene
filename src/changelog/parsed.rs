@@ -1,3 +1,6 @@
+//! Borrowed versions of changelog types.
+//!
+//! These types also contain location information, used by the [`Linter`](crate::linter::Linter).
 use serde::Serialize;
 
 use crate::span::{Span, Spanned};
@@ -7,7 +10,7 @@ use super::{owned, traits};
 
 type SpannedStr<'a> = Spanned<&'a str>;
 
-#[derive(Default, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct ParsedChangelog<'a> {
     pub(crate) title: Option<SpannedStr<'a>>,
     pub(crate) unreleased: Option<ParsedUnreleased<'a>>,
@@ -15,14 +18,14 @@ pub struct ParsedChangelog<'a> {
     pub(crate) invalid_spans: Vec<InvalidSpan>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct ParsedUnreleased<'a> {
     pub(crate) heading_span: Span,
     pub(crate) url: Option<String>,
     pub(crate) changes: Vec<ParsedChanges<'a>>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct ParsedRelease<'a> {
     pub(crate) heading_span: Span,
     pub(crate) version: SpannedStr<'a>,
@@ -32,14 +35,14 @@ pub struct ParsedRelease<'a> {
     pub(crate) changes: Vec<ParsedChanges<'a>>,
 }
 
-#[derive(Default, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct ParsedChanges<'a> {
     pub(crate) heading_span: Span,
     pub(crate) kind: SpannedStr<'a>,
     pub(crate) items: Vec<SpannedStr<'a>>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, PartialEq, Serialize)]
 pub enum InvalidSpan {
     InvalidTitle(Span),
     InvalidHeading(Span),
@@ -113,7 +116,15 @@ impl<'a> traits::Changes for ParsedChanges<'a> {
 }
 
 impl<'a> ParsedChangelog<'a> {
-    fn to_owned(&self) -> owned::OwnedChangelog {
+    pub fn parse(s: &'a str) -> Self {
+        crate::parser::parse(s)
+    }
+
+    pub fn lint(&self) -> Vec<crate::diagnostic::Diagnostic> {
+        crate::linter::lint(self)
+    }
+
+    pub fn to_owned(&self) -> owned::OwnedChangelog {
         owned::OwnedChangelog {
             title: self.title.map(|s| s.value.to_owned()),
             unreleased: self.unreleased.as_ref().map(|u| u.to_owned()),
@@ -123,7 +134,7 @@ impl<'a> ParsedChangelog<'a> {
 }
 
 impl<'a> ParsedUnreleased<'a> {
-    fn to_owned(&self) -> owned::OwnedUnreleased {
+    pub fn to_owned(&self) -> owned::OwnedUnreleased {
         owned::OwnedUnreleased {
             url: self.url.as_ref().map(|s| s.clone()),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),
@@ -132,7 +143,7 @@ impl<'a> ParsedUnreleased<'a> {
 }
 
 impl<'a> ParsedRelease<'a> {
-    fn to_owned(&self) -> owned::OwnedRelease {
+    pub fn to_owned(&self) -> owned::OwnedRelease {
         owned::OwnedRelease {
             version: self.version.value.to_owned(),
             url: self.url.as_ref().map(|s| s.clone()),
@@ -144,7 +155,7 @@ impl<'a> ParsedRelease<'a> {
 }
 
 impl<'a> ParsedChanges<'a> {
-    fn to_owned(&self) -> owned::OwnedChanges {
+    pub fn to_owned(&self) -> owned::OwnedChanges {
         owned::OwnedChanges {
             kind: self.kind.value.to_owned(),
             items: self.items.iter().map(|i| i.value.to_owned()).collect(),

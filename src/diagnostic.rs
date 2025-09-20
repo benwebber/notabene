@@ -1,4 +1,5 @@
 //! Linter diagnostics.
+use std::ops::Range;
 use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
@@ -12,11 +13,12 @@ use crate::span::{Locator, Position, Ranged, Span};
 /// [`Diagnostic::new`] accepts a `Span`.
 ///
 /// Use [`Diagnostic::locate`] to convert a `Diagnostic<Span>` to a `Diagnostic<Position>`.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct Diagnostic<L = Span> {
     /// The rule that was violated.
     pub rule: Rule,
-    /// Where the violation occurred in the source document.
+    /// Where the violation occurred in the source document. The location may be `None` if the
+    /// violation is for the document as a whole (e.g. it is missing a title).
     pub location: Option<L>,
     /// The source path, used in reporting.
     pub path: Option<PathBuf>,
@@ -64,6 +66,11 @@ impl<L: Ranged<usize>> Diagnostic<L> {
         }
     }
 
+    /// Return the range of offsets in the source document for this diagnostic.
+    pub fn range(&self) -> Option<Range<usize>> {
+        Some(self.location.as_ref()?.range())
+    }
+
     /// Return the unist Position of the diagnostic.
     pub fn position(&self, locator: &Locator) -> Option<Position> {
         self.location.as_ref().map(|l| locator.position(&l.range()))
@@ -71,10 +78,12 @@ impl<L: Ranged<usize>> Diagnostic<L> {
 }
 
 impl Diagnostic<Position> {
+    /// Return the line number corresponding to the start offset of this diagnostic's span.
     pub fn line(&self) -> Option<usize> {
         self.location.map(|p| p.start.line)
     }
 
+    /// Return the column number corresponding to the start offset of this diagnostic's span.
     pub fn column(&self) -> Option<usize> {
         self.location.map(|p| p.start.column)
     }
