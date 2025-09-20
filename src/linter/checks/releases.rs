@@ -7,7 +7,7 @@ use version_compare::{Cmp, Version};
 
 use super::preamble::*;
 
-use crate::changelog::v2::parsed;
+use crate::changelog::parsed;
 
 #[derive(Default)]
 pub struct InvalidDate {
@@ -166,7 +166,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::v2::parsed::{Changelog, Release};
+    use crate::changelog::parsed::{Changelog, Release};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};

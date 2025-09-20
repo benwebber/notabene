@@ -1,6 +1,6 @@
-//! Parse a changelog as its [intermediate representation](crate::ir::Changelog).
+//! Parse a changelog as its [intermediate representation](crate::changelog::parsed::Changelog).
 use crate::ast::{self, Block, Heading, Inline, Literal};
-use crate::changelog::v2::parsed::{Changelog, Changes, InvalidSpan, Release, Unreleased};
+use crate::changelog::parsed::{Changelog, Changes, InvalidSpan, Release, Unreleased};
 use crate::span::{Ranged, Span, SpanIterator, Spanned};
 use std::cell::RefCell;
 use std::iter::Peekable;

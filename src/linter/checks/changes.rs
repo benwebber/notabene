@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use super::preamble::*;
 
-use crate::changelog::v2::parsed;
+use crate::changelog::parsed;
 
 #[derive(Default)]
 pub struct InvalidChangeType {
@@ -64,7 +64,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::v2::parsed::{Changelog, Changes, Release, Unreleased};
+    use crate::changelog::parsed::{Changelog, Changes, Release, Unreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};

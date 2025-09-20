@@ -1,6 +1,5 @@
-use crate::changelog::v2::parsed;
+use crate::changelog::parsed;
 use crate::diagnostic::Diagnostic;
-use crate::ir;
 use crate::rule::Rule;
 use crate::span::Span;
 

@@ -1,8 +1,6 @@
 //! `E000` Structure
 use super::preamble::*;
 
-use crate::changelog::v2::Changelog;
-
 #[derive(Default)]
 pub struct MissingTitle {
     found: bool,
@@ -123,7 +121,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::v2::parsed::{Changelog, InvalidSpan};
+    use crate::changelog::parsed::{Changelog, InvalidSpan};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};

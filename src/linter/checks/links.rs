@@ -1,5 +1,4 @@
-use crate::changelog::v2::parsed;
-use crate::ir::Changelog;
+use crate::changelog::parsed;
 use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
@@ -31,7 +30,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::v2::parsed::{Changelog, InvalidSpan};
+    use crate::changelog::parsed::{Changelog, InvalidSpan};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;

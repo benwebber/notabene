@@ -1,8 +1,8 @@
 //! Linter implementation.
 use std::path::PathBuf;
 
-use crate::changelog::v2::parsed;
-use crate::changelog::v2::traits::*;
+use crate::changelog::parsed;
+use crate::changelog::traits::*;
 use crate::diagnostic::Diagnostic;
 use crate::ruleset::RuleSet;
 

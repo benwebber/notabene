@@ -52,7 +52,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::v2::parsed::{Changelog, InvalidSpan, Unreleased};
+    use crate::changelog::parsed::{Changelog, InvalidSpan, Unreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
