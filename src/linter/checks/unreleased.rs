@@ -11,7 +11,7 @@ impl Check for MissingUnreleased {
         Rule::MissingUnreleased
     }
 
-    fn visit_changelog_v2(&mut self, changelog: &parsed::Changelog) {
+    fn visit_changelog(&mut self, changelog: &parsed::Changelog) {
         self.found = changelog.unreleased.is_some();
     }
 

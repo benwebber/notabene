@@ -13,7 +13,7 @@ impl Check for MissingTitle {
         Rule::MissingTitle
     }
 
-    fn visit_changelog_v2(&mut self, changelog: &parsed::Changelog) {
+    fn visit_changelog(&mut self, changelog: &parsed::Changelog) {
         if self.found {
             return;
         }

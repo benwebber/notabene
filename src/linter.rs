@@ -44,41 +44,22 @@ impl<'a> Linter<'a> {
             .filter(|check| self.ruleset.is_enabled(check.rule()))
             .collect();
         for check in checks.iter_mut() {
-            check.visit_changelog(changelog);
-            check.visit_changelog_v2(&changelog_v2);
+            check.visit_changelog(&changelog_v2);
             if let Some(unreleased) = changelog_v2.unreleased() {
                 check.visit_unreleased(&unreleased);
                 for changes in unreleased.changes() {
-                    check.visit_changes_v2(changes);
+                    check.visit_changes(changes);
                 }
             }
             for span in &changelog_v2.invalid_spans {
                 check.visit_invalid_span(span);
             }
         }
-        for section in &changelog.sections {
-            for check in checks.iter_mut() {
-                check.visit_section(section);
-                match section {
-                    Section::Unreleased(unreleased) => {
-                        for changes in &unreleased.changes {
-                            check.visit_changes(changes);
-                        }
-                    }
-                    Section::Release(release) => {
-                        for changes in &release.changes {
-                            check.visit_changes(changes);
-                        }
-                    }
-                    _ => {}
-                }
-            }
-        }
         for release in changelog_v2.releases() {
             for check in checks.iter_mut() {
                 check.visit_release(release);
                 for changes in release.changes() {
-                    check.visit_changes_v2(changes);
+                    check.visit_changes(changes);
                 }
             }
         }

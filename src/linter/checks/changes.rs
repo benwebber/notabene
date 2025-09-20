@@ -18,7 +18,7 @@ impl Check for InvalidChangeType {
         self.spans.as_slice()
     }
 
-    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
+    fn visit_changes(&mut self, changes: &parsed::Changes) {
         if !matches!(
             changes.kind.value,
             "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
@@ -51,7 +51,7 @@ impl Check for DuplicateChangeType {
         self.seen.clear();
     }
 
-    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
+    fn visit_changes(&mut self, changes: &parsed::Changes) {
         if !self.seen.insert(changes.kind.value.to_string()) {
             self.spans.push(changes.kind.span);
         }

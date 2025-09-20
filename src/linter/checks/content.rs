@@ -25,7 +25,7 @@ impl Check for EmptySection {
         }
     }
 
-    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
+    fn visit_changes(&mut self, changes: &parsed::Changes) {
         if changes.items.is_empty() {
             self.spans.push(changes.heading_span)
         }
