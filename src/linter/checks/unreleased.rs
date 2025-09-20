@@ -11,7 +11,7 @@ impl Check for MissingUnreleased {
         Rule::MissingUnreleased
     }
 
-    fn visit_changelog(&mut self, changelog: &parsed::Changelog) {
+    fn visit_changelog(&mut self, changelog: &parsed::ParsedChangelog) {
         self.found = changelog.unreleased.is_some();
     }
 
@@ -52,7 +52,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::parsed::{Changelog, InvalidSpan, Unreleased};
+    use crate::changelog::parsed::{InvalidSpan, ParsedChangelog, ParsedUnreleased};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
@@ -62,11 +62,11 @@ mod tests {
         let ruleset = RuleSet::from([Rule::MissingUnreleased]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
-            unreleased: Some(Unreleased::default()),
+        let changelog = ParsedChangelog {
+            unreleased: Some(ParsedUnreleased::default()),
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -77,10 +77,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateUnreleased]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::DuplicateUnreleased(Span::new(1, usize::MAX))],
             ..Default::default()
         };

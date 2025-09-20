@@ -11,7 +11,7 @@ impl Check for MissingTitle {
         Rule::MissingTitle
     }
 
-    fn visit_changelog(&mut self, changelog: &parsed::Changelog) {
+    fn visit_changelog(&mut self, changelog: &parsed::ParsedChangelog) {
         if self.found {
             return;
         }
@@ -121,7 +121,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::parsed::{Changelog, InvalidSpan};
+    use crate::changelog::parsed::{InvalidSpan, ParsedChangelog};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};
@@ -131,10 +131,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::MissingTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             title: Some(Spanned::<&str>::default()),
             ..Default::default()
         };
@@ -146,10 +146,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::InvalidTitle(Span::new(1, usize::MAX))],
             ..Default::default()
         };
@@ -161,10 +161,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateTitle]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::DuplicateTitle(Span::new(1, usize::MAX))],
             ..Default::default()
         };
@@ -176,10 +176,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidSectionHeading]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::InvalidHeading(Span::new(1, usize::MAX))],
             ..Default::default()
         };
@@ -191,10 +191,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::UnreleasedOutOfOrder]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::UnreleasedOutOfOrder(Span::new(1, usize::MAX))],
             ..Default::default()
         };

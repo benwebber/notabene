@@ -1,6 +1,8 @@
 //! Parse a changelog as its [intermediate representation](crate::changelog::parsed::Changelog).
 use crate::ast::{self, Block, Heading, Inline, Literal};
-use crate::changelog::parsed::{Changelog, Changes, InvalidSpan, Release, Unreleased};
+use crate::changelog::parsed::{
+    InvalidSpan, ParsedChangelog, ParsedChanges, ParsedRelease, ParsedUnreleased,
+};
 use crate::span::{Ranged, Span, SpanIterator, Spanned};
 use std::cell::RefCell;
 use std::iter::Peekable;
@@ -9,8 +11,8 @@ use std::rc::Rc;
 use pulldown_cmark as md;
 
 enum Section<'a> {
-    Unreleased(Unreleased<'a>),
-    Release(Release<'a>),
+    Unreleased(ParsedUnreleased<'a>),
+    Release(ParsedRelease<'a>),
     Invalid(InvalidSpan),
 }
 
@@ -18,8 +20,8 @@ enum Section<'a> {
 ///
 /// Parsing never fails. Changelogs are Markdown documents, and every string is a valid Markdown
 /// document.
-pub fn parse<'a>(s: &'a str) -> Changelog<'a> {
-    let mut changelog = Changelog::default();
+pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
+    let mut changelog = ParsedChangelog::default();
     let broken_links = Rc::new(RefCell::new(Vec::new()));
     let callback = {
         let broken_links = Rc::clone(&broken_links);
@@ -81,7 +83,7 @@ fn parse_section<'a>(
         // Unreleased
         [Inline::Link(l)] if &s[l.content.span.range()] == "Unreleased" => {
             let changes = parse_changes(s, blocks);
-            Section::Unreleased(Unreleased {
+            Section::Unreleased(ParsedUnreleased {
                 heading_span: heading.span,
                 url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
                 changes,
@@ -89,7 +91,7 @@ fn parse_section<'a>(
         }
         // Release
         [Inline::Link(l), Inline::Literal(t)] => {
-            let mut release = Release {
+            let mut release = ParsedRelease {
                 heading_span: heading.span,
                 version: Spanned::new(l.content.span, &s[l.content.span.range()]),
                 url: Some(Spanned::new(l.span, &s[l.content.span.range()])),
@@ -116,8 +118,8 @@ fn parse_section<'a>(
     }
 }
 
-fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<Changes<'a>> {
-    let mut sections: Vec<Changes> = Vec::new();
+fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<ParsedChanges<'a>> {
+    let mut sections: Vec<ParsedChanges> = Vec::new();
     let mut current_kind: Option<&'a str> = None;
     let mut current_changes: Vec<Spanned<&'a str>> = Vec::new();
     let mut current_heading_span: Span = Span::default();
@@ -127,7 +129,7 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
             Block::Heading(heading @ Heading { level: 3, .. }) => {
                 if let Some(kind) = current_kind.take() {
                     // TODO: more accurate span for kind
-                    sections.push(Changes {
+                    sections.push(ParsedChanges {
                         heading_span: current_heading_span,
                         kind: Spanned::new(current_heading_span, kind),
                         items: std::mem::take(&mut current_changes),
@@ -152,7 +154,7 @@ fn parse_changes<'a>(s: &'a str, blocks: &mut Peekable<ast::Parser<'a>>) -> Vec<
     }
 
     if let Some(kind) = current_kind.take() {
-        sections.push(Changes {
+        sections.push(ParsedChanges {
             heading_span: current_heading_span,
             kind: Spanned::new(current_heading_span, kind),
             items: current_changes,

@@ -30,7 +30,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::parsed::{Changelog, InvalidSpan};
+    use crate::changelog::parsed::{InvalidSpan, ParsedChangelog};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
@@ -40,10 +40,10 @@ mod tests {
         let ruleset = RuleSet::from([Rule::LinkReferenceDoesNotExist]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             invalid_spans: vec![InvalidSpan::InvalidLinkReference(Span::new(1, usize::MAX))],
             ..Default::default()
         };

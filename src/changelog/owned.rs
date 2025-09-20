@@ -1,32 +1,32 @@
 use super::traits;
 
-pub struct Changelog {
+pub struct OwnedChangelog {
     pub(crate) title: Option<String>,
-    pub(crate) unreleased: Option<Unreleased>,
-    pub(crate) releases: Vec<Release>,
+    pub(crate) unreleased: Option<OwnedUnreleased>,
+    pub(crate) releases: Vec<OwnedRelease>,
 }
 
-pub struct Unreleased {
+pub struct OwnedUnreleased {
     pub(crate) url: Option<String>,
-    pub(crate) changes: Vec<Changes>,
+    pub(crate) changes: Vec<OwnedChanges>,
 }
 
-pub struct Release {
+pub struct OwnedRelease {
     pub(crate) version: String,
     pub(crate) url: Option<String>,
     pub(crate) date: Option<String>,
     pub(crate) yanked: bool,
-    pub(crate) changes: Vec<Changes>,
+    pub(crate) changes: Vec<OwnedChanges>,
 }
 
-pub struct Changes {
+pub struct OwnedChanges {
     pub(crate) kind: String,
     pub(crate) items: Vec<String>,
 }
 
-impl traits::Changelog for Changelog {
-    type Unreleased = Unreleased;
-    type Release = Release;
+impl traits::Changelog for OwnedChangelog {
+    type Unreleased = OwnedUnreleased;
+    type Release = OwnedRelease;
 
     fn title(&self) -> Option<&str> {
         self.title.as_deref()
@@ -41,8 +41,8 @@ impl traits::Changelog for Changelog {
     }
 }
 
-impl traits::Unreleased for Unreleased {
-    type Changes = Changes;
+impl traits::Unreleased for OwnedUnreleased {
+    type Changes = OwnedChanges;
 
     fn url(&self) -> Option<&str> {
         self.url.as_deref()
@@ -53,8 +53,8 @@ impl traits::Unreleased for Unreleased {
     }
 }
 
-impl traits::Release for Release {
-    type Changes = Changes;
+impl traits::Release for OwnedRelease {
+    type Changes = OwnedChanges;
 
     fn version(&self) -> &str {
         &self.version
@@ -77,7 +77,7 @@ impl traits::Release for Release {
     }
 }
 
-impl traits::Changes for Changes {
+impl traits::Changes for OwnedChanges {
     fn kind(&self) -> &str {
         &self.kind
     }

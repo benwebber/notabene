@@ -36,7 +36,7 @@ impl<'a> Linter<'a> {
     }
 
     /// Lint a changelog.
-    pub fn lint(&self, changelog: &parsed::Changelog) -> Vec<Diagnostic> {
+    pub fn lint(&self, changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
         let mut diagnostics: Vec<Diagnostic> = Vec::new();
         let mut checks: Vec<_> = checks()
             .into_iter()
@@ -79,7 +79,7 @@ impl<'a> Linter<'a> {
 }
 
 /// Lint a changelog with the default ruleset.
-pub fn lint(changelog: &parsed::Changelog) -> Vec<Diagnostic> {
+pub fn lint(changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
     let ruleset = RuleSet::default();
     let linter = Linter::new(&ruleset);
     linter.lint(changelog)

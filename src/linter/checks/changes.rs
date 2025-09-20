@@ -18,7 +18,7 @@ impl Check for InvalidChangeType {
         self.spans.as_slice()
     }
 
-    fn visit_changes(&mut self, changes: &parsed::Changes) {
+    fn visit_changes(&mut self, changes: &parsed::ParsedChanges) {
         if !matches!(
             changes.kind.value,
             "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
@@ -43,15 +43,15 @@ impl Check for DuplicateChangeType {
         self.spans.as_slice()
     }
 
-    fn visit_unreleased(&mut self, _unreleased: &parsed::Unreleased) {
+    fn visit_unreleased(&mut self, _unreleased: &parsed::ParsedUnreleased) {
         self.seen.clear();
     }
 
-    fn visit_release(&mut self, _unreleased: &parsed::Release) {
+    fn visit_release(&mut self, _unreleased: &parsed::ParsedRelease) {
         self.seen.clear();
     }
 
-    fn visit_changes(&mut self, changes: &parsed::Changes) {
+    fn visit_changes(&mut self, changes: &parsed::ParsedChanges) {
         if !self.seen.insert(changes.kind.value.to_string()) {
             self.spans.push(changes.kind.span);
         }
@@ -64,7 +64,9 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::parsed::{Changelog, Changes, Release, Unreleased};
+    use crate::changelog::parsed::{
+        ParsedChangelog, ParsedChanges, ParsedRelease, ParsedUnreleased,
+    };
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};
@@ -74,30 +76,30 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidChangeType]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
-            unreleased: Some(Unreleased {
+        let changelog = ParsedChangelog {
+            unreleased: Some(ParsedUnreleased {
                 changes: vec![
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(0, 0), "Added"),
                         ..Default::default()
                     },
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(1, usize::MAX), "Foo"),
                         ..Default::default()
                     },
                 ],
                 ..Default::default()
             }),
-            releases: vec![Release {
+            releases: vec![ParsedRelease {
                 changes: vec![
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(0, 0), "Added"),
                         ..Default::default()
                     },
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(2, usize::MAX), "Foo"),
                         ..Default::default()
                     },
@@ -114,30 +116,30 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateChangeType]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
-            unreleased: Some(Unreleased {
+        let changelog = ParsedChangelog {
+            unreleased: Some(ParsedUnreleased {
                 changes: vec![
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(0, 0), "Added"),
                         ..Default::default()
                     },
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(1, usize::MAX), "Added"),
                         ..Default::default()
                     },
                 ],
                 ..Default::default()
             }),
-            releases: vec![Release {
+            releases: vec![ParsedRelease {
                 changes: vec![
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(0, 0), "Added"),
                         ..Default::default()
                     },
-                    Changes {
+                    ParsedChanges {
                         kind: Spanned::new(Span::new(2, usize::MAX), "Added"),
                         ..Default::default()
                     },

@@ -23,7 +23,7 @@ impl Check for InvalidDate {
         self.spans.as_slice()
     }
 
-    fn visit_release(&mut self, release: &parsed::Release) {
+    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
         let format = format_description!("[year]-[month]-[day]");
         if let Some(spanned) = &release.date {
             if Date::parse(spanned.value, &format).is_err() {
@@ -47,7 +47,7 @@ impl Check for InvalidYanked {
         self.spans.as_slice()
     }
 
-    fn visit_release(&mut self, release: &parsed::Release) {
+    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
         if let Some(spanned) = &release.yanked {
             if spanned.value != "[YANKED]" {
                 self.spans.push(spanned.span);
@@ -70,7 +70,7 @@ impl Check for MissingDate {
         self.spans.as_slice()
     }
 
-    fn visit_release(&mut self, release: &parsed::Release) {
+    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
         if release.date.is_none() {
             self.spans.push(release.heading_span);
         }
@@ -97,7 +97,7 @@ impl Check for ReleaseOutOfOrder {
         unimplemented!()
     }
 
-    fn visit_release(&mut self, release: &parsed::Release) {
+    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
         self.info.push(ReleaseInfo {
             span: release.heading_span,
             version: release.version.value.to_string(),
@@ -153,7 +153,7 @@ impl Check for DuplicateVersion {
         self.spans.as_slice()
     }
 
-    fn visit_release(&mut self, release: &parsed::Release) {
+    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
         if !self.versions.insert(release.version.value.to_string()) {
             self.spans.push(release.version.span);
         }
@@ -166,7 +166,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::changelog::parsed::{Changelog, Release};
+    use crate::changelog::parsed::{ParsedChangelog, ParsedRelease};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::{Span, Spanned};
@@ -176,23 +176,23 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidDate]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             releases: vec![
-                Release {
+                ParsedRelease {
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::new(0, 9), "2038-01-19")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::new(1, usize::MAX), "2001-01-00")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::new(2, usize::MAX), "foo")),
                     ..Default::default()
                 },
@@ -207,17 +207,17 @@ mod tests {
         let ruleset = RuleSet::from([Rule::InvalidYanked]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             releases: vec![
-                Release::default(),
-                Release {
+                ParsedRelease::default(),
+                ParsedRelease {
                     yanked: Some(Spanned::new(Span::new(0, 9), "[YANKED]")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     yanked: Some(Spanned::new(Span::new(1, usize::MAX), "[ZANKED]")),
                     ..Default::default()
                 },
@@ -232,16 +232,16 @@ mod tests {
         let ruleset = RuleSet::from([Rule::MissingDate]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             releases: vec![
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::new(0, 11), "2025-01-01")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     heading_span: Span::new(1, usize::MAX),
                     ..Default::default()
                 },
@@ -256,25 +256,25 @@ mod tests {
         let ruleset = RuleSet::from([Rule::ReleaseOutOfOrder]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             releases: vec![
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::default(), "2025-12-31")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     heading_span: Span::new(1, usize::MAX),
                     date: Some(Spanned::new(Span::default(), "2025-06-01")),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     date: Some(Spanned::new(Span::default(), "2025-01-01")),
                     ..Default::default()
                 },
@@ -289,20 +289,20 @@ mod tests {
         let ruleset = RuleSet::from([Rule::DuplicateVersion]);
         let linter = Linter::new(&ruleset);
 
-        let changelog = Changelog::default();
+        let changelog = ParsedChangelog::default();
         assert_yaml_snapshot!(linter.lint(&changelog));
 
-        let changelog = Changelog {
+        let changelog = ParsedChangelog {
             releases: vec![
-                Release {
+                ParsedRelease {
                     version: Spanned::new(Span::default(), "1.0.0"),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     version: Spanned::new(Span::new(1, usize::MAX), "1.0.0"),
                     ..Default::default()
                 },
-                Release {
+                ParsedRelease {
                     version: Spanned::new(Span::default(), "0.1.0"),
                     ..Default::default()
                 },
