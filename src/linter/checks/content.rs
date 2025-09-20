@@ -1,3 +1,4 @@
+use crate::changelog::v2::parsed;
 use crate::ir::{Changes, Section};
 use crate::linter::Check;
 use crate::rule::Rule;
@@ -8,6 +9,7 @@ pub struct EmptySection {
     spans: Vec<Span>,
 }
 
+// TODO: Store better spans for these headings.
 impl Check for EmptySection {
     fn rule(&self) -> Rule {
         Rule::EmptySection
@@ -17,17 +19,17 @@ impl Check for EmptySection {
         self.spans.as_slice()
     }
 
-    fn visit_section(&mut self, section: &Section) {
-        if let Section::Release(release) = section {
-            if release.changes.is_empty() {
-                self.spans.push(release.heading_span);
-            }
+    fn visit_release(&mut self, release: &parsed::Release) {
+        if release.changes.is_empty() {
+            self.spans.push(release.version.span);
         }
     }
 
-    fn visit_changes(&mut self, changes: &Changes) {
-        if changes.changes.is_empty() {
-            self.spans.push(changes.heading_span)
+    fn visit_changes_v2(&mut self, changes: &parsed::Changes) {
+        // TODO: Fix the location of these diagnostics.
+        // `changes` could be a `Spanned<Changes>`.
+        if changes.items.is_empty() {
+            self.spans.push(changes.kind.span)
         }
     }
 }
@@ -38,7 +40,7 @@ mod tests {
 
     use insta::assert_yaml_snapshot;
 
-    use crate::ir::*;
+    use crate::ir::{self, *};
     use crate::linter::Linter;
     use crate::ruleset::RuleSet;
     use crate::span::Span;
@@ -55,7 +57,7 @@ mod tests {
             sections: vec![
                 // Unreleased can be empty.
                 Section::Unreleased(Unreleased::default()),
-                Section::Unreleased(Unreleased {
+                Section::Unreleased(ir::Unreleased {
                     changes: vec![
                         Changes {
                             kind: Spanned::new(Span::new(0, 0), "Added"),
@@ -71,11 +73,11 @@ mod tests {
                     ..Default::default()
                 }),
                 // No changes.
-                Section::Release(Release {
+                Section::Release(ir::Release {
                     heading_span: Span::new(3, usize::MAX),
                     ..Default::default()
                 }),
-                Section::Release(Release {
+                Section::Release(ir::Release {
                     changes: vec![
                         Changes {
                             kind: Spanned::new(Span::new(0, 0), "Added"),

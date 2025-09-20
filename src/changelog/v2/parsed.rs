@@ -6,28 +6,28 @@ use super::{owned, traits};
 type SpannedStr<'a> = Spanned<&'a str>;
 
 pub struct Changelog<'a> {
-    title: Option<SpannedStr<'a>>,
-    unreleased: Option<Unreleased<'a>>,
-    releases: Vec<Release<'a>>,
+    pub(crate) title: Option<SpannedStr<'a>>,
+    pub(crate) unreleased: Option<Unreleased<'a>>,
+    pub(crate) releases: Vec<Release<'a>>,
     pub(crate) invalid_spans: Vec<InvalidSpan>,
 }
 
 pub struct Unreleased<'a> {
-    url: Option<SpannedStr<'a>>,
-    changes: Vec<Changes<'a>>,
+    pub(crate) url: Option<SpannedStr<'a>>,
+    pub(crate) changes: Vec<Changes<'a>>,
 }
 
 pub struct Release<'a> {
-    version: SpannedStr<'a>,
-    url: Option<SpannedStr<'a>>,
-    date: Option<SpannedStr<'a>>,
-    yanked: bool,
-    changes: Vec<Changes<'a>>,
+    pub(crate) version: SpannedStr<'a>,
+    pub(crate) url: Option<SpannedStr<'a>>,
+    pub(crate) date: Option<SpannedStr<'a>>,
+    pub(crate) yanked: bool,
+    pub(crate) changes: Vec<Changes<'a>>,
 }
 
 pub struct Changes<'a> {
-    kind: SpannedStr<'a>,
-    items: Vec<SpannedStr<'a>>,
+    pub(crate) kind: SpannedStr<'a>,
+    pub(crate) items: Vec<SpannedStr<'a>>,
 }
 
 pub enum InvalidSpan {
