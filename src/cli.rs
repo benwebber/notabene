@@ -29,7 +29,7 @@ pub fn main() -> error::Result<()> {
                     Arg::new("output_format")
                         .long("output-format")
                         .value_parser(ValueParser::new(parse_output_format))
-                        .default_value("short"),
+                        .default_value("full"),
                 )
                 .arg(
                     Arg::new("select")
