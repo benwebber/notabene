@@ -29,89 +29,26 @@ impl Check for MissingTitle {
     }
 }
 
-#[derive(Default)]
-pub struct InvalidTitle {
-    spans: Vec<Span>,
-}
-
-impl Check for InvalidTitle {
-    fn rule(&self) -> Rule {
-        Rule::InvalidTitle
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::InvalidTitle(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct DuplicateTitle {
-    spans: Vec<Span>,
-}
-
-impl Check for DuplicateTitle {
-    fn rule(&self) -> Rule {
-        Rule::DuplicateTitle
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::DuplicateTitle(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct InvalidSectionHeading {
-    spans: Vec<Span>,
-}
-
-impl Check for InvalidSectionHeading {
-    fn rule(&self) -> Rule {
-        Rule::InvalidSectionHeading
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::InvalidHeading(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
-
-#[derive(Default)]
-pub struct UnreleasedOutOfOrder {
-    spans: Vec<Span>,
-}
-
-impl Check for UnreleasedOutOfOrder {
-    fn rule(&self) -> Rule {
-        Rule::InvalidUnreleasedPosition
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::UnreleasedOutOfOrder(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
+invalid_span!(
+    InvalidTitle,
+    Rule::InvalidTitle,
+    parsed::InvalidSpan::InvalidTitle
+);
+invalid_span!(
+    DuplicateTitle,
+    Rule::DuplicateTitle,
+    parsed::InvalidSpan::DuplicateTitle
+);
+invalid_span!(
+    InvalidSectionHeading,
+    Rule::InvalidSectionHeading,
+    parsed::InvalidSpan::InvalidHeading
+);
+invalid_span!(
+    UnreleasedOutOfOrder,
+    Rule::InvalidUnreleasedPosition,
+    parsed::InvalidSpan::UnreleasedOutOfOrder
+);
 
 #[cfg(test)]
 mod tests {

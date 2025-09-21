@@ -6,6 +6,9 @@ use crate::changelog::traits::*;
 use crate::diagnostic::Diagnostic;
 use crate::ruleset::RuleSet;
 
+#[macro_use]
+mod macros;
+
 mod check;
 mod checks;
 

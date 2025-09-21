@@ -3,26 +3,11 @@ use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
 
-#[derive(Default)]
-pub struct LinkReferenceDoesNotExist {
-    spans: Vec<Span>,
-}
-
-impl Check for LinkReferenceDoesNotExist {
-    fn rule(&self) -> Rule {
-        Rule::UndefinedLinkReference
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::InvalidLinkReference(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
+invalid_span!(
+    LinkReferenceDoesNotExist,
+    Rule::UndefinedLinkReference,
+    parsed::InvalidSpan::InvalidLinkReference
+);
 
 #[cfg(test)]
 mod tests {

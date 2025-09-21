@@ -24,26 +24,11 @@ impl Check for MissingUnreleased {
     }
 }
 
-#[derive(Default)]
-pub struct DuplicateUnreleased {
-    spans: Vec<Span>,
-}
-
-impl Check for DuplicateUnreleased {
-    fn rule(&self) -> Rule {
-        Rule::DuplicateUnreleased
-    }
-
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-        if let parsed::InvalidSpan::DuplicateUnreleased(s) = span {
-            self.spans.push(*s);
-        }
-    }
-}
+invalid_span!(
+    DuplicateUnreleased,
+    Rule::DuplicateUnreleased,
+    parsed::InvalidSpan::DuplicateUnreleased
+);
 
 #[cfg(test)]
 mod tests {
