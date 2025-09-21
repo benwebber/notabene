@@ -6,17 +6,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+* Add rule to check unreleased section position
+* Add rule to check release order
+8 Add rule to check release has a date
+8 Add rule to check release date adheres to ISO 8601
+* Add rule to check duplicate release version
+* Add rule to check for undefined link references
+* Added trait-based API
+* Added `RuleSet`
+* Added `Linter` to public API
+
 ### Changed
 
+* **BREAKING:** Redesign the library API. Significant changes:
+    * Renamed `Changelog` to `OwnedChangelog`.
+    * A borrowed version of the changelog, `ParsedChangelog` is now part of the public API.
+    * Renamed `parse_str` to `parse`.
+    * Renamed `span::Index` to `span::Locator`.
+    * `Diagnostic` is now generic over `Span` and `Position`.
 * Run checks in single pass
-
-### Fixed
-
-* Fix code sequence for initial rules
+* Change default output mode to full
+* Renumbered code sequence for initial rules
 
 ### Removed
 
-* Remove unused method `Changelog::title`
 * Remove `renderer` from public API
+* Removed `parse_str` from public API
+* Removed `parse_file` from public API
 
 [Unreleased]: https://github.com/benwebber/notabene/compare/v0.1.0...HEAD
