@@ -29,11 +29,7 @@ impl Check for MissingTitle {
     }
 }
 
-invalid_span!(
-    DuplicateTitle,
-    Rule::DuplicateTitle,
-    parsed::InvalidSpan::DuplicateTitle
-);
+invalid_span!(DuplicateTitle);
 
 #[derive(Default)]
 pub struct MissingUnreleased {
@@ -58,17 +54,9 @@ impl Check for MissingUnreleased {
     }
 }
 
-invalid_span!(
-    DuplicateUnreleased,
-    Rule::DuplicateUnreleased,
-    parsed::InvalidSpan::DuplicateUnreleased
-);
+invalid_span!(DuplicateUnreleased);
 
-invalid_span!(
-    UnreleasedOutOfOrder,
-    Rule::InvalidUnreleasedPosition,
-    parsed::InvalidSpan::UnreleasedOutOfOrder
-);
+invalid_span!(InvalidUnreleasedPosition);
 
 #[cfg(test)]
 mod tests {
@@ -142,7 +130,7 @@ mod tests {
     }
 
     #[test]
-    fn test_unreleased_not_first() {
+    fn test_invalid_unreleased_position() {
         let ruleset = RuleSet::from([Rule::InvalidUnreleasedPosition]);
         let linter = Linter::new(&ruleset);
 
@@ -150,7 +138,10 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = ParsedChangelog {
-            invalid_spans: vec![InvalidSpan::UnreleasedOutOfOrder(Span::new(1, usize::MAX))],
+            invalid_spans: vec![InvalidSpan::InvalidUnreleasedPosition(Span::new(
+                1,
+                usize::MAX,
+            ))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));

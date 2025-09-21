@@ -46,11 +46,11 @@ pub struct ParsedChanges<'a> {
 #[derive(Debug, PartialEq, Serialize)]
 pub enum InvalidSpan {
     InvalidTitle(Span),
-    InvalidHeading(Span),
-    InvalidLinkReference(Span),
+    InvalidSectionHeading(Span),
+    UndefinedLinkReference(Span),
     DuplicateUnreleased(Span),
     DuplicateTitle(Span),
-    UnreleasedOutOfOrder(Span),
+    InvalidUnreleasedPosition(Span),
 }
 
 impl<'a> traits::Changelog for ParsedChangelog<'a> {

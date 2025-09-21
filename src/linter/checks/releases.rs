@@ -78,7 +78,7 @@ impl Check for MissingDate {
 }
 
 #[derive(Default)]
-pub struct ReleaseOutOfOrder {
+pub struct InvalidReleaseOrder {
     info: Vec<ReleaseInfo>,
 }
 
@@ -88,7 +88,7 @@ struct ReleaseInfo {
     date: Option<String>,
 }
 
-impl Check for ReleaseOutOfOrder {
+impl Check for InvalidReleaseOrder {
     fn rule(&self) -> Rule {
         Rule::InvalidReleaseOrder
     }
@@ -252,7 +252,7 @@ mod tests {
     }
 
     #[test]
-    fn test_release_out_of_order() {
+    fn test_invalid_release_order() {
         let ruleset = RuleSet::from([Rule::InvalidReleaseOrder]);
         let linter = Linter::new(&ruleset);
 

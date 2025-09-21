@@ -5,17 +5,9 @@ use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
 
-invalid_span!(
-    InvalidTitle,
-    Rule::InvalidTitle,
-    parsed::InvalidSpan::InvalidTitle
-);
+invalid_span!(InvalidTitle);
 
-invalid_span!(
-    InvalidSectionHeading,
-    Rule::InvalidSectionHeading,
-    parsed::InvalidSpan::InvalidHeading
-);
+invalid_span!(InvalidSectionHeading);
 
 #[derive(Default)]
 pub struct EmptySection {
@@ -46,11 +38,11 @@ impl Check for EmptySection {
 }
 
 #[derive(Default)]
-pub struct InvalidChangeType {
+pub struct UnknownChangeType {
     spans: Vec<Span>,
 }
 
-impl Check for InvalidChangeType {
+impl Check for UnknownChangeType {
     fn rule(&self) -> Rule {
         Rule::UnknownChangeType
     }
@@ -136,7 +128,7 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = ParsedChangelog {
-            invalid_spans: vec![InvalidSpan::InvalidHeading(Span::new(1, usize::MAX))],
+            invalid_spans: vec![InvalidSpan::InvalidSectionHeading(Span::new(1, usize::MAX))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));
@@ -211,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_change_type() {
+    fn test_unknown_change_type() {
         let ruleset = RuleSet::from([Rule::UnknownChangeType]);
         let linter = Linter::new(&ruleset);
 

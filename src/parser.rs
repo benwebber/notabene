@@ -36,7 +36,7 @@ pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
         move |link: md::BrokenLink| {
             broken_links
                 .borrow_mut()
-                .push(InvalidSpan::InvalidLinkReference(link.span.into()));
+                .push(InvalidSpan::UndefinedLinkReference(link.span.into()));
             None
         }
     };
@@ -122,7 +122,7 @@ fn parse_section<'a>(
             release.changes = changes;
             Section::Release(release)
         }
-        _ => Section::Invalid(InvalidSpan::InvalidHeading(heading.span)),
+        _ => Section::Invalid(InvalidSpan::InvalidSectionHeading(heading.span)),
     }
 }
 

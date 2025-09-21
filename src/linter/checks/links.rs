@@ -3,11 +3,7 @@ use crate::linter::Check;
 use crate::rule::Rule;
 use crate::span::Span;
 
-invalid_span!(
-    LinkReferenceDoesNotExist,
-    Rule::UndefinedLinkReference,
-    parsed::InvalidSpan::InvalidLinkReference
-);
+invalid_span!(UndefinedLinkReference);
 
 #[cfg(test)]
 mod tests {
@@ -21,7 +17,7 @@ mod tests {
     use crate::span::Span;
 
     #[test]
-    fn test_link_reference_does_not_exist() {
+    fn test_undefined_link_reference() {
         let ruleset = RuleSet::from([Rule::UndefinedLinkReference]);
         let linter = Linter::new(&ruleset);
 
@@ -29,7 +25,10 @@ mod tests {
         assert_yaml_snapshot!(linter.lint(&changelog));
 
         let changelog = ParsedChangelog {
-            invalid_spans: vec![InvalidSpan::InvalidLinkReference(Span::new(1, usize::MAX))],
+            invalid_spans: vec![InvalidSpan::UndefinedLinkReference(Span::new(
+                1,
+                usize::MAX,
+            ))],
             ..Default::default()
         };
         assert_yaml_snapshot!(linter.lint(&changelog));

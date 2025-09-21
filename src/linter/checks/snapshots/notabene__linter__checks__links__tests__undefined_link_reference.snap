@@ -1,5 +1,5 @@
 ---
 source: src/linter/checks/links.rs
-expression: "linter.lint(&changelog)"
+expression: linter.lint(&changelog)
 ---
 []

@@ -98,9 +98,9 @@ invalid_spans:
   - DuplicateTitle:
       start: 13
       end: 20
-  - InvalidHeading:
+  - InvalidSectionHeading:
       start: 183
       end: 207
-  - InvalidLinkReference:
+  - UndefinedLinkReference:
       start: 186
       end: 194

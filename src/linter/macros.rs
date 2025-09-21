@@ -1,5 +1,5 @@
 macro_rules! invalid_span {
-    ($check:ident,$rule:path,$span:path) => {
+    ($check:ident) => {
         #[derive(Default)]
         pub struct $check {
             spans: Vec<Span>,
@@ -7,7 +7,7 @@ macro_rules! invalid_span {
 
         impl Check for $check {
             fn rule(&self) -> Rule {
-                $rule
+                Rule::$check
             }
 
             fn spans(&self) -> &[Span] {
@@ -15,7 +15,7 @@ macro_rules! invalid_span {
             }
 
             fn visit_invalid_span(&mut self, span: &parsed::InvalidSpan) {
-                if let $span(s) = span {
+                if let parsed::InvalidSpan::$check(s) = span {
                     self.spans.push(*s);
                 }
             }
