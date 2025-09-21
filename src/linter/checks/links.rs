@@ -10,7 +10,7 @@ pub struct LinkReferenceDoesNotExist {
 
 impl Check for LinkReferenceDoesNotExist {
     fn rule(&self) -> Rule {
-        Rule::LinkReferenceDoesNotExist
+        Rule::UndefinedLinkReference
     }
 
     fn spans(&self) -> &[Span] {
@@ -37,7 +37,7 @@ mod tests {
 
     #[test]
     fn test_link_reference_does_not_exist() {
-        let ruleset = RuleSet::from([Rule::LinkReferenceDoesNotExist]);
+        let ruleset = RuleSet::from([Rule::UndefinedLinkReference]);
         let linter = Linter::new(&ruleset);
 
         let changelog = ParsedChangelog::default();

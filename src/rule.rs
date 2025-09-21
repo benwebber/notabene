@@ -39,7 +39,7 @@ macro_rules! rules {
                 }
             }
 
-            /// Return the documentation this rule.
+            /// Return the documentation for this rule.
             pub fn doc(&self) -> &str {
                 match self {
                     $(Rule::$rule => $doc),*
@@ -78,7 +78,7 @@ rules! {
         "E004",
         "Duplicate title `{}`",
     ),
-    UnreleasedOutOfOrder = (
+    InvalidUnreleasedPosition = (
         "The unreleased section is not the first section in the document.",
         "E005",
         "Unreleased section must come before releases.",
@@ -99,7 +99,7 @@ rules! {
         "E102",
         "Empty section",
     ),
-    InvalidChangeType = (
+    UnknownChangeType = (
         "The change section heading is not a known change type.",
         "E103",
         "Invalid change type `{}`",
@@ -110,7 +110,7 @@ rules! {
         "Duplicate change type `{}`",
     ),
     // E200 Release
-    ReleaseOutOfOrder = (
+    InvalidReleaseOrder = (
         "The release is not in reverse chronological order.",
         "E200",
         "Release out of order `{}`",
@@ -136,7 +136,7 @@ rules! {
         "Invalid [YANKED] format `{}`",
     ),
     // E500 Links
-    LinkReferenceDoesNotExist = (
+    UndefinedLinkReference = (
         "The target reference does not exist.",
         "E300",
         "Link reference does not exist: `{}`",

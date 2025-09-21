@@ -11,7 +11,7 @@ pub struct InvalidChangeType {
 
 impl Check for InvalidChangeType {
     fn rule(&self) -> Rule {
-        Rule::InvalidChangeType
+        Rule::UnknownChangeType
     }
 
     fn spans(&self) -> &[Span] {
@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_invalid_change_type() {
-        let ruleset = RuleSet::from([Rule::InvalidChangeType]);
+        let ruleset = RuleSet::from([Rule::UnknownChangeType]);
         let linter = Linter::new(&ruleset);
 
         let changelog = ParsedChangelog::default();

@@ -2,7 +2,7 @@
 source: src/linter/checks/releases.rs
 expression: linter.lint(&changelog)
 ---
-- rule: ReleaseOutOfOrder
+- rule: InvalidReleaseOrder
   location:
     start: 1
     end: 18446744073709551615

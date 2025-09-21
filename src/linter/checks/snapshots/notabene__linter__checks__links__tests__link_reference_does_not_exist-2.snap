@@ -2,7 +2,7 @@
 source: src/linter/checks/links.rs
 expression: linter.lint(&changelog)
 ---
-- rule: LinkReferenceDoesNotExist
+- rule: UndefinedLinkReference
   location:
     start: 1
     end: 18446744073709551615

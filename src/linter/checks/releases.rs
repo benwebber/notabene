@@ -90,7 +90,7 @@ struct ReleaseInfo {
 
 impl Check for ReleaseOutOfOrder {
     fn rule(&self) -> Rule {
-        Rule::ReleaseOutOfOrder
+        Rule::InvalidReleaseOrder
     }
 
     fn spans(&self) -> &[Span] {
@@ -253,7 +253,7 @@ mod tests {
 
     #[test]
     fn test_release_out_of_order() {
-        let ruleset = RuleSet::from([Rule::ReleaseOutOfOrder]);
+        let ruleset = RuleSet::from([Rule::InvalidReleaseOrder]);
         let linter = Linter::new(&ruleset);
 
         let changelog = ParsedChangelog::default();

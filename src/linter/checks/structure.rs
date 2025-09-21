@@ -99,7 +99,7 @@ pub struct UnreleasedOutOfOrder {
 
 impl Check for UnreleasedOutOfOrder {
     fn rule(&self) -> Rule {
-        Rule::UnreleasedOutOfOrder
+        Rule::InvalidUnreleasedPosition
     }
 
     fn spans(&self) -> &[Span] {
@@ -186,7 +186,7 @@ mod tests {
 
     #[test]
     fn test_unreleased_not_first() {
-        let ruleset = RuleSet::from([Rule::UnreleasedOutOfOrder]);
+        let ruleset = RuleSet::from([Rule::InvalidUnreleasedPosition]);
         let linter = Linter::new(&ruleset);
 
         let changelog = ParsedChangelog::default();
