@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-09-21
+
 ### Added
 
 * Add rule to check unreleased section position
@@ -39,4 +41,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * Remove `parse_str` from public API
 * Remove `parse_file` from public API
 
+## [0.1.0] - 2025-09-06
+
+### Added
+
+* Add basic rules
+* Add `nb` command
+
 [Unreleased]: https://github.com/benwebber/notabene/compare/v0.1.0...HEAD
+[0.2.0]: https://github.com/benwebber/notabene/releases/v0.2.0
+[0.1.0]: https://github.com/benwebber/notabene/releases/v0.1.0
