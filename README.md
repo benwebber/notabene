@@ -24,15 +24,15 @@ The title is missing.
 
 ### E002
 
-The document does not have an unreleased section.
+There is a duplicate `h1` in the document.
 
 ### E003
 
-There is more than one unreleased section heading in the document.
+The document does not have an unreleased section.
 
 ### E004
 
-There is a duplicate `h1` in the document.
+There is more than one unreleased section heading in the document.
 
 ### E005
 

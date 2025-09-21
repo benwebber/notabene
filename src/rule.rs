@@ -63,20 +63,20 @@ rules! {
         "E001",
         "Missing title",
     ),
+    DuplicateTitle = (
+        "There is a duplicate `h1` in the document.",
+        "E002",
+        "Duplicate title `{}`",
+    ),
     MissingUnreleased = (
         "The document does not have an unreleased section.",
-        "E002",
+        "E003",
         "Missing unreleased heading",
     ),
     DuplicateUnreleased = (
         "There is more than one unreleased section heading in the document.",
-        "E003",
-        "Duplicate unreleased section `{}`",
-    ),
-    DuplicateTitle = (
-        "There is a duplicate `h1` in the document.",
         "E004",
-        "Duplicate title `{}`",
+        "Duplicate unreleased section `{}`",
     ),
     InvalidUnreleasedPosition = (
         "The unreleased section is not the first section in the document.",
