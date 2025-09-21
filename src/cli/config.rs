@@ -171,7 +171,7 @@ mod tests {
             Config {
                 lint: Lint {
                     select: Some(HashSet::from([Rule::MissingTitle])),
-                    ignore: Some(HashSet::from([Rule::InvalidTitle])),
+                    ignore: Some(HashSet::from([Rule::MissingUnreleased])),
                     output_format: Some(Format::Json),
                 }
             }

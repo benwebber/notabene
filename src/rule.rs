@@ -57,90 +57,88 @@ macro_rules! rules {
 }
 
 rules! {
-    // E000 Document
+    // E000 Structure
     MissingTitle = (
         "The title is missing.",
         "E001",
         "Missing title",
     ),
-    InvalidTitle = (
-        "The title is not plain text.",
+    MissingUnreleased = (
+        "The document does not have an unreleased section.",
         "E002",
-        "Invalid title `{}`",
+        "Missing unreleased heading",
+    ),
+    DuplicateUnreleased = (
+        "There is more than one unreleased section heading in the document.",
+        "E003",
+        "Duplicate unreleased section `{}`",
     ),
     DuplicateTitle = (
         "There is a duplicate `h1` in the document.",
-        "E003",
-        "Duplicate title `{}`",
-    ),
-    InvalidSectionHeading = (
-        "The `h2` is not a valid unreleased or release section heading.",
         "E004",
-        "Invalid heading `{}`",
+        "Duplicate title `{}`",
     ),
     UnreleasedOutOfOrder = (
         "The unreleased section is not the first section in the document.",
         "E005",
         "Unreleased section must come before releases.",
     ),
-    // E100 Unreleased
-    MissingUnreleased = (
-        "The document does not have an unreleased section.",
+    // E100 Content
+    InvalidTitle = (
+        "The title is not plain text.",
         "E100",
-        "Missing unreleased heading",
+        "Invalid title `{}`",
     ),
-    DuplicateUnreleased = (
-        "There is more than one unreleased section heading in the document.",
+    InvalidSectionHeading = (
+        "The `h2` is not a valid unreleased or release section heading.",
         "E101",
-        "Duplicate unreleased section `{}`",
+        "Invalid heading `{}`",
+    ),
+    EmptySection = (
+        "A section is unexpectedly empty (e.g. a release with no changes).",
+        "E102",
+        "Empty section",
+    ),
+    InvalidChangeType = (
+        "The change section heading is not a known change type.",
+        "E103",
+        "Invalid change type `{}`",
+    ),
+    DuplicateChangeType = (
+        "There is more than one change section with the same change type.",
+        "E104",
+        "Duplicate change type `{}`",
     ),
     // E200 Release
-    InvalidDate = (
-        "The date is not in ISO 8601 format.",
+    ReleaseOutOfOrder = (
+        "The release is not in reverse chronological order.",
         "E200",
-        "Invalid date `{}`",
+        "Release out of order `{}`",
     ),
-    InvalidYanked = (
-        "The yanked token does not match `[YANKED]`.",
+    DuplicateVersion = (
+        "There is more than one release for this version in the document.",
         "E201",
-        "Invalid [YANKED] format `{}`",
+        "Duplicate version `{}`",
     ),
     MissingDate = (
         "The release is missing a date",
         "E202",
         "Release missing date",
     ),
-    ReleaseOutOfOrder = (
-        "The release is not in reverse chronological order.",
+    InvalidDate = (
+        "The date is not in ISO 8601 format.",
         "E203",
-        "Release out of order `{}`",
+        "Invalid date `{}`",
     ),
-    DuplicateVersion = (
-        "There is more than one release for this version in the document.",
+    InvalidYanked = (
+        "The yanked token does not match `[YANKED]`.",
         "E204",
-        "Duplicate version `{}`",
-    ),
-    // E300 Changes
-    InvalidChangeType = (
-        "The change section heading is not a known change type.",
-        "E300",
-        "Invalid change type `{}`",
-    ),
-    DuplicateChangeType = (
-        "There is more than one change section with the same change type.",
-        "E301",
-        "Duplicate change type `{}`",
-    ),
-    // E400 Content
-    EmptySection = (
-        "A section is unexpectedly empty (e.g. a release with no changes).",
-        "E400",
-        "Empty section",
+        "Invalid [YANKED] format `{}`",
     ),
     // E500 Links
     LinkReferenceDoesNotExist = (
         "The target reference does not exist.",
-        "E500",
+        "E300",
         "Link reference does not exist: `{}`",
     ),
 }

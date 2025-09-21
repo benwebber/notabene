@@ -123,7 +123,7 @@
 //! # let changelog = parse(&s);
 //! # let diagnostics = Linter::default().lint(&changelog);
 //! assert_eq!(diagnostics[0].rule, Rule::LinkReferenceDoesNotExist);
-//! assert_eq!(diagnostics[0].rule.code(), "E500");
+//! assert_eq!(diagnostics[0].rule.code(), "E300");
 //! ```
 //!
 //! Use [`Linter::new`] to create a linter with a custom set of rules.
