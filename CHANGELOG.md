@@ -14,26 +14,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 8 Add rule to check release date adheres to ISO 8601
 * Add rule to check duplicate release version
 * Add rule to check for undefined link references
-* Added trait-based API
-* Added `RuleSet`
-* Added `Linter` to public API
+* Add trait-based API
+* Add `RuleSet`
+* Add `Linter` to public API
 
 ### Changed
 
 * **BREAKING:** Redesign the library API. Significant changes:
-    * Renamed `Changelog` to `OwnedChangelog`.
-    * A borrowed version of the changelog, `ParsedChangelog` is now part of the public API.
-    * Renamed `parse_str` to `parse`.
-    * Renamed `span::Index` to `span::Locator`.
-    * `Diagnostic` is now generic over `Span` and `Position`.
+    * Rename `Changelog` to `OwnedChangelog`
+    * Add borrowed version of the changelog, `ParsedChangelog` is now part of the public API
+    * Rename `parse_str` to `parse`
+    * Rename `span::Index` to `span::Locator`
+    * Make `Diagnostic` generic over `Span` and `Position`
 * Run checks in single pass
 * Change default output mode to full
-* Renumbered code sequence for initial rules
+* Renumber code sequence for initial rules
 
 ### Removed
 
 * Remove `renderer` from public API
-* Removed `parse_str` from public API
-* Removed `parse_file` from public API
+* Remove `parse_str` from public API
+* Remove `parse_file` from public API
 
 [Unreleased]: https://github.com/benwebber/notabene/compare/v0.1.0...HEAD
