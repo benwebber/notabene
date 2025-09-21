@@ -1,8 +1,8 @@
 ---
-- id: nb-check
-  name: nb check
-  description: Check changelog with 'nb check'
-  entry: nb check
+- id: nb-lint
+  name: nb lint
+  description: Check changelog with 'nb lint'
+  entry: nb lint
   files: 'CHANGELOG.md'
   language: rust
   additional_dependencies:
