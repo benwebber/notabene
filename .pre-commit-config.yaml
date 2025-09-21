@@ -13,6 +13,6 @@ repos:
           - cli
 
   - repo: .
-    rev: 77d575d831f41a468378d7f1ff4ec58f62713851
+    rev: 809810b0dc728905e64f67e5dd8cfc2ee790fedc
     hooks:
-      - id: nb-check
+      - id: nb-lint
