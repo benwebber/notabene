@@ -2,7 +2,7 @@
 source: src/linter/checks/structure.rs
 expression: linter.lint(&changelog)
 ---
-- rule: InvalidTitle
+- rule: DuplicateUnreleased
   location:
     start: 1
     end: 18446744073709551615

@@ -1,5 +1,5 @@
 ---
-source: src/linter/checks/structure.rs
+source: src/linter/checks/content.rs
 expression: linter.lint(&changelog)
 ---
 - rule: InvalidSectionHeading

@@ -1,8 +1,8 @@
 ---
-source: src/linter/checks/unreleased.rs
+source: src/linter/checks/content.rs
 expression: linter.lint(&changelog)
 ---
-- rule: DuplicateUnreleased
+- rule: InvalidTitle
   location:
     start: 1
     end: 18446744073709551615

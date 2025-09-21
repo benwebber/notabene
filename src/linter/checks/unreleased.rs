@@ -1,35 +1,6 @@
 //! `E100` Unreleased
 use super::preamble::*;
 
-#[derive(Default)]
-pub struct MissingUnreleased {
-    found: bool,
-}
-
-impl Check for MissingUnreleased {
-    fn rule(&self) -> Rule {
-        Rule::MissingUnreleased
-    }
-
-    fn visit_changelog(&mut self, changelog: &parsed::ParsedChangelog) {
-        self.found = changelog.unreleased.is_some();
-    }
-
-    fn diagnostics(&self) -> Vec<Diagnostic> {
-        if self.found {
-            vec![]
-        } else {
-            vec![Diagnostic::new(self.rule(), None)]
-        }
-    }
-}
-
-invalid_span!(
-    DuplicateUnreleased,
-    Rule::DuplicateUnreleased,
-    parsed::InvalidSpan::DuplicateUnreleased
-);
-
 #[cfg(test)]
 mod tests {
     use super::*;
