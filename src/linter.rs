@@ -14,6 +14,12 @@ mod checks;
 
 use check::Check;
 
+macro_rules! checks {
+    ($($check:ty),* $(,)?) => {
+        vec![$(Box::new(<$check>::default())),*]
+    }
+}
+
 /// A changelog linter.
 #[derive(Debug)]
 pub struct Linter<'a> {
@@ -88,26 +94,26 @@ impl<'a> Default for Linter<'a> {
 }
 
 fn checks() -> Vec<Box<dyn Check>> {
-    vec![
+    checks![
         // E000 Structure
-        Box::new(checks::MissingTitle::default()),
-        Box::new(checks::DuplicateTitle::default()),
-        Box::new(checks::MissingUnreleased::default()),
-        Box::new(checks::DuplicateUnreleased::default()),
-        Box::new(checks::InvalidUnreleasedPosition::default()),
+        checks::MissingTitle,
+        checks::DuplicateTitle,
+        checks::MissingUnreleased,
+        checks::DuplicateUnreleased,
+        checks::InvalidUnreleasedPosition,
         // E100 Content
-        Box::new(checks::InvalidSectionHeading::default()),
-        Box::new(checks::InvalidTitle::default()),
-        Box::new(checks::EmptySection::default()),
-        Box::new(checks::UnknownChangeType::default()),
-        Box::new(checks::DuplicateChangeType::default()),
+        checks::InvalidSectionHeading,
+        checks::InvalidTitle,
+        checks::EmptySection,
+        checks::UnknownChangeType,
+        checks::DuplicateChangeType,
         // E200 Release
-        Box::new(checks::InvalidReleaseOrder::default()),
-        Box::new(checks::DuplicateVersion::default()),
-        Box::new(checks::MissingDate::default()),
-        Box::new(checks::InvalidDate::default()),
-        Box::new(checks::InvalidYanked::default()),
+        checks::InvalidReleaseOrder,
+        checks::DuplicateVersion,
+        checks::MissingDate,
+        checks::InvalidDate,
+        checks::InvalidYanked,
         // E300 Links
-        Box::new(checks::UndefinedLinkReference::default()),
+        checks::UndefinedLinkReference,
     ]
 }
