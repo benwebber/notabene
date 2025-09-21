@@ -17,6 +17,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * Add trait-based API
 * Add `RuleSet`
 * Add `Linter` to public API
+* Add `--select` and `--ignore` flags to `check`
+* Add support for `nb.toml` file
 
 ### Changed
 

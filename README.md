@@ -16,6 +16,40 @@ nb check [FILE]
 
 By default, `nb` tries to read `CHANGELOG.md` in the current directory.
 
+## Configuration
+
+### CLI
+
+Use `--output-format` to change the output format of diagnostics.
+
+Use `--select` and `--ignore` to select or ignore rule codes, respectively.
+Ignored rules have precedence over selected rules.
+
+### `nb.toml` or `pyproject.toml`
+
+You can configure `nb` using an `nb.toml` or `pyproject.toml` file.
+If you use an `nb.toml` file, configure the linter with a `lint` section:
+
+```toml
+[lint]
+ignore = ["E003"]
+```
+
+If you use a `pyproject.toml` file, use `[tool.nb.lint]` instead.
+
+#### `select`
+
+Select these rules.
+
+#### `ignore`
+
+Ignore these rules.
+
+#### `output_format`
+
+Use this output format.
+Choose from `full`, `short`, `json`, or `jsonl`.
+
 ## Rules
 
 ### E001
