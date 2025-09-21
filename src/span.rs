@@ -44,7 +44,7 @@ impl Ranged<usize> for Span {
     }
 }
 
-impl<'a> Deref for Spanned<&'a str> {
+impl Deref for Spanned<&str> {
     type Target = str;
 
     fn deref(&self) -> &Self::Target {

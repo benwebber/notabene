@@ -98,7 +98,7 @@ impl<'a> traits::Release for ParsedRelease<'a> {
     }
 
     fn yanked(&self) -> bool {
-        self.yanked.map_or(false, |s| s.value == "[YANKED]")
+        self.yanked.is_some_and(|s| s.value == "[YANKED]")
     }
 
     fn changes(&self) -> &[Self::Changes] {
@@ -108,7 +108,7 @@ impl<'a> traits::Release for ParsedRelease<'a> {
 
 impl<'a> traits::Changes for ParsedChanges<'a> {
     fn kind(&self) -> &str {
-        &self.kind.value
+        self.kind.value
     }
 
     fn items(&self) -> impl Iterator<Item = &str> {
@@ -136,7 +136,7 @@ impl<'a> ParsedChangelog<'a> {
         &self,
         diagnostics: &[crate::Diagnostic],
     ) -> Vec<crate::Diagnostic<crate::span::Position>> {
-        diagnostics.into_iter().map(|d| self.locate(&d)).collect()
+        diagnostics.iter().map(|d| self.locate(d)).collect()
     }
 
     pub fn to_owned(&self) -> owned::OwnedChangelog {
@@ -151,7 +151,7 @@ impl<'a> ParsedChangelog<'a> {
 impl<'a> ParsedUnreleased<'a> {
     pub fn to_owned(&self) -> owned::OwnedUnreleased {
         owned::OwnedUnreleased {
-            url: self.url.as_ref().map(|s| s.clone()),
+            url: self.url.clone(),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),
         }
     }
@@ -161,7 +161,7 @@ impl<'a> ParsedRelease<'a> {
     pub fn to_owned(&self) -> owned::OwnedRelease {
         owned::OwnedRelease {
             version: self.version.value.to_owned(),
-            url: self.url.as_ref().map(|s| s.clone()),
+            url: self.url.clone(),
             date: self.date.map(|s| s.value.to_owned()),
             yanked: self.yanked(),
             changes: self.changes.iter().map(|c| c.to_owned()).collect(),

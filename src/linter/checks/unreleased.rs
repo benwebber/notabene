@@ -27,7 +27,6 @@ impl Check for MissingUnreleased {
 #[derive(Default)]
 pub struct DuplicateUnreleased {
     spans: Vec<Span>,
-    found: bool,
 }
 
 impl Check for DuplicateUnreleased {

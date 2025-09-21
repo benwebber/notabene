@@ -26,8 +26,10 @@ enum Section<'a> {
 ///
 /// Use [`Linter`](crate::Linter) to report structural and semantic diagnostics.
 pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
-    let mut changelog = ParsedChangelog::default();
-    changelog.source = s;
+    let mut changelog = ParsedChangelog {
+        source: s,
+        ..Default::default()
+    };
     let broken_links = Rc::new(RefCell::new(Vec::new()));
     let callback = {
         let broken_links = Rc::clone(&broken_links);
@@ -44,7 +46,7 @@ pub fn parse<'a>(s: &'a str) -> ParsedChangelog<'a> {
     while let Some(block) = blocks.next() {
         match block {
             Block::Heading(heading @ Heading { level: 1, .. }) => {
-                let span = match get_heading_span(&heading) {
+                match get_heading_span(&heading) {
                     Some(span) => match changelog.title {
                         Some(_) => changelog
                             .invalid_spans

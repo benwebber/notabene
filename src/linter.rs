@@ -43,9 +43,9 @@ impl<'a> Linter<'a> {
             .filter(|check| self.ruleset.is_enabled(check.rule()))
             .collect();
         for check in checks.iter_mut() {
-            check.visit_changelog(&changelog);
+            check.visit_changelog(changelog);
             if let Some(unreleased) = changelog.unreleased() {
-                check.visit_unreleased(&unreleased);
+                check.visit_unreleased(unreleased);
                 for changes in unreleased.changes() {
                     check.visit_changes(changes);
                 }
@@ -82,13 +82,6 @@ impl<'a> Default for Linter<'a> {
     fn default() -> Linter<'a> {
         Linter::new(RuleSet::default_static())
     }
-}
-
-/// Lint a changelog with the default ruleset.
-pub(crate) fn lint(changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
-    let ruleset = RuleSet::default();
-    let linter = Linter::new(&ruleset);
-    linter.lint(changelog)
 }
 
 fn checks() -> Vec<Box<dyn Check>> {

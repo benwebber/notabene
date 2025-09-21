@@ -53,7 +53,6 @@ impl Check for InvalidTitle {
 #[derive(Default)]
 pub struct DuplicateTitle {
     spans: Vec<Span>,
-    found: bool,
 }
 
 impl Check for DuplicateTitle {
@@ -96,7 +95,6 @@ impl Check for InvalidSectionHeading {
 #[derive(Default)]
 pub struct UnreleasedOutOfOrder {
     spans: Vec<Span>,
-    found: bool,
 }
 
 impl Check for UnreleasedOutOfOrder {

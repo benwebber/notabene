@@ -35,7 +35,6 @@ pub trait Release {
     fn url(&self) -> Option<&str>;
 
     /// The release date.
-
     fn date(&self) -> Option<&str>;
 
     /// Whether the release was yanked.
