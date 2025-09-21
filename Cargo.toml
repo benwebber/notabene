@@ -23,6 +23,7 @@ version-compare = "0.2.0"
 toml = { version = "0.9.5", features = ["parse", "serde"], optional = true }
 
 [dev-dependencies]
+criterion = "0.3"
 insta = { version = "1.43.1", features = ["redactions", "yaml"] }
 
 [features]
@@ -36,6 +37,10 @@ path = "src/lib.rs"
 name = "nb"
 path = "src/main.rs"
 required-features = ["cli"]
+
+[[bench]]
+name = "lint"
+harness = false
 
 [profile.dev.package]
 insta.opt-level = 3
