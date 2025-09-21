@@ -13,10 +13,10 @@ jobs:
 
   build:
     needs: [test]
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        platform:
+        include:
           - runner: ubuntu-22.04
             target: x86_64-unknown-linux-musl
           - runner: ubuntu-22.04
@@ -27,11 +27,14 @@ jobs:
             target: aarch64-apple-darwin
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9 # v1
+        with:
+          targets: ${{ matrix.target }}
       - run: |
-          ./bin/build ${{ matrix.platform.target }} ${{ github.ref }}
+          ./bin/build ${{ matrix.target }} ${{ github.ref }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: nb-${{ matrix.platform.target }}
+          name: nb-${{ matrix.target }}
           path: nb-*
 
   release:
