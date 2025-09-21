@@ -13,7 +13,7 @@ use super::config::{Config, Lint};
 use super::error::{Error, Result};
 use super::report::{Format, report};
 
-pub fn check(matches: &ArgMatches) -> Result<()> {
+pub fn lint(matches: &ArgMatches) -> Result<()> {
     let mut config = Config::load(None).unwrap();
     if let Some(path) = matches.get_one::<PathBuf>("config_file") {
         config = config.merge(&Config::from_file(path).unwrap());

@@ -31,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 * Run checks in single pass
 * Change default output mode to full
 * Renumber code sequence for initial rules
+* Rename the `check` command to `lint`. Check will remain an alias at least until the next release.
 
 ### Removed
 

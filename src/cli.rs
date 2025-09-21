@@ -16,8 +16,9 @@ pub fn main() -> error::Result<()> {
         .subcommand_required(true)
         .styles(Styles::plain())
         .subcommand(
-            Command::new("check")
-                .about("Check a changelog")
+            Command::new("lint")
+                .alias("check")
+                .about("Lint a changelog")
                 .arg(Arg::new("FILE").value_parser(value_parser!(PathBuf)))
                 .arg(
                     Arg::new("config_file")
@@ -64,7 +65,7 @@ pub fn main() -> error::Result<()> {
         )
         .get_matches();
     match matches.subcommand() {
-        Some(("check", submatches)) => commands::check(submatches),
+        Some(("lint", submatches)) => commands::lint(submatches),
         Some(("rule", submatches)) => commands::rule(submatches),
         _ => unreachable!(),
     }

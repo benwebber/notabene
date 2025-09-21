@@ -11,7 +11,7 @@ cargo install --features=cli notabene
 ## Usage
 
 ```
-nb check [FILE]
+nb lint [FILE]
 ```
 
 By default, `nb` tries to read `CHANGELOG.md` in the current directory.
