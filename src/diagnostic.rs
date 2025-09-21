@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use crate::changelog::ParsedChangelog;
 use crate::rule::Rule;
 use crate::span::{Locator, Position, Ranged, Span};
 

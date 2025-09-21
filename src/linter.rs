@@ -4,7 +4,9 @@ use std::path::PathBuf;
 use crate::changelog::parsed;
 use crate::changelog::traits::*;
 use crate::diagnostic::Diagnostic;
+use crate::rule::Rule;
 use crate::ruleset::RuleSet;
+use crate::span::Span;
 
 #[macro_use]
 mod macros;
@@ -27,6 +29,17 @@ pub struct Linter<'a> {
     filename: Option<PathBuf>,
 }
 
+#[derive(Default)]
+pub(crate) struct Context {
+    diagnostics: Vec<Diagnostic>,
+}
+
+impl Context {
+    fn report(&mut self, rule: Rule, span: Option<Span>) {
+        self.diagnostics.push(Diagnostic::new(rule, span));
+    }
+}
+
 impl<'a> Linter<'a> {
     /// Create a new linter with the given ruleset.
     pub fn new(ruleset: &'a RuleSet) -> Self {
@@ -46,44 +59,42 @@ impl<'a> Linter<'a> {
 
     /// Lint a changelog.
     pub fn lint(&self, changelog: &parsed::ParsedChangelog) -> Vec<Diagnostic> {
-        let mut diagnostics: Vec<Diagnostic> = Vec::new();
         let mut checks: Vec<_> = checks()
             .into_iter()
             .filter(|check| self.ruleset.is_enabled(check.rule()))
             .collect();
+        let mut context = Context::default();
         for check in checks.iter_mut() {
-            check.visit_changelog(changelog);
+            check.visit_changelog(&mut context, changelog);
             if let Some(unreleased) = changelog.unreleased() {
-                check.visit_unreleased(unreleased);
+                check.visit_unreleased(&mut context, unreleased);
                 for changes in unreleased.changes() {
-                    check.visit_changes(changes);
+                    check.visit_changes(&mut context, changes);
                 }
             }
             for span in &changelog.invalid_spans {
-                check.visit_invalid_span(span);
+                check.visit_invalid_span(&mut context, span);
             }
         }
         for release in changelog.releases() {
             for check in checks.iter_mut() {
-                check.visit_release(release);
+                check.visit_release(&mut context, release);
                 for changes in release.changes() {
-                    check.visit_changes(changes);
+                    check.visit_changes(&mut context, changes);
                 }
             }
         }
         for check in checks.iter_mut() {
-            diagnostics.append(
-                &mut check
-                    .diagnostics()
-                    .into_iter()
-                    .map(|mut d| {
-                        d.path = self.filename.clone();
-                        d
-                    })
-                    .collect(),
-            );
+            check.finalize(&mut context);
         }
-        diagnostics
+        context
+            .diagnostics
+            .into_iter()
+            .map(|mut diagnostic| {
+                diagnostic.path = self.filename.clone();
+                diagnostic
+            })
+            .collect()
     }
 }
 

@@ -1,7 +1,8 @@
 use crate::changelog::parsed;
 use crate::linter::Check;
 use crate::rule::Rule;
-use crate::span::Span;
+
+use super::preamble::*;
 
 invalid_span!(UndefinedLinkReference);
 

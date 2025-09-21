@@ -3,16 +3,15 @@ use std::collections::HashSet;
 use crate::changelog::parsed;
 use crate::linter::Check;
 use crate::rule::Rule;
-use crate::span::Span;
+
+use super::preamble::*;
 
 invalid_span!(InvalidTitle);
 
 invalid_span!(InvalidSectionHeading);
 
 #[derive(Default)]
-pub struct EmptySection {
-    spans: Vec<Span>,
-}
+pub struct EmptySection;
 
 // TODO: Store better spans for these headings.
 impl Check for EmptySection {
@@ -20,50 +19,39 @@ impl Check for EmptySection {
         Rule::EmptySection
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
         if release.changes.is_empty() {
-            self.spans.push(release.heading_span);
+            context.report(self.rule(), Some(release.heading_span));
         }
     }
 
-    fn visit_changes(&mut self, changes: &parsed::ParsedChanges) {
+    fn visit_changes(&mut self, context: &mut Context, changes: &parsed::ParsedChanges) {
         if changes.items.is_empty() {
-            self.spans.push(changes.heading_span)
+            context.report(self.rule(), Some(changes.heading_span));
         }
     }
 }
 
 #[derive(Default)]
-pub struct UnknownChangeType {
-    spans: Vec<Span>,
-}
+pub struct UnknownChangeType;
 
 impl Check for UnknownChangeType {
     fn rule(&self) -> Rule {
         Rule::UnknownChangeType
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_changes(&mut self, changes: &parsed::ParsedChanges) {
+    fn visit_changes(&mut self, context: &mut Context, changes: &parsed::ParsedChanges) {
         if !matches!(
             changes.kind.value,
             "Added" | "Changed" | "Deprecated" | "Fixed" | "Removed" | "Security"
         ) {
-            self.spans.push(changes.kind.span);
+            context.report(self.rule(), Some(changes.kind.span));
         }
     }
 }
 
 #[derive(Default)]
 pub struct DuplicateChangeType {
-    spans: Vec<Span>,
     seen: HashSet<String>,
 }
 
@@ -72,21 +60,17 @@ impl Check for DuplicateChangeType {
         Rule::DuplicateChangeType
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_unreleased(&mut self, _unreleased: &parsed::ParsedUnreleased) {
+    fn visit_unreleased(&mut self, _context: &mut Context, _unreleased: &parsed::ParsedUnreleased) {
         self.seen.clear();
     }
 
-    fn visit_release(&mut self, _unreleased: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, _context: &mut Context, _unreleased: &parsed::ParsedRelease) {
         self.seen.clear();
     }
 
-    fn visit_changes(&mut self, changes: &parsed::ParsedChanges) {
+    fn visit_changes(&mut self, context: &mut Context, changes: &parsed::ParsedChanges) {
         if !self.seen.insert(changes.kind.value.to_string()) {
-            self.spans.push(changes.kind.span);
+            context.report(self.rule(), Some(changes.kind.span));
         }
     }
 }

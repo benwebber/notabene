@@ -2,29 +2,16 @@
 use super::preamble::*;
 
 #[derive(Default)]
-pub struct MissingTitle {
-    found: bool,
-}
+pub struct MissingTitle;
 
 impl Check for MissingTitle {
     fn rule(&self) -> Rule {
         Rule::MissingTitle
     }
 
-    fn visit_changelog(&mut self, changelog: &parsed::ParsedChangelog) {
-        if self.found {
-            return;
-        }
-        if changelog.title().is_some() {
-            self.found = true;
-        }
-    }
-
-    fn diagnostics(&self) -> Vec<Diagnostic> {
-        if self.found {
-            vec![]
-        } else {
-            vec![Diagnostic::new(self.rule(), None)]
+    fn visit_changelog(&mut self, context: &mut Context, changelog: &parsed::ParsedChangelog) {
+        if changelog.title.is_none() {
+            context.report(self.rule(), None);
         }
     }
 }
@@ -32,24 +19,16 @@ impl Check for MissingTitle {
 invalid_span!(DuplicateTitle);
 
 #[derive(Default)]
-pub struct MissingUnreleased {
-    found: bool,
-}
+pub struct MissingUnreleased;
 
 impl Check for MissingUnreleased {
     fn rule(&self) -> Rule {
         Rule::MissingUnreleased
     }
 
-    fn visit_changelog(&mut self, changelog: &parsed::ParsedChangelog) {
-        self.found = changelog.unreleased.is_some();
-    }
-
-    fn diagnostics(&self) -> Vec<Diagnostic> {
-        if self.found {
-            vec![]
-        } else {
-            vec![Diagnostic::new(self.rule(), None)]
+    fn visit_changelog(&mut self, context: &mut Context, changelog: &parsed::ParsedChangelog) {
+        if changelog.unreleased.is_none() {
+            context.report(self.rule(), None);
         }
     }
 }

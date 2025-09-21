@@ -10,69 +10,51 @@ use super::preamble::*;
 use crate::changelog::parsed;
 
 #[derive(Default)]
-pub struct InvalidDate {
-    spans: Vec<Span>,
-}
+pub struct InvalidDate;
 
 impl Check for InvalidDate {
     fn rule(&self) -> Rule {
         Rule::InvalidDate
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
         let format = format_description!("[year]-[month]-[day]");
         if let Some(spanned) = &release.date {
             if Date::parse(spanned.value, &format).is_err() {
-                self.spans.push(spanned.span);
+                context.report(self.rule(), Some(spanned.span));
             }
         }
     }
 }
 
 #[derive(Default)]
-pub struct InvalidYanked {
-    spans: Vec<Span>,
-}
+pub struct InvalidYanked;
 
 impl Check for InvalidYanked {
     fn rule(&self) -> Rule {
         Rule::InvalidYanked
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
         if let Some(spanned) = &release.yanked {
             if spanned.value != "[YANKED]" {
-                self.spans.push(spanned.span);
+                context.report(self.rule(), Some(spanned.span));
             }
         }
     }
 }
 
 #[derive(Default)]
-pub struct MissingDate {
-    spans: Vec<Span>,
-}
+pub struct MissingDate;
 
 impl Check for MissingDate {
     fn rule(&self) -> Rule {
         Rule::MissingDate
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
         if release.date.is_none() {
-            self.spans.push(release.heading_span);
+            context.report(self.rule(), Some(release.heading_span));
         }
     }
 }
@@ -93,11 +75,7 @@ impl Check for InvalidReleaseOrder {
         Rule::InvalidReleaseOrder
     }
 
-    fn spans(&self) -> &[Span] {
-        unimplemented!()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, _context: &mut Context, release: &parsed::ParsedRelease) {
         self.info.push(ReleaseInfo {
             span: release.heading_span,
             version: release.version.value.to_string(),
@@ -105,42 +83,39 @@ impl Check for InvalidReleaseOrder {
         });
     }
 
-    fn diagnostics(&self) -> Vec<Diagnostic> {
-        self.info
-            .as_slice()
-            .windows(2)
-            .filter_map(|window| {
-                let prev = &window[0];
-                let curr = &window[1];
-                let prev_version = Version::from(&prev.version);
-                let curr_version = Version::from(&curr.version);
-                let (Some(prev_version), Some(curr_version)) = (prev_version, curr_version) else {
-                    // Skip if either version is invalid.
-                    return None;
-                };
-                // Sort by date in reverse chronological order. If the date is None, sort it last.
-                let date_cmp = match (&curr.date, &prev.date) {
-                    (Some(curr_date), Some(prev_date)) => curr_date.cmp(prev_date),
-                    (Some(_), None) => Ordering::Greater,
-                    (None, Some(_)) => Ordering::Less,
-                    (None, None) => Ordering::Equal,
-                };
-                // Then sort by version in reverse order.
-                let out_of_order = match date_cmp {
-                    Ordering::Less => false,
-                    Ordering::Equal => matches!(curr_version.compare(&prev_version), Cmp::Gt),
-                    Ordering::Greater => true,
-                };
-                if out_of_order { Some(curr.span) } else { None }
-            })
-            .map(|span| Diagnostic::new(self.rule(), Some(span)))
-            .collect()
+    fn finalize(&mut self, context: &mut Context) {
+        let spans = self.info.as_slice().windows(2).filter_map(|window| {
+            let prev = &window[0];
+            let curr = &window[1];
+            let prev_version = Version::from(&prev.version);
+            let curr_version = Version::from(&curr.version);
+            let (Some(prev_version), Some(curr_version)) = (prev_version, curr_version) else {
+                // Skip if either version is invalid.
+                return None;
+            };
+            // Sort by date in reverse chronological order. If the date is None, sort it last.
+            let date_cmp = match (&curr.date, &prev.date) {
+                (Some(curr_date), Some(prev_date)) => curr_date.cmp(prev_date),
+                (Some(_), None) => Ordering::Greater,
+                (None, Some(_)) => Ordering::Less,
+                (None, None) => Ordering::Equal,
+            };
+            // Then sort by version in reverse order.
+            let out_of_order = match date_cmp {
+                Ordering::Less => false,
+                Ordering::Equal => matches!(curr_version.compare(&prev_version), Cmp::Gt),
+                Ordering::Greater => true,
+            };
+            if out_of_order { Some(curr.span) } else { None }
+        });
+        for span in spans {
+            context.report(self.rule(), Some(span));
+        }
     }
 }
 
 #[derive(Default)]
 pub struct DuplicateVersion {
-    spans: Vec<Span>,
     versions: HashSet<String>,
 }
 
@@ -149,13 +124,9 @@ impl Check for DuplicateVersion {
         Rule::DuplicateVersion
     }
 
-    fn spans(&self) -> &[Span] {
-        self.spans.as_slice()
-    }
-
-    fn visit_release(&mut self, release: &parsed::ParsedRelease) {
+    fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
         if !self.versions.insert(release.version.value.to_string()) {
-            self.spans.push(release.version.span);
+            context.report(self.rule(), Some(release.version.span));
         }
     }
 }
