@@ -1,5 +1,6 @@
 use std::ops::Range;
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::span::Ranged;
@@ -8,14 +9,16 @@ use crate::span::Ranged;
 ///
 /// Like [`Span`](crate::span::Span), `Position` represents a span within the source document.
 /// `Position` also includes line and column information.
-#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Position {
     pub start: Point,
     pub end: Point,
 }
 
 /// A unist [Point](https://github.com/syntax-tree/unist/tree/3.0.0?tab=readme-ov-file#point).
-#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
+#[derive(Copy, Clone, Debug, Default, Eq, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Point {
     pub line: usize,
     pub column: usize,

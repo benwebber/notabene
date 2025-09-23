@@ -14,11 +14,11 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 pulldown-cmark = "0.13.0"
-serde = { version = "1.0.219", features = ["derive"] }
+version-compare = "0.2.0"
 clap = { version = "4.5.45", features = ["cargo"], optional = true }
 owo-colors = { version = "4.2.2", features = ["supports-colors"], optional = true }
+serde = { version = "1.0.219", features = ["derive"], optional = true }
 serde_json = { version = "1.0.143", optional = true }
-version-compare = "0.2.0"
 toml = { version = "0.9.5", features = ["parse", "serde"], optional = true }
 
 [dev-dependencies]
@@ -26,7 +26,8 @@ criterion = "0.3"
 insta = { version = "1.43.1", features = ["redactions", "yaml"] }
 
 [features]
-cli = ["dep:clap", "dep:serde_json", "dep:owo-colors", "dep:toml"]
+cli = ["serde", "dep:clap", "dep:serde_json", "dep:owo-colors", "dep:toml"]
+serde = ["dep:serde"]
 
 [lib]
 name = "notabene"

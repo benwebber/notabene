@@ -1,6 +1,7 @@
 //! Work with spans within the source document.
 use std::ops::{Deref, Range};
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 mod iter;
@@ -16,9 +17,8 @@ pub use unist::{Point, Position};
 /// A span within the source document.
 ///
 /// Use [`Locator`] to convert a `Span` to a [`Position`].
-#[derive(
-    Copy, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize,
-)]
+#[derive(Copy, Clone, Debug, Default, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Span {
     /// The start offset of the span.
     pub start: usize,
@@ -26,7 +26,8 @@ pub struct Span {
     pub end: usize,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub(crate) struct Spanned<T> {
     pub span: Span,
     pub value: T,

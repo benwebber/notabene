@@ -1,6 +1,7 @@
 //! Borrowed versions of changelog types.
 //!
 //! These types also contain location information, used by the [`Linter`](crate::linter::Linter).
+#[cfg(feature = "serde")]
 use serde::Serialize;
 
 use crate::span::{Locator, Span, Spanned};
@@ -10,7 +11,8 @@ use super::{owned, traits};
 
 type SpannedStr<'a> = Spanned<&'a str>;
 
-#[derive(Debug, Default, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct ParsedChangelog<'a> {
     pub(crate) source: &'a str,
     pub(crate) title: Option<SpannedStr<'a>>,
@@ -19,14 +21,16 @@ pub struct ParsedChangelog<'a> {
     pub(crate) invalid_spans: Vec<InvalidSpan>,
 }
 
-#[derive(Debug, Default, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct ParsedUnreleased<'a> {
     pub(crate) heading_span: Span,
     pub(crate) url: Option<String>,
     pub(crate) changes: Vec<ParsedChanges<'a>>,
 }
 
-#[derive(Debug, Default, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct ParsedRelease<'a> {
     pub(crate) heading_span: Span,
     pub(crate) version: SpannedStr<'a>,
@@ -36,14 +40,16 @@ pub struct ParsedRelease<'a> {
     pub(crate) changes: Vec<ParsedChanges<'a>>,
 }
 
-#[derive(Debug, Default, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub struct ParsedChanges<'a> {
     pub(crate) heading_span: Span,
     pub(crate) kind: SpannedStr<'a>,
     pub(crate) items: Vec<SpannedStr<'a>>,
 }
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize))]
 pub enum InvalidSpan {
     InvalidTitle(Span),
     InvalidSectionHeading(Span),

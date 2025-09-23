@@ -2,6 +2,7 @@
 use std::ops::Range;
 use std::path::PathBuf;
 
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::rule::Rule;
@@ -13,7 +14,8 @@ use crate::span::{Locator, Position, Ranged, Span};
 /// [`Diagnostic::new`] accepts a `Span`.
 ///
 /// Use [`Diagnostic::locate`] to convert a `Diagnostic<Span>` to a `Diagnostic<Position>`.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Diagnostic<L = Span> {
     /// The rule that was violated.
     pub rule: Rule,

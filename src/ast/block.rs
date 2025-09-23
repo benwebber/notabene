@@ -1,10 +1,12 @@
 //! AST block elements.
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
 use crate::span::Span;
 
 /// A block element.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Block {
     Heading(Heading),
     Paragraph(Literal),
@@ -12,14 +14,16 @@ pub enum Block {
 }
 
 /// An inline element.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Inline {
     Link(Link),
     Literal(Literal),
 }
 
 /// A section heading.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Heading {
     pub span: Span,
     pub level: usize,
@@ -27,7 +31,8 @@ pub struct Heading {
 }
 
 /// A link.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Link {
     pub span: Span,
     pub content: Literal,
@@ -36,13 +41,15 @@ pub struct Link {
 }
 
 /// Literal markup.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Literal {
     pub span: Span,
 }
 
 /// An unordered list.
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct List {
     pub span: Span,
     pub items: Vec<Literal>,

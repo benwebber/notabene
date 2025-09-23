@@ -2,7 +2,9 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
+#[cfg(feature = "serde")]
 use serde::de::{self, Visitor};
+#[cfg(feature = "serde")]
 use serde::{Deserialize, Deserializer, Serialize};
 
 pub static RULES_BY_CODE: LazyLock<HashMap<String, Rule>> = LazyLock::new(|| {
@@ -15,7 +17,8 @@ pub static RULES_BY_CODE: LazyLock<HashMap<String, Rule>> = LazyLock::new(|| {
 macro_rules! rules {
     ($($rule:ident = ($doc:literal, $code:literal, $message:literal $(,)?)),* $(,)?) => {
         /// A linter rule.
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        #[cfg_attr(feature = "serde", derive(Serialize))]
         #[non_exhaustive]
         pub enum Rule {
             $(#[doc = concat!("`", $code, "`. ")] #[doc = $doc] $rule),*
@@ -162,6 +165,7 @@ impl TryFrom<&str> for Rule {
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Rule {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
