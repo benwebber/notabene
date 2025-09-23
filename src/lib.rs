@@ -180,6 +180,11 @@
 //! assert_eq!((diagnostics[0].range()), (Some(52..60)));
 //! assert_eq!((diagnostics[0].line(), diagnostics[0].column()), (Some(7), Some(12)));
 //! ```
+//!
+//! # Features
+//!
+//! * `serde`: Add support for serializing key types with [`serde`](https://serde.rs/).
+//! * `cli`: Build the CLI.
 pub(crate) mod ast;
 pub(crate) mod diagnostic;
 pub(crate) mod linter;
