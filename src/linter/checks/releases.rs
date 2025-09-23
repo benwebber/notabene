@@ -1,8 +1,6 @@
 use std::cmp::Ordering;
 use std::collections::HashSet;
 
-use time::Date;
-use time::macros::format_description;
 use version_compare::{Cmp, Version};
 
 use super::preamble::*;

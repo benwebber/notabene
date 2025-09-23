@@ -18,7 +18,6 @@ serde = { version = "1.0.219", features = ["derive"] }
 clap = { version = "4.5.45", features = ["cargo"], optional = true }
 owo-colors = { version = "4.2.2", features = ["supports-colors"], optional = true }
 serde_json = { version = "1.0.143", optional = true }
-time = { version = "0.3.43", features = ["formatting", "macros", "parsing"] }
 version-compare = "0.2.0"
 toml = { version = "0.9.5", features = ["parse", "serde"], optional = true }
 
