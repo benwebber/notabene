@@ -14,13 +14,12 @@ pub struct InvalidDate;
 
 impl Check for InvalidDate {
     fn rule(&self) -> Rule {
-        Rule::InvalidDate
+        Rule::InvalidDateFormat
     }
 
     fn visit_release(&mut self, context: &mut Context, release: &parsed::ParsedRelease) {
-        let format = format_description!("[year]-[month]-[day]");
         if let Some(spanned) = &release.date {
-            if Date::parse(spanned.value, &format).is_err() {
+            if !is_iso8601_date(spanned.value) {
                 context.report(self.rule(), Some(spanned.span));
             }
         }
@@ -131,6 +130,18 @@ impl Check for DuplicateVersion {
     }
 }
 
+fn is_iso8601_date(s: &str) -> bool {
+    if s.len() != 10 {
+        return false;
+    }
+    let bytes = s.as_bytes();
+    bytes[0..4].iter().all(|u| u.is_ascii_digit())
+        && bytes[4] == b'-'
+        && bytes[5..7].iter().all(|u| u.is_ascii_digit())
+        && bytes[7] == b'-'
+        && bytes[8..9].iter().all(|u| u.is_ascii_digit())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -144,7 +155,7 @@ mod tests {
 
     #[test]
     fn test_invalid_date() {
-        let ruleset = RuleSet::from([Rule::InvalidDate]);
+        let ruleset = RuleSet::from([Rule::InvalidDateFormat]);
         let linter = Linter::new(&ruleset);
 
         let changelog = ParsedChangelog::default();
@@ -160,11 +171,7 @@ mod tests {
                     ..Default::default()
                 },
                 ParsedRelease {
-                    date: Some(Spanned::new(Span::new(1, usize::MAX), "2001-01-00")),
-                    ..Default::default()
-                },
-                ParsedRelease {
-                    date: Some(Spanned::new(Span::new(2, usize::MAX), "foo")),
+                    date: Some(Spanned::new(Span::new(1, usize::MAX), "foo")),
                     ..Default::default()
                 },
             ],

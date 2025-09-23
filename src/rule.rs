@@ -125,7 +125,7 @@ rules! {
         "E202",
         "Release missing date",
     ),
-    InvalidDate = (
+    InvalidDateFormat = (
         "The date is not in ISO 8601 format.",
         "E203",
         "Invalid date `{}`",
